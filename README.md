@@ -17,4 +17,14 @@ $ make
 - A Fortran compiler (E.g.: [GNU Fortran](https://gcc.gnu.org/fortran/))
 - `make`
 
+## Project structure
+
+The project consists of a main file (`vdw_gas.f90`) and a subroutines file
+(`subroutines.f90`) that sources the contents of the `include/` directory, which
+stores all the different subroutines used in the code, separated into different
+files by topic or task.
+
+A single module called `subroutines` is used due to the fact that different
+subroutines might interact with each other.
+
 ## Credits
