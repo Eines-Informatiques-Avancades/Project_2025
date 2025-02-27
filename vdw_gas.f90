@@ -8,8 +8,6 @@
 ! execution.
 !
 
-include 'subroutines.f90'
-
 program vdw_gas
     use subroutines
 
