@@ -20,7 +20,7 @@ currently present in this repository.
 
   Example of acceptable code indentation:
 
-  ```fortran
+```fortran
 module io
     implicit none
 
@@ -57,11 +57,11 @@ contains
     end subroutine read_xyz
 
 end module io
-  ```
+```
 
   Examples of bad code indentation:
 
-  ```fortran
+```fortran
 module abc
 implicit none
 
@@ -76,18 +76,18 @@ x = x + i
 end do
 end subroutine xyz
 end module abc
-  ```
+```
 
 Example of unacceptable code indentation:
 
-  ```fortran
+```fortran
 module abc
                 implicit none
         contains
     subroutine xyz
 implicit none
 ...
-  ```
+```
 
 - Really long lines of code are bad for code readability and code clarity,
   worsening the overall code quality and making maintenance more difficult.
