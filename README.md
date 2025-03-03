@@ -6,10 +6,18 @@ Advanced Computer Tools subject.
 
 ## Compiling and running the simulation
 
+The project can be cloned and compiled by running:
+
 ```
 $ git clone https://github.com/Eines-Informatiques-Avancades/Project_2025.git
 $ cd Project_2025
 $ make
+```
+
+This will produce the `vdw_gas` executable file, which can be ran by:
+
+```
+$ ./vdw_gas
 ```
 
 ## Dependencies
@@ -27,4 +35,12 @@ files by topic or task.
 A single module called `subroutines` is used due to the fact that different
 subroutines might interact with each other.
 
-## Credits
+## Credits and contributors
+
+- Ricard Rodríguez: system initialization, periodic boundary condition, project
+    coordination
+- Oriol Miró: integrators
+- Alejandro Díaz: forces
+- Joan Serrano: statistical analysis
+- Huang Haoyu: post-trajectory analysis
+- Itziar Rabal: final testing
