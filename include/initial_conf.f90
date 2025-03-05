@@ -1,10 +1,20 @@
+!
+! initial_conf.f90
+! Equilibrium Monte Carlo simulation of the 2D Ising model
+! Ricard Rodriguez
+!
+! Subroutines related to generating the system's initial configuration.
+! A 3-dimensional cubic system is assumed.
+!
+
+! Generate an initial lattice for the system (either SC or BCC).
 subroutine gen_initial_conf(lattice_type, system_size, part_num, part_density, positions)
     implicit none
 
     integer, intent(in) ::  part_num
-    real, intent(in) :: part_density
+    real, intent(in) :: system_size
     character(5), intent(in) :: lattice_type
-    real, intent(out) :: system_size
+    real, intent(out) :: part_density
     real, allocatable, intent(out) :: positions(:, :)
 
     integer :: i, j, k, uc_onedim, part_index
@@ -22,7 +32,7 @@ subroutine gen_initial_conf(lattice_type, system_size, part_num, part_density, p
 
             ! Lattice parameters.
             uc_onedim = int(part_num**(1./3.))
-            system_size = (part_num/part_density)**(1./3.)
+            part_density = (part_num/system_size**(3.))
             lattice_spacing = system_size/uc_onedim
 
             part_index = 1
@@ -43,7 +53,7 @@ subroutine gen_initial_conf(lattice_type, system_size, part_num, part_density, p
 
             ! Lattice parameters.
             uc_onedim = int((part_num/2)**(1./3.))
-            system_size = (part_num/part_density)**(1./3.)
+            part_density = (part_num/system_size**(3.))
             lattice_spacing = system_size/uc_onedim
 
             part_index = 1

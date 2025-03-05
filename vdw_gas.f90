@@ -1,6 +1,7 @@
 !
 ! vdw_gas
-! Ricard Rodriguez i Dargallo
+! Equilibrium Monte Carlo simulation of the 2D Ising model
+! Ricard Rodriguez
 !
 ! Main program corresponding to the "Molecular Dynamics Simulation of a Van der
 ! Waals Gas" project for the Advanced Computer Tools subject. Please check the
@@ -12,4 +13,21 @@ program vdw_gas
     use subroutines
 
     implicit none
+
+    integer :: part_num, i
+    real :: part_density, system_size, volume
+    real, allocatable :: positions(:, :)
+    character(6) :: lattice_type
+
+    ! Generate initial lattice.
+    lattice_type = 'SC'
+    part_num = 125
+    system_size = 500
+
+    volume = system_size**(3.) ! System is a cubic box.
+
+    call gen_initial_conf(lattice_type, system_size, part_num, part_density, positions)
+
+    ! Center initial config at the origin of coordinates.
+    call apply_pbc(positions, system_size)
 end program vdw_gas
