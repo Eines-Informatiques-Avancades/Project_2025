@@ -11,5 +11,6 @@ module subroutines
 
     contains
         include 'include/initial_conf.f90'
+        include 'include/geometry.f90'
 
 end module subroutines
