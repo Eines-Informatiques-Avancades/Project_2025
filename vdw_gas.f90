@@ -14,10 +14,11 @@ program vdw_gas
 
     implicit none
 
-    integer :: part_num, i
+    integer :: part_num
     real :: part_density, system_size, volume
     real, allocatable :: positions(:, :)
     character(6) :: lattice_type
+    character(50) :: positions_file
 
     ! Generate initial lattice.
     lattice_type = 'SC'
@@ -30,4 +31,7 @@ program vdw_gas
 
     ! Center initial config at the origin of coordinates.
     call apply_pbc(positions, system_size)
+
+    positions_file = 'positions_t0.xyz'
+    call write_positions_xyz(part_num, positions, positions_file)
 end program vdw_gas
