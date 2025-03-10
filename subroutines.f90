@@ -1,5 +1,6 @@
 !
 ! subroutines.f90
+! Equilibrium Monte Carlo simulation of the 2D Ising model
 ! Ricard Rodriguez i Dargallo
 !
 ! This is part of the "Molecular Dynamics Simulation of a Van der Waals Gas"

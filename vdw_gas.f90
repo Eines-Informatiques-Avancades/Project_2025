@@ -1,6 +1,6 @@
 !
 ! vdw_gas
-! Equilibrium Monte Carlo simulation of the 2D Ising model
+! Molecular Dynamics Simulation of a Van der Waals Gas
 ! Ricard Rodriguez
 !
 ! Main program corresponding to the "Molecular Dynamics Simulation of a Van der

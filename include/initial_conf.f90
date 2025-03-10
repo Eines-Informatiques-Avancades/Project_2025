@@ -1,6 +1,6 @@
 !
 ! initial_conf.f90
-! Equilibrium Monte Carlo simulation of the 2D Ising model
+! Molecular Dynamics Simulation of a Van der Waals Gas
 ! Ricard Rodriguez
 !
 ! Subroutines related to generating the system's initial configuration.
