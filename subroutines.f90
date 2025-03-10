@@ -14,5 +14,6 @@ module subroutines
         include 'include/initial_conf.f90'
         include 'include/geometry.f90'
         include 'include/io.f90'
+        include 'include/forces.f90'
 
 end module subroutines
