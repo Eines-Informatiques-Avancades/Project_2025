@@ -32,12 +32,12 @@ subroutine compute_forces(part_num, positions, forces, system_size)
             end do
             
             r2 = r_vec(1)**2 + r_vec(2)**2 + r_vec(3)**2
-            r = sqrt(r_sq)
+            r = sqrt(r2)
             
             if (r > 0.0) then
                 f = 48.0 / (r**14) - 24.0 / (r**8)
             else
-            ! Avoid dividing by 0
+                ! Avoid dividing by 0
                 f = 0.0
             end if
 
