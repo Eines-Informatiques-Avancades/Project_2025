@@ -14,7 +14,7 @@ program vdw_gas
 
     implicit none
 
-    integer :: part_num
+    integer :: part_num, time
     real :: part_density, system_size, volume, cutoff
     real, allocatable :: positions(:, :), forces(:, :)
     character(6) :: lattice_type
@@ -33,8 +33,14 @@ program vdw_gas
     ! Center initial config at the origin of coordinates.
     call apply_pbc(positions, system_size)
 
-    positions_file = 'positions_t0.xyz'
-    call write_positions_xyz(part_num, positions, positions_file)
+    positions_file = 'positions.xyz'
 
-    call compute_forces(part_num, positions, forces, system_size, cutoff)
+    ! Create a new positions_file or replace the existing one.
+    open(4, file = positions_file, status = 'replace')
+    write(4, *) '# time, particle coordinates'
+    close(4)
+
+    do time = 1, 5
+        call write_positions_xyz(part_num, time, positions, positions_file)
+    end do
 end program vdw_gas

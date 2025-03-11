@@ -26,9 +26,7 @@ subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
     do i = 1, part_num - 1
         do j = i + 1, part_num
             ! Compute distance between particles i and j.
-            r_vec(1) = positions(i, 1) - positions(j, 1)
-            r_vec(2) = positions(i, 2) - positions(j, 2)
-            r_vec(3) = positions(i, 3) - positions(j, 3)
+            r_vec(:) = positions(i, :) - positions(j, :)
 
             ! Apply PBC
             do k = 1, 3
@@ -42,13 +40,8 @@ subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
                 f = 48.0 / (r**14) - 24.0 / (r**8)
 
                 ! Update forces.
-                forces(i, 1) = forces(i, 1) + f * r_vec(1)
-                forces(i, 2) = forces(i, 2) + f * r_vec(2)
-                forces(i, 3) = forces(i, 3) + f * r_vec(3)
-
-                forces(j, 1) = forces(j, 1) - f * r_vec(1)
-                forces(j, 2) = forces(j, 2) - f * r_vec(2)
-                forces(j, 3) = forces(j, 3) - f * r_vec(3)
+                forces(i, :) = forces(i, :) + f * r_vec(:)
+                forces(j, :) = forces(j, :) - f * r_vec(:)
             end if
         end do
     end do
