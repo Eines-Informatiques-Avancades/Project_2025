@@ -8,12 +8,12 @@
 
 subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
     implicit none
-    
+
     integer, intent(in) :: part_num
     real, intent(in) :: positions(part_num, 3)
     real, intent(in) :: system_size, cutoff
     real, intent(out) :: forces(part_num, 3)
-    
+
     integer :: i, j, k
     real :: r, f
     real :: r_vec(3)
@@ -27,26 +27,26 @@ subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
             r_vec(1) = positions(i, 1) - positions(j, 1)
             r_vec(2) = positions(i, 2) - positions(j, 2)
             r_vec(3) = positions(i, 3) - positions(j, 3)
-            
+
             ! Apply PBC
             do k = 1, 3
                 r_vec(k) = pbc(r_vec(k), system_size)
             end do
-            
+
             r = sqrt(dot_product(r_vec, r_vec))
 
             if (r < cutoff .and. r > 0.0) then
                 ! Force related to a Lennard-Jones potential.
                 f = 48.0 / (r**14) - 24.0 / (r**8)
-                                
+
                 ! Update forces.
                 forces(i, 1) = forces(i, 1) + f * r_vec(1)
                 forces(i, 2) = forces(i, 2) + f * r_vec(2)
                 forces(i, 3) = forces(i, 3) + f * r_vec(3)
-                
-                forces(i, 1) = forces(j, 1) - f * r_vec(1)
-                forces(i, 2) = forces(j, 2) - f * r_vec(2)
-                forces(i, 3) = forces(j, 3) - f * r_vec(3)
+
+                forces(j, 1) = forces(j, 1) - f * r_vec(1)
+                forces(j, 2) = forces(j, 2) - f * r_vec(2)
+                forces(j, 3) = forces(j, 3) - f * r_vec(3)
             end if
         end do
     end do
