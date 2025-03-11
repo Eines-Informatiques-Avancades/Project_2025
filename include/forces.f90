@@ -6,12 +6,12 @@
 ! Compute forces derived from a Lennard-Jones potential.
 !
 
-subroutine compute_forces(part_num, positions, forces, system_size)
+subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
     implicit none
     
     integer, intent(in) :: part_num
     real, intent(in) :: positions(3, part_num)
-    real, intent(in) :: system_size
+    real, intent(in) :: system_size, cutoff
     real, intent(out) :: forces(3, part_num)
     
     integer :: i, j, k
@@ -35,23 +35,25 @@ subroutine compute_forces(part_num, positions, forces, system_size)
             
             r2 = r_vec(1)**2 + r_vec(2)**2 + r_vec(3)**2
             r = sqrt(r2)
-            
-            if (r > 0.0) then
-                ! Force related to a Lennard-Jones potential.
-                f = 48.0 / (r**14) - 24.0 / (r**8)
-            else
-                ! Avoid dividing by 0.
-                f = 0.0
-            end if
 
-            ! Update forces.
-            forces(1, i) = forces(1, i) + f * r_vec(1)
-            forces(2, i) = forces(2, i) + f * r_vec(2)
-            forces(3, i) = forces(3, i) + f * r_vec(3)
-            
-            forces(1, j) = forces(1, j) - f * r_vec(1)
-            forces(2, j) = forces(2, j) - f * r_vec(2)
-            forces(3, j) = forces(3, j) - f * r_vec(3)
+            if (r < cutoff) then
+                if (r > 0.0) then
+                    ! Force related to a Lennard-Jones potential.
+                    f = 48.0 / (r**14) - 24.0 / (r**8)
+                else
+                    ! Avoid dividing by 0.
+                    f = 0.0
+                end if
+                
+                ! Update forces.
+                forces(1, i) = forces(1, i) + f * r_vec(1)
+                forces(2, i) = forces(2, i) + f * r_vec(2)
+                forces(3, i) = forces(3, i) + f * r_vec(3)
+                
+                forces(1, j) = forces(1, j) - f * r_vec(1)
+                forces(2, j) = forces(2, j) - f * r_vec(2)
+                forces(3, j) = forces(3, j) - f * r_vec(3)
+            end if
         end do
     end do
 end subroutine compute_forces
