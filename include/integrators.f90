@@ -21,5 +21,6 @@ subroutine verlet(part_num, dt, system_size, cutoff, positions, positions_old, f
     call compute_forces(part_num, positions, forces, system_size, cutoff)
     positions_aux = positions
     positions = r*positions - positions_old + forces*dt*dt
+    positions_old = positions_aux
 
 end subroutine verlet
