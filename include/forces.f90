@@ -10,13 +10,15 @@ subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
     implicit none
 
     integer, intent(in) :: part_num
-    real, intent(in) :: positions(part_num, 3)
     real, intent(in) :: system_size, cutoff
-    real, intent(out) :: forces(part_num, 3)
+    real, allocatable, intent(in) :: positions(:, :)
+    real, allocatable, intent(out) :: forces(:, :)
 
     integer :: i, j, k
     real :: r, f
     real :: r_vec(3)
+
+    allocate(forces(part_num, 3))
 
     ! In reduced units: epsilon = sigma = 1.
     forces = 0.0
