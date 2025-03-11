@@ -15,7 +15,7 @@ subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
     real, intent(out) :: forces(3, part_num)
     
     integer :: i, j, k
-    real :: r, r2, f
+    real :: r, f
     real :: r_vec(3)
 
     ! In reduced units: epsilon = sigma = 1.
@@ -33,8 +33,7 @@ subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
                 r_vec(k) = pbc(r_vec(k), system_size)
             end do
             
-            r2 = r_vec(1)**2 + r_vec(2)**2 + r_vec(3)**2
-            r = sqrt(r2)
+            r = sqrt(dot_product(r_vec, r_vec))
 
             if (r < cutoff .and. r > 0.0) then
                 ! Force related to a Lennard-Jones potential.
