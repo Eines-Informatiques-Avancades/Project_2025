@@ -7,9 +7,20 @@
 ! A 3-dimensional cubic system is assumed.
 !
 
-subroutine verlet(positions, positions_old, dt, system_size,cutoff, forces, pot)
+subroutine verlet(part_num, dt, system_size, cutoff, positions, positions_old, forces)
     implicit none
 
+    integer, intent(in) :: part_num
     real, intent(in) :: dt, system_size, cutoff
-    real, intent(inout) :: positions(:,:), positions_old(:,:)
-    real, intent(out) :: forces(:,:), pot
+    real, allocatable, intent(inout) :: positions(:,:), positions_old(:,:)
+    real, allocatable, intent(out) :: forces(:,:)
+    real, allocatable :: positions_aux(:,:)
+
+
+    allocate(positions(part_num, 3), positions_old(part_num, 3), positions_aux(part_num, 3))
+    call compute_forces(part_num, positions, forces, system_size, cutoff)
+    positions_aux = positions
+    positions = r*positions - positions_old + forces*dt*dt
+    positions_old = positions_aux
+
+end subroutine verlet
