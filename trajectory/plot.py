@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 from mpl_toolkits.mplot3d import Axes3D
 
-# 读取 RDF 数据并保存图像
+
 def plot_rdf(filename="rdf_data.txt"):
     data = np.loadtxt(filename)
     r = data[:, 0]
@@ -22,7 +22,7 @@ def plot_rdf(filename="rdf_data.txt"):
     plt.show()
     print(f"RDF plot saved as {rdf_output}")
 
-# 读取 RMSD 数据并保存图像
+
 def plot_rmsd(filename="rmsd_data.txt"):
     data = np.loadtxt(filename)
     frames = data[:, 0]
@@ -41,28 +41,27 @@ def plot_rmsd(filename="rmsd_data.txt"):
     plt.show()
     print(f"RMSD plot saved as {rmsd_output}")
 
-# 读取 traj.xyz 并保存粒子轨迹图像
 def plot_trajectories(filename="traj.xyz"):
     data = np.loadtxt(filename)
 
-    frame_ids = data[:, 0].astype(int)  # 提取帧编号
+    frame_ids = data[:, 0].astype(int)  
     x = data[:, 1]
     y = data[:, 2]
     z = data[:, 3]
 
-    unique_frames = np.unique(frame_ids)  # 获取所有帧编号
-    num_atoms = len(frame_ids) // len(unique_frames)  # 计算原子数
+    unique_frames = np.unique(frame_ids)  
+    num_atoms = len(frame_ids) // len(unique_frames)  
 
-    # 重新整理数据：每个原子单独存储
+
     trajectories = {i: {'x': [], 'y': [], 'z': []} for i in range(num_atoms)}
 
     for i in range(len(frame_ids)):
-        atom_id = i % num_atoms  # 根据原子编号分组
+        atom_id = i % num_atoms  
         trajectories[atom_id]['x'].append(x[i])
         trajectories[atom_id]['y'].append(y[i])
         trajectories[atom_id]['z'].append(z[i])
 
-    # 绘制 3D 轨迹
+
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111, projection='3d')
 
@@ -81,7 +80,7 @@ def plot_trajectories(filename="traj.xyz"):
 
     print(f"Trajectory plot saved as {traj_output}")
 
-# 调用所有函数
+
 plot_rdf()
 plot_rmsd()
 plot_trajectories("traj.xyz")
