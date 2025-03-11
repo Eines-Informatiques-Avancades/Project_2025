@@ -1,7 +1,7 @@
 !
 ! forces.f90
 ! Molecular Dynamics Simulation of a Van der Waals Gas
-! Alejandro Díaz
+! Alejandro Díaz, Ricard Rodríguez
 !
 ! Compute forces derived from a Lennard-Jones potential.
 !
@@ -36,15 +36,10 @@ subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
             r2 = r_vec(1)**2 + r_vec(2)**2 + r_vec(3)**2
             r = sqrt(r2)
 
-            if (r < cutoff) then
-                if (r > 0.0) then
-                    ! Force related to a Lennard-Jones potential.
-                    f = 48.0 / (r**14) - 24.0 / (r**8)
-                else
-                    ! Avoid dividing by 0.
-                    f = 0.0
-                end if
-                
+            if (r < cutoff .and. r > 0.0) then
+                ! Force related to a Lennard-Jones potential.
+                f = 48.0 / (r**14) - 24.0 / (r**8)
+                                
                 ! Update forces.
                 forces(1, i) = forces(1, i) + f * r_vec(1)
                 forces(2, i) = forces(2, i) + f * r_vec(2)
