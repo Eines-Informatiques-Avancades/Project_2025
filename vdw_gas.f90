@@ -15,7 +15,7 @@ program vdw_gas
     implicit none
 
     integer :: part_num
-    real :: part_density, system_size, volume
+    real :: part_density, system_size, volume, cutoff
     real, allocatable :: positions(:, :)
     character(6) :: lattice_type
     character(50) :: positions_file
@@ -26,6 +26,7 @@ program vdw_gas
     system_size = 500
 
     volume = system_size**(3.) ! System is a cubic box.
+    cutoff= 0.5*system_size    ! Cutoff radius for molecular interactions (can be changed)
 
     call gen_initial_conf(lattice_type, system_size, part_num, part_density, positions)
 
