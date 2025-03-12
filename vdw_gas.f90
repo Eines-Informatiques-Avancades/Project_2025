@@ -23,23 +23,29 @@ program vdw_gas
     ! System parameters.
     lattice_type = 'SC'
     part_num = 125
-    system_size = 500
+    system_size = 6
     timestep = 0.0001
     step_num = 10000
 
     volume = system_size**(3.)  ! System is a cubic box.
-    cutoff = 0.5*system_size    ! Cutoff radius for molecular interactions.
-
-    allocate(velocities(part_num, 3))
+    cutoff = 1.5                ! Cutoff radius for molecular interactions.
 
     !
     ! Generate initial system configuration.
     !
 
+    ! Generate the initial configuration from a lattice.
     call gen_initial_conf(lattice_type, system_size, part_num, part_density, positions)
+    print *, 'Initial lattice particle density: ', part_density
 
     ! Center initial config at the origin of coordinates.
     call apply_pbc(positions, system_size)
+
+    allocate(velocities(part_num, 3))
+    velocities(:, :) = 0
+
+    print *, 'Computing initial Lennard-Jones forces...'
+    call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
 
     ! Create a new positions_file or replace the existing one.
     positions_file = 'positions.xyz'
@@ -55,11 +61,9 @@ program vdw_gas
         call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities)
 
         call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
-        print *, positions(1, 1)
 
         write(5, *) time, lj_potential
+        call write_positions_xyz(part_num, time, positions, positions_file)
     end do
     close(5)
-
-    call write_positions_xyz(part_num, time, positions, positions_file)
 end program vdw_gas
