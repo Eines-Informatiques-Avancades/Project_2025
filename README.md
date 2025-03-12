@@ -51,3 +51,8 @@ subroutines might interact with each other.
 - Joan Serrano: statistical analysis
 - Huang Haoyu: post-trajectory analysis
 - Itziar Rabal: final testing
+
+The Matplotlib Python plotting scripts under the `plot/` subfolder make
+use of the `science.mplstyle` Matplotlib style, which is part of the
+[SciencePlots project](https://github.com/garrettj403/SciencePlots) by [John
+Garrett](https://github.com/garrettj403).
