@@ -26,5 +26,3 @@ ${OBJ}: modules
 
 clean:
 	rm ${PROG} ${OBJ} *.mod
-
-
