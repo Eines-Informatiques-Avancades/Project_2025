@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 !
 ! integrators.f90
 ! Molecular Dynamics simulation of 3D Van der Waals gas
@@ -63,3 +64,4 @@ subroutine euler(dt, part_num, system_size, cutoff, positions, velocities)
     call apply_pbc(positions, system_size)
     velocities = velocities + forces * dt
 end subroutine euler
+
