@@ -1,11 +1,13 @@
 !
 ! integrators.f90
-! Equilibrium Monte Carlo simulation of the 2D Ising model
+! Molecular Dynamics simulation of 3D Van der Waals gas
 ! Oriol Miro
 !
 ! Integrators for Molecular Dynamics.
 ! A 3-dimensional cubic system is assumed.
 !
+
+! Verlet integrator, updates positions, positions_old and velocities.
 
 subroutine verlet(part_num, dt, system_size, cutoff, positions, positions_old, velocities)
     implicit none
@@ -32,6 +34,7 @@ subroutine verlet(part_num, dt, system_size, cutoff, positions, positions_old, v
     call apply_pbc(positions, system_size)
 end subroutine verlet
 
+! Velocity Verlet integrator, updates positions and velocities.
 subroutine velocity_verlet(dt, part_num, system_size, cutoff, positions, velocities)
     implicit none
 
@@ -55,6 +58,7 @@ subroutine velocity_verlet(dt, part_num, system_size, cutoff, positions, velocit
     velocities = velocities + 0.5 * forces*dt
 end subroutine velocity_verlet
 
+! Euler integrator, updates positions and velocities.
 subroutine euler(dt, part_num, system_size, cutoff, positions, velocities)
     implicit none
 
@@ -74,4 +78,7 @@ subroutine euler(dt, part_num, system_size, cutoff, positions, velocities)
     velocities = velocities + forces*dt
     
     call apply_pbc(positions, system_size)
+    velocities = velocities + forces * dt
 end subroutine euler
+
+

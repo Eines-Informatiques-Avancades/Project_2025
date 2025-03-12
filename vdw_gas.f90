@@ -15,8 +15,8 @@ program vdw_gas
     implicit none
 
     integer :: part_num, time
-    real :: part_density, system_size, volume, cutoff
-    real, allocatable :: positions(:, :), forces(:, :)
+    real :: part_density, system_size, volume, cutoff, dt, temperature, collision_frequence
+    real, allocatable :: positions(:, :), forces(:, :), velocities(:,:)
     character(6) :: lattice_type
     character(50) :: positions_file
 
@@ -24,6 +24,9 @@ program vdw_gas
     lattice_type = 'SC'
     part_num = 125
     system_size = 500
+    dt = 0.01
+    temperature = 10.0
+    collision frequence = 0.05
 
     volume = system_size**(3.)  ! System is a cubic box.
     cutoff = 0.5*system_size    ! Cutoff radius for molecular interactions.
@@ -42,5 +45,8 @@ program vdw_gas
 
     do time = 1, 5
         call write_positions_xyz(part_num, time, positions, positions_file)
+	
+	call velocity_verlet(dt, part_num, system_size, cutoff, positions, velocities)
+	call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
     end do
 end program vdw_gas
