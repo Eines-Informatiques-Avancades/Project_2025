@@ -6,13 +6,14 @@
 ! Compute forces derived from a Lennard-Jones potential.
 !
 
-subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
+subroutine compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
     implicit none
 
     integer, intent(in) :: part_num
     real, intent(in) :: system_size, cutoff
     real, allocatable, intent(in) :: positions(:, :)
     real, allocatable, intent(out) :: forces(:, :)
+    real, intent(out) :: lj_potential
 
     integer :: i, j, k
     real :: r, f
@@ -22,6 +23,7 @@ subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
 
     ! In reduced units: epsilon = sigma = 1.
     forces = 0.0
+    lj_potential = 0.0
 
     do i = 1, part_num - 1
         do j = i + 1, part_num
@@ -36,6 +38,9 @@ subroutine compute_forces(part_num, positions, forces, system_size, cutoff)
             r = sqrt(dot_product(r_vec, r_vec))
 
             if (r < cutoff .and. r > 0.0) then
+                ! Lennard-Jones potential
+                lj_potential = lj_potential + 4.0 * (1.0 / (r**12) - 1.0 / (r**6))
+
                 ! Force related to a Lennard-Jones potential.
                 f = 48.0 / (r**14) - 24.0 / (r**8)
 
