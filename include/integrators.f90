@@ -15,16 +15,17 @@ subroutine verlet(part_num, dt, system_size, cutoff, positions, positions_old, v
     real, allocatable, intent(inout) :: positions(:, :), positions_old(:, :)
     real, allocatable, intent(out) :: velocities(:, :)
 
+    real :: lj_potential
     real, allocatable :: positions_aux(:, :), forces(:, :)
 
     allocate( &
         positions(part_num, 3), &
         positions_old(part_num, 3), &
         positions_aux(part_num, 3), &
-        velocities(part_num,3) &
+        velocities(part_num, 3) &
     )
 
-    call compute_forces(part_num, positions, forces, system_size, cutoff)
+    call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
     positions_aux = positions
     positions = 2*positions - positions_old + forces*dt*dt
     positions_old = positions_aux
@@ -39,6 +40,7 @@ subroutine velocity_verlet(dt, part_num, system_size, cutoff, positions, velocit
     real, intent(in) :: dt, system_size, cutoff
     real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
 
+    real :: lj_potential
     real, allocatable :: forces(:, :)
 
     allocate( &
@@ -46,12 +48,12 @@ subroutine velocity_verlet(dt, part_num, system_size, cutoff, positions, velocit
         velocities(part_num, 3) &
     )
 
-    call compute_forces(part_num, positions, forces, system_size, cutoff)
+    call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
     positions = positions + velocities*dt + 0.5 * forces*dt*dt
 
     call apply_pbc(positions, system_size)
 
-    call compute_forces(part_num, positions, forces, system_size, cutoff)
+    call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
     velocities = velocities + 0.5 * forces*dt
 end subroutine velocity_verlet
 
@@ -62,6 +64,7 @@ subroutine euler(dt, part_num, system_size, cutoff, positions, velocities)
     real, intent(in) :: dt, system_size, cutoff
     real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
 
+    real :: lj_potential
     real, allocatable :: forces(:, :)
 
     allocate( &
@@ -69,7 +72,7 @@ subroutine euler(dt, part_num, system_size, cutoff, positions, velocities)
         velocities(part_num, 3) &
     )
 
-    call compute_forces(part_num, positions, forces, system_size, cutoff)
+    call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
     positions = positions + velocities * dt + 0.5 * forces*dt*dt
     velocities = velocities + forces*dt
 
