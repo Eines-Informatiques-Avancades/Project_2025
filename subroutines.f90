@@ -17,5 +17,6 @@ module subroutines
         include 'include/forces.f90'
         include 'include/integrators.f90'
         include 'include/thermostat.f90'
+        include 'include/thermodynamics.f90'
 
 end module subroutines
