@@ -40,7 +40,7 @@ subroutine compute_forces(part_num, positions, forces, lj_potential, system_size
             if (r < cutoff .and. r > 0.0) then
                 ! Lennard-Jones potential
                 lj_potential = lj_potential + 4.0 * (1.0 / (r**12) - 1.0 / (r**6))
-                
+
                 ! Force related to a Lennard-Jones potential.
                 f = 48.0 / (r**14) - 24.0 / (r**8)
 
