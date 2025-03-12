@@ -16,7 +16,7 @@ program vdw_gas
 
     integer :: part_num, step_num, step
     real :: part_density, system_size, volume, cutoff, time, timestep, lj_potential, &
-        temperature, collision_frequence
+        temperature, collision_frequence, kinetic_energy, total_energy
     real, allocatable :: positions(:, :), forces(:, :), velocities(:, :)
     character(6) :: lattice_type
     character(50) :: positions_file, input_file
@@ -58,14 +58,17 @@ program vdw_gas
     write(4, *) '# time, particle coordinates'
     close(4)
 
-    open(5, file = 'lj_potential.dat')
+    open(5, file = 'lj_potential.dat', status = 'replace')
     time = 0
     do step = 1, step_num
         time = time + timestep
 
         call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities)
+        call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
 
         call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
+        call compute_total_kinetic_energy(part_num, velocities, kinetic_energy)
+        total_energy = lj_potential + kinetic_energy
 
         write(5, *) time, lj_potential
         call write_positions_xyz(part_num, time, positions, positions_file)

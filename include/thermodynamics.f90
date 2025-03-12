@@ -1,0 +1,39 @@
+!
+! thermodynamics.f90
+! Molecular Dynamics Simulation of a Van der Waals Gas
+! Ricard Rodriguez
+!
+! Compute different thermodynamical variables of the system.
+!
+
+! Compute the system's kinetic energy in an specific instant, given a matrix of
+! velocities.
+subroutine compute_total_kinetic_energy(part_num, velocities, kinetic_energy)
+    implicit none
+
+    integer, intent(in) :: part_num
+    real, allocatable, intent(in) :: velocities(:, :)
+    real, intent(out) :: kinetic_energy
+
+    integer :: i
+    real :: velocity_norm_sq, kinetic_energy_part
+
+    kinetic_energy = 0
+    do i = 1, part_num
+        velocity_norm_sq = velocities(i, 1)**2 + velocities(i, 2)**2 + velocities(i, 3)**2
+        kinetic_energy_part = 0.5*velocity_norm_sq
+        kinetic_energy = kinetic_energy + kinetic_energy_part
+    end do
+end subroutine compute_total_kinetic_energy
+
+! Compute the system's instantaneous temperature, given the system's particle
+! number and the system's total kinetic energy.
+function instantaneous_temperature(part_num, kinetic_energy) result(temperature_inst)
+    implicit none
+
+    integer :: part_num, n_f
+    real :: kinetic_energy, temperature_inst
+
+    n_f = 3*part_num - 3
+    temperature_inst = (2*kinetic_energy)/n_f
+end function
