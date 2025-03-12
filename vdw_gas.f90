@@ -45,6 +45,13 @@ program vdw_gas
     print *, 'Computing initial Lennard-Jones forces...'
     call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
 
+    print *, 'Generating initial configuration for a VdW gas from the lattice...'
+
+    do step = 1, step_num
+        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities)
+        call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
+    end do
+
     ! Create a new positions_file or replace the existing one.
     positions_file = 'positions.xyz'
     open(4, file = positions_file, status = 'replace')
