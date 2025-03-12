@@ -23,7 +23,7 @@ program vdw_gas
 
     ! System parameters.
     input_file = 'input_parameters.in'
-    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num)
+    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence)
 
     volume = system_size**(3.)  ! System is a cubic box.
     cutoff = 1.5                ! Cutoff radius for molecular interactions.

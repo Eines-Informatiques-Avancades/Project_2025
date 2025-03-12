@@ -31,49 +31,38 @@ subroutine write_positions_xyz(part_num, time, positions, output_file)
     close(4)
 end subroutine
 
-! Itziar Rabal
+! Itziar Rabal, Ricard Rodriguez
 !
 ! Reads external input files that follow the structure of test_input.dat
-subroutine read_input(input_file, part_num, system_size, lattice_type, timestep, step_num)
+subroutine read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence)
     implicit none
 
-    character(50), intent(in) :: input_file
+    character(*), intent(in) :: input_file
     integer, intent(out) :: part_num, step_num
-    real, intent(out) :: system_size, timestep
+    real, intent(out) :: system_size, timestep, temperature, collision_frequence
     character(6), intent(out) :: lattice_type
 
-    integer :: ios, nlines, i
-    character(70), allocatable :: line(:)
+    integer :: ios
 
-    nlines = 0
+    open(10, file = input_file, status = 'old', action = 'read', iostat = ios)
 
-    open(10, file = input_file, status = 'old', iostat = ios)
     if (ios /= 0) then
         print *, 'Error reading input file ', input_file
         stop
-    endif
+    end if
 
-    do
-        read(10, *, iostat = ios)
-        if (ios /= 0) exit
-        nlines = nlines + 1
-    enddo
-
-    rewind(10)
-
-    allocate(line(nlines))
-
-    do i = 1, nlines
-        read(10, '(A)') line(i)
-    enddo
-
-    read(line(3)(17:20), '(I3)') part_num
-    read(line(4)(17:20), '(F12.6)') system_size
-    read(line(5)(17:19), '(A)') lattice_type
-    read(line(6)(17:23), '(F12.6)') timestep
-    read(line(7)(17:23), '(I6)') step_num
-
-    deallocate(line)
+    ! Read input file contents,
+    ! Make sure these are in the same order that the ones defined in 'input_file'.
+    ! In case you wish to add an extra variable to be read from the 'input_file',
+    ! it should also be added here below and added as an
+    ! argument of the subroutine as 'intent(out)'.
+    read(10, fmt = *) part_num
+    read(10, fmt = *) system_size
+    read(10, fmt = *) lattice_type
+    read(10, fmt = *) timestep
+    read(10, fmt = *) step_num
+    read(10, fmt = *) temperature
+    read(10, fmt = *) collision_frequence
 
     close(10)
 end subroutine read_input
