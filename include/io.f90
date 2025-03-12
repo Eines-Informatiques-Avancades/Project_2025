@@ -13,7 +13,8 @@
 subroutine write_positions_xyz(part_num, time, positions, output_file)
     implicit none
 
-    integer, intent(in) :: part_num, time
+    integer, intent(in) :: part_num
+    real, intent(in) :: time
     character(50), intent(in) :: output_file
     real, allocatable, intent(in) :: positions(:, :)
 
