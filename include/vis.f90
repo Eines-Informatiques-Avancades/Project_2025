@@ -1,76 +1,66 @@
-! This module is used for the storage of the n (number of atoms/particles),
-! t(simulation time), frame  and positions information.
+! This module is used for the storage of the variables                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 ! Also it ensures that these variables can be accessed by the subroutine.
 module var
     implicit none
-
-    integer :: n, t
-    integer, allocatable :: frame(:)
-    real, allocatable :: x(:,:), y(:,:), z(:,:)
-    real :: d, a, v
+    integer :: part_num, step_num
+    real, allocatable :: x(:,:), y(:,:), z(:,:),time(:)
+    real :: part_density, system_size
 end module var
 
 ! Test main program. Eliminate this program when all subroutine can be merged.
 program main
     use var
-
     implicit none
-
-    ! n: number of atoms/particles = d * v    test
-    ! t: simulation time                      test
-    ! d: density = n/v                        test
-    ! a: lenght of cube                       test
-    ! v: volume                               test
-    t = 5
-    d = 0.8
-    a = 1.55
-    v = a**3
+    step_num = 5
+    part_density = 0.8
+    system_size = 1.55
 
     ! nint is necessary to truncate the nearest integer number
-    n = nint(d * v)                         ! test
+    part_num = nint(part_density * system_size**3)                        
 
-    ! allocate memory for x y z variable that is labeled following the
-    ! n(atom1, atom2, ...) and the time frame (time1,time2,...)
-    allocate(x(n, t), y(n, t), z(n, t), frame(t))
+    ! allocate memory for x y z variable 
+    allocate(x(part_num, step_num), y(part_num, step_num), z(part_num, step_num), time(step_num))
 
     ! Read the trajectory file
+    ! Do the test1 and test2
+    ! Print the number of particles in the system
+    ! Compute the rdf and rmsd
+
     call read_trajectory
-
-    ! call test1()
-    ! call test2()
-
-    print *, n
-
+    call test1()
+    call test2()
+    print *,'Number of particles:', part_num
     call compute_rdf()
     call compute_rmsd()
 
-    deallocate(x, y, z, frame)
+    ! Release the stored memory
+    deallocate(x, y, z, time)
+
 end program main
 
 subroutine read_trajectory
     use var
-
     implicit none
-
-    integer :: i, j, ios, f
+    integer :: i, j, ios
+    real :: t
 
     open(1, file = 'traj.xyz', status = 'old', action = 'read')
 
     ! Read information line by line.
-    ! i.e. at time j=1 or frame=1, read n atoms xyz information, then for
+    ! i.e. at time j=1 or time=1, read n atoms xyz information, then for
     ! j = 2, 3, ... the same
-    do j = 1, t
-        do i = 1, n
-            ! this 'xyz' format is： frame x y z
+    do j = 1, step_num
+        do i = 1, part_num
+            ! this 'xyz' format is： time x y z
             ! these positions are vectorized following the the atom number
-            ! (i = atom1, atom2, ...) and the frame that is registered
+            ! (i = atom1, atom2, ...) and the time that is registered
             ! (j = 1, 2, ...)
-            read(1, *, iostat = ios) f, x(i, j), y(i, j), z(i, j)
+            read(1, *, iostat = ios) t, x(i, j), y(i, j), z(i, j)
 
-            ! store the frame information (it's enough with register first atom
-            ! frame)
+            ! store the time information (it's enough with register first atom
+            ! time)
             if (i == 1) then
-                frame(j) = f
+                time(j) = t
             end if
         end do
     end do
@@ -78,41 +68,38 @@ subroutine read_trajectory
     close(1)
 
     print *, 'Finished reading the trajectories.'
-end subroutine reading
+end subroutine read_trajectory
 
 ! Test to proove that the program has access to all the stored xyz information.
 subroutine test1()
     use var
-
     implicit none
     integer :: i, j
 
     print *, 'Processing stored coordinates...'
 
-    do j = 1, t
-        print *, 'frame:', frame(j)
+    do j = 1, step_num
+        print *, 'time:', time(j)
 
-        do i = 1, n
+        do i = 1, part_num
             print *,'(', x(i, j), y(i, j), z(i, j), ')'
         end do
     end do
 end subroutine test1
 
-! Test to access certain frame xyz information.
+! Test to access specific step xyz information.
 subroutine test2()
     use var
-
     implicit none
-
     integer :: i, j
 
-    print *, 'Testing specific frame data:'
+    print *, 'Testing specific step xyz information:'
 
-    do j = 1, t
-        if (frame(j) == 3) then  ! let's test for frame=3
-            print *, 'frame:', frame(j)
+    do j = 1, step_num
+        if (j == 3) then                            ! test for step = 3
+            print *, 'time:', time(j)
 
-            do i = 1, n
+            do i = 1, part_num
                 print *, 'x', x(i, j), 'y', y(i, j), 'z', z(i, j)
             end do
         end if
@@ -122,51 +109,45 @@ end subroutine test2
 ! Compute RDF using the stored data.
 subroutine compute_rdf()
     use var
-
     implicit none
+    integer :: i, j, k, time_index
+    real(4) :: maximum_radius                      ! maximum radius 
+    real(4), parameter :: dr = 0.05                 
+    integer :: bins                                ! Define a number of bins to set the size of rdf and r vectors size
+    real(4), allocatable :: rdf(:), r_values(:)    ! dx,dy,dz,dr and dv are respectively x,y,z,r positions variation and volume variation
+    real(4) :: r, dx, dy, dz, dv, density          
+    integer :: bin_index                           ! bin_index correspond to the zone of sphere that this r belongs
+    real(4) :: volume                              ! volume refers to the sphere's volume
 
-    integer :: i, j, k, fi
-    real(4), parameter :: rmax = 1.0               ! maximum radius
-    real(4), parameter :: dr = 0.1                 ! rangesteps
-    integer :: bins                                ! bin number
-    real(4), allocatable :: rdf(:), r_values(:)
-    real(4) :: r, dx, dy, dz, dv, density          ! dx,dy,dz positions variations
-    integer :: bi                                  ! bi bv are respectively bin index and spherical volume
-    real(4) :: volume
-
-    bins = int(rmax / dr)
+    maximum_radius = 0.5 * system_size
+    bins = int(maximum_radius / dr)
+    volume = (4.0/3.0) * 3.1415926 * maximum_radius**3
+    density = part_num / volume
     allocate(rdf(bins), r_values(bins))
     rdf = 0.0
 
-    do fi = 1, t       ! loop for all frames
-        do i = 1, n-1  ! loop for all atoms i.e. i=1 j=2 dx=x1-x2 ...
-            do j = i+1, n
-                ! x y z variation between frames to calculate r
-                dx = x(j, fi) - x(i, fi)
-                dy = y(j, fi) - y(i, fi)
-                dz = z(j, fi) - z(i, fi)
-
-                r = sqrt(dx**2 + dy**2 + dz**2)    ! r = sqrt(dx^2 + dy^2 + dz^2)
+    do time_index = 1, step_num                    ! loop for all registered time
+        do i = 1, part_num - 1                     ! loop for all atoms i.e. i=1 j=2 dx=x1-x2 ...
+            do j = i+1, part_num                   ! loop for the next atom (atom j) of atom i
+                dx = x(j, time_index) - x(i, time_index)
+                dy = y(j, time_index) - y(i, time_index)
+                dz = z(j, time_index) - z(i, time_index)
+                r = sqrt(dx**2 + dy**2 + dz**2)    
                 print *, 'r:',r                    ! check the calculated r
 
-                ! consider sphere to calculate rdf
-                if (r < rmax) then
-                    bi = int(r / dr) + 1  ! there a different portions/zones of spheres, each zone/portions labeled as bi=1,2,3,...
-                    rdf(bi) = rdf(bi) + 1 ! bi correspond to the zone of sphere that this r belongs and we will increase the size to accumulate the rdf
+                if (r < maximum_radius) then
+                    bin_index = int(r / dr) + 1  
+                    rdf(bin_index) = rdf(bin_index) + 1 
                 end if
             end do
         end do
     end do
 
-    ! volume != entire cubic volume, it's refering the rdf related spherical
-    ! volume. Therefore, it's necessary to set a maximum radius
-    volume = (4.0/3.0) * 3.1415926 * rmax**3
-    density = n  / volume
-
+    
     do k = 1, bins
-        r_values(k) = k * dr
-        dv = 4.0 * 3.14159 * r_values(k)**2 * dr  ! volume between r to r + dr to normalize the rdf
-        rdf(k) = rdf(k) / (density * n * dv )     ! normalize the rdf
+        r_values(k) = k * dr                             ! r_values are grid points of r
+        dv = 4.0 * 3.14159 * r_values(k)**2 * dr         ! volume between r to r + dr to normalize the rdf
+        rdf(k) = rdf(k) / (density * part_num * dv )     ! normalize the rdf
     end do
 
     open(2, file = 'rdf_data.txt', status = 'replace')
@@ -183,33 +164,28 @@ end subroutine compute_rdf
 ! Compute RMSD using the stored data.
 subroutine compute_rmsd()
     use var
-
     implicit none
-
     integer :: i, j
     real(4), allocatable :: rmsd(:)
     real(4) :: dx, dy, dz, sum_sq
 
-    allocate(rmsd(t))
+    allocate(rmsd(step_num))
 
-    do j = 1, t   ! for all time frame
-        sum_sq = 0.0  ! summation using the acumulation
-        do i = 1, n
-            ! here difference of positions is between the xj and x1 (as
-            ! reference and changeble).
+    do j = 1, step_num                                  ! for all steps
+        sum_sq = 0.0                                    ! summation using the acumulation
+        do i = 1, part_num                                            
             dx = x(i, j) - x(i, 1)
-            dy = y(i, j) - y(i, 1)
+            dy = y(i, j) - y(i, 1)                      ! difference of positions is between the xj and x1 (as reference).
             dz = z(i, j) - z(i, 1)
-
             sum_sq = sum_sq + (dx**2 + dy**2 + dz**2)
         end do
 
-        rmsd(j) = sqrt(sum_sq / n)    !   rmsd=sqrt(summation(r-r')^2 / n)
+        rmsd(j) = sqrt(sum_sq / part_num)               ! rmsd=sqrt(summation(r-r')^2 / n)
     end do
 
     open(2, file = 'rmsd_data.txt', status = 'replace')
-    do j = 1, t
-        write(2, *) frame(j), rmsd(j)
+    do j = 1, step_num
+        write(2, *) time(j), rmsd(j)
     end do
     close(2)
 
