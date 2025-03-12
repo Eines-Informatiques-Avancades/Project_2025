@@ -6,7 +6,9 @@ Advanced Computer Tools subject.
 
 ## Compiling and running the simulation
 
-The project can be cloned and compiled by running:
+This project includes a Makefile which should be used in order to compile its
+source code. In order to download and build this program one should follow the
+next steps:
 
 ```
 $ git clone https://github.com/Eines-Informatiques-Avancades/Project_2025.git
@@ -20,6 +22,10 @@ This will produce the `vdw_gas` executable file, which can be ran by:
 $ ./vdw_gas
 ```
 
+Edit the `input_parameters.in` file before running the simulation to set the
+system parameters. There's no need to recompile the program once this file is
+edited, as it is read at runtime.
+
 ## Dependencies
 
 - A Fortran compiler (E.g.: [GNU Fortran](https://gcc.gnu.org/fortran/))
@@ -31,6 +37,8 @@ scripts are provided. These scripts have the following dependencies:
 - [Python 3](https://www.python.org/)
   - [NumPy](https://numpy.org/)
   - [Matplotlib](https://matplotlib.org/)
+  - [imageio](https://imageio.readthedocs.io/en/stable/)
+- [cm-super TeX font package](https://ctan.org/pkg/cm-super)
 
 ## Project structure
 
