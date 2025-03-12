@@ -15,14 +15,15 @@ program vdw_gas
     implicit none
 
     integer :: part_num, step_num, step
-    real :: part_density, system_size, volume, cutoff, time, timestep, lj_potential
+    real :: part_density, system_size, volume, cutoff, time, timestep, lj_potential, &
+        temperature, collision_frequence
     real, allocatable :: positions(:, :), forces(:, :), velocities(:, :)
     character(6) :: lattice_type
     character(50) :: positions_file, input_file
 
     ! System parameters.
     input_file = 'input_parameters.in'
-    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num)
+    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence)
 
     volume = system_size**(3.)  ! System is a cubic box.
     cutoff = 1.5                ! Cutoff radius for molecular interactions.
@@ -43,6 +44,13 @@ program vdw_gas
 
     print *, 'Computing initial Lennard-Jones forces...'
     call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
+
+    print *, 'Generating initial configuration for a VdW gas from the lattice...'
+
+    do step = 1, step_num
+        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities)
+        call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
+    end do
 
     ! Create a new positions_file or replace the existing one.
     positions_file = 'positions.xyz'
