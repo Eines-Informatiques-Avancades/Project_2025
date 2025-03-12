@@ -1,7 +1,8 @@
-! This module is used for the storage of the variables                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+! This module is used for the storage of the variables
 ! Also it ensures that these variables can be accessed by the subroutine.
 module var
     implicit none
+
     integer :: part_num, step_num
     real, allocatable :: x(:,:), y(:,:), z(:,:),time(:)
     real :: part_density, system_size
@@ -10,26 +11,28 @@ end module var
 ! Test main program. Eliminate this program when all subroutine can be merged.
 program main
     use var
+
     implicit none
+
     step_num = 5
     part_density = 0.8
     system_size = 1.55
 
     ! nint is necessary to truncate the nearest integer number
-    part_num = nint(part_density * system_size**3)                        
+    part_num = nint(part_density * system_size**3)
 
-    ! allocate memory for x y z variable 
-    allocate(x(part_num, step_num), y(part_num, step_num), z(part_num, step_num), time(step_num))
+    allocate( &
+        x(part_num, step_num), y(part_num, step_num), &
+        z(part_num, step_num), time(step_num) &
+    )
 
-    ! Read the trajectory file
-    ! Do the test1 and test2
-    ! Print the number of particles in the system
-    ! Compute the rdf and rmsd
+    call read_trajectory()
 
-    call read_trajectory
-    call test1()
-    call test2()
+    ! call test_access_xyz_data()
+    ! call test_access_xyz_frame()
+
     print *,'Number of particles:', part_num
+
     call compute_rdf()
     call compute_rmsd()
 
@@ -38,9 +41,11 @@ program main
 
 end program main
 
-subroutine read_trajectory
+subroutine read_trajectory()
     use var
+
     implicit none
+
     integer :: i, j, ios
     real :: t
 
@@ -68,12 +73,14 @@ subroutine read_trajectory
     close(1)
 
     print *, 'Finished reading the trajectories.'
-end subroutine read_trajectory
+end subroutine read_trajectory()
 
 ! Test to proove that the program has access to all the stored xyz information.
-subroutine test1()
+subroutine test_access_xyz_data()
     use var
+
     implicit none
+
     integer :: i, j
 
     print *, 'Processing stored coordinates...'
@@ -85,12 +92,14 @@ subroutine test1()
             print *,'(', x(i, j), y(i, j), z(i, j), ')'
         end do
     end do
-end subroutine test1
+end subroutine test_access_xyz_data
 
 ! Test to access specific step xyz information.
-subroutine test2()
+subroutine test_access_xyz_frame()
     use var
+
     implicit none
+
     integer :: i, j
 
     print *, 'Testing specific step xyz information:'
@@ -104,18 +113,20 @@ subroutine test2()
             end do
         end if
     end do
-end subroutine test2
+end subroutine test_access_xyz_frame
 
 ! Compute RDF using the stored data.
 subroutine compute_rdf()
     use var
+
     implicit none
+
     integer :: i, j, k, time_index
-    real(4) :: maximum_radius                      ! maximum radius 
-    real(4), parameter :: dr = 0.05                 
+    real(4) :: maximum_radius                      ! maximum radius
+    real(4), parameter :: dr = 0.05
     integer :: bins                                ! Define a number of bins to set the size of rdf and r vectors size
     real(4), allocatable :: rdf(:), r_values(:)    ! dx,dy,dz,dr and dv are respectively x,y,z,r positions variation and volume variation
-    real(4) :: r, dx, dy, dz, dv, density          
+    real(4) :: r, dx, dy, dz, dv, density
     integer :: bin_index                           ! bin_index correspond to the zone of sphere that this r belongs
     real(4) :: volume                              ! volume refers to the sphere's volume
 
@@ -132,18 +143,18 @@ subroutine compute_rdf()
                 dx = x(j, time_index) - x(i, time_index)
                 dy = y(j, time_index) - y(i, time_index)
                 dz = z(j, time_index) - z(i, time_index)
-                r = sqrt(dx**2 + dy**2 + dz**2)    
+                r = sqrt(dx**2 + dy**2 + dz**2)
                 print *, 'r:',r                    ! check the calculated r
 
                 if (r < maximum_radius) then
-                    bin_index = int(r / dr) + 1  
-                    rdf(bin_index) = rdf(bin_index) + 1 
+                    bin_index = int(r / dr) + 1
+                    rdf(bin_index) = rdf(bin_index) + 1
                 end if
             end do
         end do
     end do
 
-    
+
     do k = 1, bins
         r_values(k) = k * dr                             ! r_values are grid points of r
         dv = 4.0 * 3.14159 * r_values(k)**2 * dr         ! volume between r to r + dr to normalize the rdf
@@ -164,7 +175,9 @@ end subroutine compute_rdf
 ! Compute RMSD using the stored data.
 subroutine compute_rmsd()
     use var
+
     implicit none
+
     integer :: i, j
     real(4), allocatable :: rmsd(:)
     real(4) :: dx, dy, dz, sum_sq
@@ -173,7 +186,7 @@ subroutine compute_rmsd()
 
     do j = 1, step_num                                  ! for all steps
         sum_sq = 0.0                                    ! summation using the acumulation
-        do i = 1, part_num                                            
+        do i = 1, part_num
             dx = x(i, j) - x(i, 1)
             dy = y(i, j) - y(i, 1)                      ! difference of positions is between the xj and x1 (as reference).
             dz = z(i, j) - z(i, 1)
