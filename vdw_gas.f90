@@ -18,10 +18,11 @@ program vdw_gas
     real :: part_density, system_size, volume, cutoff, time, timestep, lj_potential
     real, allocatable :: positions(:, :), forces(:, :), velocities(:, :)
     character(6) :: lattice_type
-    character(50) :: positions_file
+    character(50) :: positions_file, input_file
 
     ! System parameters.
-    call read_input(part_num, system_size, lattice_type, timestep, step_num)
+    input_file = 'input_parameters.in'
+    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num)
 
     volume = system_size**(3.)  ! System is a cubic box.
     cutoff = 1.5                ! Cutoff radius for molecular interactions.
