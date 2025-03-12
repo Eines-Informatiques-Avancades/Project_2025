@@ -19,7 +19,6 @@ subroutine verlet(part_num, dt, system_size, cutoff, positions, positions_old, v
     real, allocatable :: positions_aux(:, :), forces(:, :)
 
     allocate( &
-        positions(part_num, 3), &
         positions_old(part_num, 3), &
         positions_aux(part_num, 3), &
         velocities(part_num, 3) &
@@ -43,10 +42,7 @@ subroutine velocity_verlet(dt, part_num, system_size, cutoff, positions, velocit
     real :: lj_potential
     real, allocatable :: forces(:, :)
 
-    allocate( &
-        positions(part_num, 3), &
-        velocities(part_num, 3) &
-    )
+    allocate(velocities(part_num, 3))
 
     call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
     positions = positions + velocities*dt + 0.5 * forces*dt*dt
@@ -67,10 +63,7 @@ subroutine euler(dt, part_num, system_size, cutoff, positions, velocities)
     real :: lj_potential
     real, allocatable :: forces(:, :)
 
-    allocate( &
-        positions(part_num, 3), &
-        velocities(part_num, 3) &
-    )
+    allocate(velocities(part_num, 3))
 
     call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
     positions = positions + velocities * dt + 0.5 * forces*dt*dt
