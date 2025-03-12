@@ -43,6 +43,7 @@ def plot_rmsd(filename="rmsd_data.txt"):
     plt.show()
     print(f"RMSD plot saved as {rmsd_output}")
 
+
 def plot_trajectories(filename="traj.xyz"):
     data = np.loadtxt(filename)
 
@@ -54,7 +55,6 @@ def plot_trajectories(filename="traj.xyz"):
     unique_frames = np.unique(frame_ids)  
     num_atoms = len(frame_ids) // len(unique_frames)  
 
-
     trajectories = {i: {'x': [], 'y': [], 'z': []} for i in range(num_atoms)}
 
     for i in range(len(frame_ids)):
@@ -62,7 +62,6 @@ def plot_trajectories(filename="traj.xyz"):
         trajectories[atom_id]['x'].append(x[i])
         trajectories[atom_id]['y'].append(y[i])
         trajectories[atom_id]['z'].append(z[i])
-
 
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111, projection='3d')
