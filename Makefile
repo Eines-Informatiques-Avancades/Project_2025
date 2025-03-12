@@ -26,3 +26,6 @@ ${OBJ}: modules
 
 clean:
 	rm ${PROG} ${OBJ} *.mod
+
+clean-output:
+	rm *.xyz *.dat
