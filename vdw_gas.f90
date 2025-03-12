@@ -63,10 +63,9 @@ program vdw_gas
     do step = 1, step_num
         time = time + timestep
 
-        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities)
+        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities, lj_potential)
         call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
 
-        call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
         call compute_total_kinetic_energy(part_num, velocities, kinetic_energy)
         total_energy = lj_potential + kinetic_energy
 
