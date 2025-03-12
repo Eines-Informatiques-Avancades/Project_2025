@@ -19,7 +19,6 @@ subroutine andersen_thermostat(part_num, temperature, collision_frequence, veloc
     real :: sigma, rnumber
     integer :: i
 
-    allocate(velocities(part_num, 3))
     sigma = sqrt(temperature)
 
     do i = 1, part_num
