@@ -21,11 +21,7 @@ program vdw_gas
     character(50) :: positions_file
 
     ! System parameters.
-    lattice_type = 'SC'
-    part_num = 125
-    system_size = 6
-    timestep = 0.0001
-    step_num = 10000
+    call read_input(part_num, system_size, lattice_type, timestep, step_num)
 
     volume = system_size**(3.)  ! System is a cubic box.
     cutoff = 1.5                ! Cutoff radius for molecular interactions.
