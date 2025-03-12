@@ -1,6 +1,6 @@
 !
 ! integrators.f90
-! Equilibrium Monte Carlo simulation of the 2D Ising model
+! Molecular Dynamics Simulation of a Van der Waals Gas
 ! Oriol Miro
 !
 ! Integrators for Molecular Dynamics.
