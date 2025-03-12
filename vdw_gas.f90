@@ -15,7 +15,8 @@ program vdw_gas
     implicit none
 
     integer :: part_num, step_num, step
-    real :: part_density, system_size, volume, cutoff, time, timestep, lj_potential
+    real :: part_density, system_size, volume, cutoff, time, timestep, lj_potential, &
+        temperature, collision_frequence
     real, allocatable :: positions(:, :), forces(:, :), velocities(:, :)
     character(6) :: lattice_type
     character(50) :: positions_file, input_file
