@@ -13,16 +13,17 @@ subroutine andersen_thermostat(part_num, temperature, collision_frequence, veloc
     implicit none
 
     integer, intent(in) :: part_num
-    real, allocatable, intent(inout) :: velocities
-    real, intent(in) :: temperature, collision frequence
-    real :: sigma
+    real, allocatable, intent(inout) :: velocities(:,:)
+    real, intent(in) :: temperature, collision_frequence
+    real :: sigma, rnumber
     integer :: i
 
     allocate(velocities(part_num, 3))
     sigma = sqrt(temperature)
 
     do i = 1, part_num
-        if (random_number() < collision_frequence) then
+        call random_number(rnumber)
+        if (rnumber < collision_frequence) then
                 velocities(i,1) = sigma * random_gaussian()
                 velocities(i,2) = sigma * random_gaussian()
                 velocities(i,3) = sigma * random_gaussian()

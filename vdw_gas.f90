@@ -19,14 +19,16 @@ program vdw_gas
     real, allocatable :: positions(:, :), forces(:, :), velocities(:,:)
     character(6) :: lattice_type
     character(50) :: positions_file
-
+	
+    allocate(positions(system_size,3), velocities(system_size,3), forces(system_size,3))
+    velocities = 0
     ! Generate initial lattice.
     lattice_type = 'SC'
     part_num = 125
     system_size = 500
     dt = 0.01
     temperature = 10.0
-    collision frequence = 0.05
+    collision_frequence = 0.05
 
     volume = system_size**(3.)  ! System is a cubic box.
     cutoff = 0.5*system_size    ! Cutoff radius for molecular interactions.
