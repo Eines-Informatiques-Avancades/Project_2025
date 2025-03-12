@@ -1,56 +1,50 @@
-
-program main
-    use, intrinsic :: iso_fortran_env, only : dp => real64
-
-    implicit none
-    integer :: part_num, system_size
-    character(len = 2) :: lattice_type
-
-    call read_input(part_num, system_size, lattice_type)
-
-    print("(I3,x,I3,x,A)"), part_num, system_size, lattice_type
-contains
+!
+! read_input.f90
+! Molecular Dynamics Simulation of a Van der Waals Gas
+! Itziar Rabal
+!
+! Subroutine that reads external input files that follow the structure of test_input.dat
+!
 
 subroutine read_input(part_num, system_size, lattice_type)
     implicit none
     integer, intent(out) :: part_num, system_size
-    character(len = 2), intent(out) :: lattice_type
+    character(len = 3), intent(out) :: lattice_type
 
-    integer :: io
-    character(len = 14) :: filename
-    character(len = 70) :: line
-
-    filename = "test_input.dat"
-
-    open(10, file = filename, iostat = io)
-    if (io == 0) then
-        print*, "testing file opened for reading"
-    endif
-
+    character(len = 70) :: filename
+    integer :: io, nlines, i
+    character(len = 70), allocatable :: line(:)
     
-    read(10,*)  !skip title line
-    read(10,*)  !skip title line
-    read(10,*)  !skip title line
+    nlines = 0
 
-    read(10,"(A)")line
-    print*, line
+    print*, "enter input file"
+    read(*,*)filename
 
-    read(line(17:20), "(I3)")part_num
-    print*, part_num
+    open(10, file = filename, status = "old", iostat = io)
+    if (io /= 0) then
+        print*, "error reading input file"
+        stop
+    endif
+    
+    do 
+        read(10,*, iostat = io)
+        if (io /= 0) exit
+        nlines = nlines + 1
+    enddo
+    
+    rewind(10)
 
-    read(10,"(A)")line
-    print*, line
+    allocate(line(nlines))
 
-    read(line(17:20), "(I3)")system_size
-    print*, system_size
+    do i =  1, nlines
+        read(10,"(A)")line(i)
+    enddo
 
-    read(10,"(A)")line
-    print*, line
-
-    read(line(17:19), "(A)")lattice_type
-    print*, lattice_type
+    read(line(3)(17:20), "(I3)")part_num
+    read(line(4)(17:20), "(I3)")system_size
+    read(line(5)(17:19), "(A)")lattice_type
+    
+    deallocate(line)
 
     close(10)
 end subroutine read_input
-
-end program main

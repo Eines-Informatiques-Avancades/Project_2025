@@ -1,7 +1,5 @@
 vdw MD symulation tester
 
-
 part_num      = 5
 system_size   = 25
 lattice_type  = SC
-
