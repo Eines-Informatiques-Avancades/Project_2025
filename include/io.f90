@@ -33,7 +33,7 @@ end subroutine
 
 ! Itziar Rabal, Ricard Rodriguez
 !
-! Reads external input files that follow the structure of test_input.dat
+! Reads external input files that follow the structure of input_parameters.in
 subroutine read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence)
     implicit none
 
