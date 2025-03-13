@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-#  # Plot appearance settings.
+# Plot appearance settings.
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "STIXGeneral"

@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 # Plot appearance settings.
-plt.rcParams.update({
-    "text.usetex": True,
-    "font.family": "STIXGeneral"
-})
+#  plt.rcParams.update({
+    #  "text.usetex": True,
+    #  "font.family": "STIXGeneral"
+#  })
 
 # Parse arguments.
 def parse_args():
