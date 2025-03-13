@@ -50,6 +50,32 @@ files by topic or task.
 A single module called `subroutines` is used due to the fact that different
 subroutines might interact with each other.
 
+As previously mentioned, system parameters are set under `input_parameters.in`,
+which is read at runtime.
+
+The project tree has the following structure (excluding git-related files, such
+as this README).
+
+```
+.
+|-- include/
+|   |-- forces.f90
+|   |-- geometry.f90
+|   |-- initial_conf.f90
+|   |-- integrators.f90
+|   |-- io.f90
+|   |-- thermodynamics.f90
+|   `-- thermostat.f90
+|-- plot/
+|   `-- ...
+|-- test/
+|   `-- ...
+|-- Makefile
+|-- input_parameters.in
+|-- subroutines.f90
+`-- vdw_gas.f90
+```
+
 ## Credits and contributors
 
 - Ricard Rodríguez: system initialization, periodic boundary condition, project
