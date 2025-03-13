@@ -7,6 +7,13 @@ import matplotlib.pyplot as plt
 
 from mpl_toolkits.mplot3d import Axes3D
 
+
+#  # Plot appearance settings.
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "STIXGeneral"
+})
+
 # Parse arguments.
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -44,8 +51,9 @@ def plot_particles(filename):
     ax.set_zlabel('Z')
     ax.set_title('3D Particle Visualization')
 
-    output_filename = os.path.splitext(filename)[0] + '.png'
-    plt.savefig(output_filename)
+    output_filename = os.path.splitext(filename)[0] + '.pdf'
+    plt.savefig(output_filename, format = 'pdf')
+    plt.close()
 
     print(f"Plot saved as {output_filename}")
 
