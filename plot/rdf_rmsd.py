@@ -44,44 +44,5 @@ def plot_rmsd(filename="rmsd_data.txt"):
     print(f"RMSD plot saved as {rmsd_output}")
 
 
-def plot_trajectories(filename="traj.xyz"):
-    data = np.loadtxt(filename)
-
-    frame_ids = data[:, 0].astype(int)  
-    x = data[:, 1]
-    y = data[:, 2]
-    z = data[:, 3]
-
-    unique_frames = np.unique(frame_ids)  
-    num_atoms = len(frame_ids) // len(unique_frames)  
-
-    trajectories = {i: {'x': [], 'y': [], 'z': []} for i in range(num_atoms)}
-
-    for i in range(len(frame_ids)):
-        atom_id = i % num_atoms  
-        trajectories[atom_id]['x'].append(x[i])
-        trajectories[atom_id]['y'].append(y[i])
-        trajectories[atom_id]['z'].append(z[i])
-
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(111, projection='3d')
-
-    for atom_id, traj in trajectories.items():
-        ax.plot(traj['x'], traj['y'], traj['z'], marker='o', label=f'Atom {atom_id+1}')
-
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title('3D Particle Trajectories')
-    ax.legend()
-
-    traj_output = os.path.splitext(filename)[0] + '_trajectory.png'
-    plt.savefig(traj_output, dpi=300)
-    plt.show()
-
-    print(f"Trajectory plot saved as {traj_output}")
-
-
 plot_rdf()
 plot_rmsd()
-plot_trajectories("traj.xyz")
