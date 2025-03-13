@@ -1,10 +1,10 @@
 !
-! jackknife.f90
+! binning.f90
 ! Molecular Dynamics Simulation of a Van der Waals Gas
 ! Ricard Rodriguez, Joan Serrano
 !
-! Jackknife program corresponding to the final project for the Advanced
-! Computer Tools subject.
+! Binning program corresponding to the final project for the Advanced Computer
+! Tools subject.
 !
 
 program binning
