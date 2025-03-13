@@ -124,7 +124,7 @@ subroutine compute_rdf()
     integer :: i, j, k, time_index
     real(4) :: maximum_radius                      ! maximum radius
     real(4), parameter :: dr = 0.05
-    integer :: bins                                ! Define a number of bins to set the size of rdf and r vectors size
+    integer :: bins                                ! Define a number of bins to set the size of rdf and r vectors 
     real(4), allocatable :: rdf(:), r_values(:)    ! dx,dy,dz,dr and dv are respectively x,y,z,r positions variation and volume variation
     real(4) :: r, dx, dy, dz, dv, density
     integer :: bin_index                           ! bin_index correspond to the zone of sphere that this r belongs
