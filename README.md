@@ -26,6 +26,17 @@ Edit the `input_parameters.in` file before running the simulation to set the
 system parameters. There's no need to recompile the program once this file is
 edited, as it is read at runtime.
 
+## Plotting the results
+
+After running the simulation, output files with the results will be produced. In
+order to better review and analyse these results, a set of Python scripts are
+included under the `plot/` folder. These scripts make use of several Python
+libraries to produce different plots of the results (see
+[Dependencies](#dependencies)).
+
+The scripts can be run manually (one by one) or using the `plot.sh` shell
+script, which will execute all of them sequentially.
+
 ## Dependencies
 
 - A Fortran compiler (E.g.: [GNU Fortran](https://gcc.gnu.org/fortran/))
