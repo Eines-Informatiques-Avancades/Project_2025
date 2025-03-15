@@ -36,10 +36,10 @@ end subroutine andersen_thermostat
 function random_gaussian() result(r)
     implicit none
 
-    real(8) :: r, u1, u2
+    real :: r, u1, u2
 
     call random_number(u1)
     call random_number(u2)
 
-    r = sqrt(-2.0d0 * log(u1)) * cos(2.0d0 * 3.141592653589793d0 * u2)
+    r = real(sqrt(-2.0d0 * log(u1)) * cos(2.0d0 * 3.141592653589793d0 * u2))
 end function random_gaussian
