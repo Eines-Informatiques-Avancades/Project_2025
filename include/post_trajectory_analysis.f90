@@ -13,7 +13,7 @@ module var
     integer :: part_num, step_num
     real :: timestep, part_density, temperature, system_size, collision_frequence
     character(6) :: lattice_type
-    character(50) :: input_file
+    character(50) :: input_file, rdf_file, rmsd_file
 
     real, allocatable :: x(:,:), y(:,:), z(:,:), time(:)
 end module var
@@ -38,6 +38,8 @@ program post_trajectory_analysis
     ! call test_access_xyz_data()
     ! call test_access_xyz_frame()
 
+    rdf_file = 'rdf.dat'
+    rmsd_file = 'rmsd.dat'
     call compute_rdf()
     call compute_rmsd()
 
@@ -164,13 +166,13 @@ subroutine compute_rdf()
         rdf(k) = rdf(k) / (density * part_num * dv )     ! normalize the rdf
     end do
 
-    open(2, file = 'rdf_data.txt', status = 'replace')
+    open(2, file = rdf_file, status = 'replace')
     do k = 1, bins
         write(2, *) r_values(k), rdf(k)
     end do
     close(2)
 
-    print *, 'RDF calculation completed and saved to rdf_data.txt'
+    print *, 'RDF calculation completed and saved to ', rdf_file
 
     deallocate(rdf, r_values)
 end subroutine compute_rdf
@@ -199,13 +201,13 @@ subroutine compute_rmsd()
         rmsd(j) = sqrt(sum_sq / part_num)               ! rmsd=sqrt(summation(r-r')^2 / n)
     end do
 
-    open(2, file = 'rmsd_data.txt', status = 'replace')
+    open(2, file = rmsd_file, status = 'replace')
     do j = 1, step_num
         write(2, *) time(j), rmsd(j)
     end do
     close(2)
 
-    print *, 'RMSD calculation completed and saved to rmsd_data.txt'
+    print *, 'RMSD calculation completed and saved to ', rmsd_file
 
     deallocate(rmsd)
 end subroutine compute_rmsd
