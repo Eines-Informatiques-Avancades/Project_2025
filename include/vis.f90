@@ -4,7 +4,7 @@ module var
     implicit none
 
     integer :: part_num, step_num
-    real, allocatable :: x(:,:), y(:,:), z(:,:),time(:)
+    real, allocatable :: x(:,:), y(:,:), z(:,:), time(:)
     real :: part_density, system_size
 end module var
 
@@ -134,6 +134,7 @@ subroutine compute_rdf()
     bins = int(maximum_radius / dr)
     volume = (4.0/3.0) * 3.1415926 * maximum_radius**3
     density = part_num / volume
+    
     allocate(rdf(bins), r_values(bins))
     rdf = 0.0
 
@@ -154,7 +155,6 @@ subroutine compute_rdf()
         end do
     end do
 
-
     do k = 1, bins
         r_values(k) = k * dr                             ! r_values are grid points of r
         dv = 4.0 * 3.14159 * r_values(k)**2 * dr         ! volume between r to r + dr to normalize the rdf
@@ -162,12 +162,13 @@ subroutine compute_rdf()
     end do
 
     open(2, file = 'rdf_data.txt', status = 'replace')
+    write(2, *) '# r_values, rdf'
     do k = 1, bins
         write(2, *) r_values(k), rdf(k)
     end do
     close(2)
 
-    print *, 'RDF calculation completed and saved to rdf_data.txt'
+    print *, 'RDF calculation completed and saved into rdf_data.txt'
 
     deallocate(rdf, r_values)
 end subroutine compute_rdf
@@ -197,6 +198,7 @@ subroutine compute_rmsd()
     end do
 
     open(2, file = 'rmsd_data.txt', status = 'replace')
+    write(2, *) '# time, rmsd'
     do j = 1, step_num
         write(2, *) time(j), rmsd(j)
     end do
