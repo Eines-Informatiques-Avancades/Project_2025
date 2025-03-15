@@ -1,20 +1,11 @@
 #!/bin/sh
 
-#read -p 'Enter test name : ' test_name
-test_name=test_template
 out_files=("kinetic_energy.dat" "lj_potential.dat" "positions.xyz" "temperature_inst.dat" "total_energy.dat")
-
-cd $test_name
-
-./../../vdw_gas
-
-echo ' '
-mv *.dat positions.xyz ./run_out
 
 cd run_out
 
 echo ' ' 
-echo "comparing files with test outputs"
+echo "comparing files with test outputs..."
 echo ' ' 
 
 for file in "${out_files[@]}"; do
@@ -24,10 +15,10 @@ for file in "${out_files[@]}"; do
        echo NaN : '        ' $nans lines
        infinit=$(grep Infinity $file | wc -l)    # check for Infinity value 
        echo Infinity : '   ' $infinit lines
-       heads=$(head -10 $file) 
-       tails=$(tail -10 $file)
-       if [ '$heads' == 'tails' ]; then    # check if all lines display same data
-           echo print or propagation error 
+       heads=$(tail -n +2 $file | head -10 | awk '{print $2}')
+       tails=$(tail -10 $file | awk '{print $2}')
+       if [ "$heads" = "$tails" ]; then    # check if all lines display same data
+           echo ERROR : print or propagation issue
        fi
    else
        echo File $file not found.
