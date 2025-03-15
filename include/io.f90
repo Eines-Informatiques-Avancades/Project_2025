@@ -33,14 +33,16 @@ end subroutine
 
 ! Itziar Rabal, Ricard Rodriguez
 !
-! Reads external input files that follow the structure of test_input.dat
-subroutine read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence)
+! Reads external input files that follow the structure of input_parameters.in
+subroutine read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence, &
+    cutoff, test_mode)
     implicit none
 
     character(*), intent(in) :: input_file
     integer, intent(out) :: part_num, step_num
-    real, intent(out) :: system_size, timestep, temperature, collision_frequence
+    real, intent(out) :: system_size, timestep, temperature, collision_frequence, cutoff
     character(6), intent(out) :: lattice_type
+    character(3), intent(out) :: test_mode
 
     integer :: ios
 
@@ -63,6 +65,8 @@ subroutine read_input(input_file, part_num, system_size, lattice_type, timestep,
     read(10, fmt = *) step_num
     read(10, fmt = *) temperature
     read(10, fmt = *) collision_frequence
+    read(10, fmt = *) cutoff
+    read(10, fmt = *) test_mode
 
     close(10)
 end subroutine read_input
