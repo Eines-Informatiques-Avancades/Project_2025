@@ -6,7 +6,8 @@ cd run_out
 
 echo ' ' 
 echo "comparing files with test outputs..."
-echo ' ' 
+echo ' '
+mv *.dat positions.xyz ./run_out
 
 for file in "${out_files[@]}"; do
    if [ -f $file ]; then
