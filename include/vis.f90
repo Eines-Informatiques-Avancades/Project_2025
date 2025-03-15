@@ -1,3 +1,10 @@
+!
+! post_trajectory_analysis
+! Molecular Dynamics Simulation of a Van der Waals Gas
+! Haoyu Huang, Ricard Rodriguez
+!
+
+
 ! This module is used for the storage of the variables
 ! Also it ensures that these variables can be accessed by the subroutine.
 module var
@@ -11,7 +18,7 @@ module var
     real, allocatable :: x(:,:), y(:,:), z(:,:), time(:)
 end module var
 
-program main
+program post_trajectory_analysis
     use var
     use subroutines, only: read_input
 
@@ -31,18 +38,12 @@ program main
     ! call test_access_xyz_data()
     ! call test_access_xyz_frame()
 
-    print *, 'Number of particles:', part_num
-    print *, 'Step number:', step_num
-    print *, 'System size:', system_size
-    print *, 'Timestep:', timestep
-    print *, 'Lattice type:', lattice_type
-
     call compute_rdf()
     call compute_rmsd()
 
     ! Release the stored memory
     deallocate(x, y, z, time)
-end program main
+end program post_trajectory_analysis
 
 
 subroutine read_trajectory()
@@ -148,7 +149,6 @@ subroutine compute_rdf()
                 dy = y(j, time_index) - y(i, time_index)
                 dz = z(j, time_index) - z(i, time_index)
                 r = sqrt(dx**2 + dy**2 + dz**2)
-                !print *, 'r:',r                    ! check the calculated r
 
                 if (r < maximum_radius) then
                     bin_index = int(r / dr) + 1
