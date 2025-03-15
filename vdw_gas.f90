@@ -18,8 +18,9 @@ program vdw_gas
     real :: part_density, system_size, volume, cutoff, time, timestep, lj_potential, &
         temperature, temperature_inst, collision_frequence, kinetic_energy, total_energy
     real, allocatable :: positions(:, :), forces(:, :), velocities(:, :)
+    real, allocatable :: x(:, :), y(:, :), z(:, :), time_points(:)
     character(6) :: lattice_type
-    character(50) :: positions_file, input_file
+    character(50) :: positions_file, input_file, rdf_file, rmsd_file
 
     ! System parameters.
     input_file = 'input_parameters.in'
@@ -89,4 +90,26 @@ program vdw_gas
     close(6)
     close(7)
     close(8)
+
+    deallocate(positions, velocities, forces)
+
+    !
+    ! Post-trajectory analysis (RDF and RMSD computation).
+    !
+
+    print *, 'Performing post-trajectory analysis...'
+
+    allocate( &
+        x(part_num, step_num), y(part_num, step_num), &
+        z(part_num, step_num), time_points(step_num) &
+    )
+
+    call read_trajectory(part_num, step_num, positions_file, x, y, z, time_points)
+
+    rdf_file = 'rdf.dat'
+    rmsd_file = 'rmsd.dat'
+    call compute_rdf(part_num, step_num, system_size, x, y, z, rdf_file)
+    call compute_rmsd(part_num, step_num, x, y, z, time_points, rmsd_file)
+
+    deallocate(x, y, z, time_points)
 end program vdw_gas

@@ -4,89 +4,43 @@
 ! Haoyu Huang, Ricard Rodriguez
 !
 
-
-! This module is used for the storage of the variables
-! Also it ensures that these variables can be accessed by the subroutine.
-module var
+! Read data from the positions file and store it into arrays.
+! Particle positions in time are stored in columns: time x y z
+! Each row refers to a particle in an specific time.
+subroutine read_trajectory(part_num, step_num, positions_file, x, y, z, time)
     implicit none
 
-    integer :: part_num, step_num
-    real :: timestep, part_density, temperature, system_size, collision_frequence
-    character(6) :: lattice_type
-    character(50) :: input_file, rdf_file, rmsd_file
+    integer, intent(in) :: part_num, step_num
+    character(50), intent(in) :: positions_file
+    real, allocatable, intent(inout) :: x(:, :), y(:, :), z(:, :), time(:)
 
-    real, allocatable :: x(:,:), y(:,:), z(:,:), time(:)
-end module var
-
-program post_trajectory_analysis
-    use var
-    use subroutines, only: read_input
-
-    implicit none
-
-    ! read initial configuration to obtain the parameters of the simulation
-    input_file = 'input_parameters.in'
-    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence)
-
-    allocate( &
-        x(part_num, step_num), y(part_num, step_num), &
-        z(part_num, step_num), time(step_num) &
-    )
-
-    call read_trajectory()
-
-    ! call test_access_xyz_data()
-    ! call test_access_xyz_frame()
-
-    rdf_file = 'rdf.dat'
-    rmsd_file = 'rmsd.dat'
-    call compute_rdf()
-    call compute_rmsd()
-
-    ! Release the stored memory
-    deallocate(x, y, z, time)
-end program post_trajectory_analysis
-
-
-subroutine read_trajectory()
-    use var
-
-    implicit none
-
-    integer :: i, j, ios
+    integer :: part, step, ios
     real :: t
 
-    open(1, file = 'positions.xyz', status = 'old', action = 'read')
+    print *, 'Reading trajectory data from ', positions_file
 
-    ! Read information line by line.
-    ! i.e. at time j=1 or time=1, read n atoms xyz information, then for
-    ! j = 2, 3, ... the same
-    do j = 1, step_num
-        do i = 1, part_num
-            ! this 'xyz' format is： time x y z
-            ! these positions are vectorized following the the atom number
-            ! (i = atom1, atom2, ...) and the time that is registered
-            ! (j = 1, 2, ...)
-            read(1, *, iostat = ios) t, x(i, j), y(i, j), z(i, j)
+    open(1, file = positions_file, status = 'old', action = 'read')
 
-            ! store the time information (it's enough with register first atom
-            ! time)
-            if (i == 1) then
-                time(j) = t
+    do step = 1, step_num
+        do part = 1, part_num
+            read(1, *, iostat = ios) t, x(part, step), y(part, step), z(part, step)
+
+            ! Store the different values of t (once for each different time).
+            if (part == 1) then
+                time(step) = t
             end if
         end do
     end do
 
     close(1)
-
-    print *, 'Finished reading the trajectories.'
 end subroutine read_trajectory
 
 ! Test to proove that the program has access to all the stored xyz information.
-subroutine test_access_xyz_data()
-    use var
-
+subroutine test_access_xyz_data(part_num, step_num, x, y, z, time)
     implicit none
+
+    integer, intent(in) :: part_num, step_num
+    real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
 
     integer :: i, j
 
@@ -102,14 +56,15 @@ subroutine test_access_xyz_data()
 end subroutine test_access_xyz_data
 
 ! Test to access specific step xyz information.
-subroutine test_access_xyz_frame()
-    use var
-
+subroutine test_access_xyz_frame(part_num, step_num, x, y, z, time)
     implicit none
+
+    integer, intent(in) :: part_num, step_num
+    real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
 
     integer :: i, j
 
-    print *, 'Testing specific step xyz information:'
+    print *, 'Testing specific step xyz information...'
 
     do j = 1, step_num
         if (j == 3) then                            ! test for step = 3
@@ -123,10 +78,15 @@ subroutine test_access_xyz_frame()
 end subroutine test_access_xyz_frame
 
 ! Compute RDF using the stored data.
-subroutine compute_rdf()
-    use var
-
+! Must be executed after read_trajectory, as it depends on the arrays it
+! creates.
+subroutine compute_rdf(part_num, step_num, system_size, x, y, z, rdf_file)
     implicit none
+
+    integer, intent(in) :: part_num, step_num
+    real, intent(in) :: system_size
+    real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :)
+    character(50), intent(in) :: rdf_file
 
     integer :: i, j, k, time_index
     real(4) :: maximum_radius                      ! maximum radius
@@ -141,12 +101,13 @@ subroutine compute_rdf()
     bins = int(maximum_radius / dr)
     volume = (4.0/3.0) * 3.1415926 * maximum_radius**3
     density = part_num / volume
+
     allocate(rdf(bins), r_values(bins))
     rdf = 0.0
 
     do time_index = 1, step_num                    ! loop for all registered time
         do i = 1, part_num - 1                     ! loop for all atoms i.e. i=1 j=2 dx=x1-x2 ...
-            do j = i+1, part_num                   ! loop for the next atom (atom j) of atom i
+            do j = i + 1, part_num                 ! loop for the next atom (atom j) of atom i
                 dx = x(j, time_index) - x(i, time_index)
                 dy = y(j, time_index) - y(i, time_index)
                 dz = z(j, time_index) - z(i, time_index)
@@ -178,10 +139,14 @@ subroutine compute_rdf()
 end subroutine compute_rdf
 
 ! Compute RMSD using the stored data.
-subroutine compute_rmsd()
-    use var
-
+! Must be executed after read_trajectory, as it depends on the arrays it
+! creates.
+subroutine compute_rmsd(part_num, step_num, x, y, z, time, rmsd_file)
     implicit none
+
+    integer, intent(in) :: part_num, step_num
+    real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
+    character(50), intent(in) :: rmsd_file
 
     integer :: i, j
     real(4), allocatable :: rmsd(:)
