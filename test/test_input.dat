@@ -1,7 +1,5 @@
-vdw MD symulation tester
-
-part_num      = 125
-system_size   = 6
-lattice_type  = SC
-timestep      = 0.0001
-step_num      = 10000
+part_num=125
+system_size=6
+lattice_type=SC
+timestep=0.0001
+step_num= 100000

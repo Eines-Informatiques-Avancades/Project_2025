@@ -2,36 +2,81 @@
 ! Also it ensures that these variables can be accessed by the subroutine.
 module var
     implicit none
+    integer :: part_num, system_size, step_num
+    real :: timestep, part_density
+    character(len=50) :: lattice_type
+    real, allocatable :: x(:,:), y(:,:), z(:,:), time(:)
 
-    integer :: part_num, step_num
-    real, allocatable :: x(:,:), y(:,:), z(:,:),time(:)
-    real :: part_density, system_size
+contains
+    subroutine read_config()
+        implicit none
+        character(len=100) :: line, var_name, value_str
+        integer :: equal_pos, ios, unit
+
+
+        open(1, file="test_input.dat", status="old", action="read")
+        print *, "Reading configuration file..."
+
+        do
+            read(1, '(A)', IOSTAT=ios) line
+            if (ios /= 0) exit  
+
+            line = trim(line)  ! ignore the space
+            equal_pos = index(line, "=")
+            if (equal_pos > 0) then
+                var_name = trim(line(1:equal_pos-1))
+                value_str = trim(line(equal_pos+1:))
+
+                select case (trim(var_name))
+                    case ("part_num")
+                        read(value_str, *) part_num
+                    case ("system_size")
+                        read(value_str, *) system_size
+                    case ("step_num")
+                        read(value_str, *) step_num
+                    case ("timestep")
+                        read(value_str, *) timestep
+                    case ("lattice_type")
+                        lattice_type = trim(value_str)
+                    case default
+                        print *, "Warning: Unrecognized variable:", var_name
+                end select
+            end if
+        end do
+
+        close(unit)
+        print *, "Configuration Loaded."
+    end subroutine read_config
 end module var
 
-! Test main program. Eliminate this program when all subroutine can be merged.
+
 program main
     use var
-
     implicit none
 
-    step_num = 5
-    part_density = 0.8
-    system_size = 1.55
+    ! read initial configuration to obtain the parameters of the simulation
+    call read_config()
 
-    ! nint is necessary to truncate the nearest integer number
-    part_num = nint(part_density * system_size**3)
+    ! extrapolate the density of system
+    part_density = part_num / (system_size**3)
+
 
     allocate( &
         x(part_num, step_num), y(part_num, step_num), &
         z(part_num, step_num), time(step_num) &
     )
 
+
     call read_trajectory()
 
     ! call test_access_xyz_data()
     ! call test_access_xyz_frame()
 
-    print *,'Number of particles:', part_num
+    print *, 'Number of particles:', part_num
+    print *, 'Step number:', step_num
+    print *, 'System size:', system_size
+    print *, 'Timestep:', timestep
+    print *, 'Lattice type:', lattice_type
 
     call compute_rdf()
     call compute_rmsd()
@@ -40,6 +85,7 @@ program main
     deallocate(x, y, z, time)
 
 end program main
+
 
 subroutine read_trajectory()
     use var
@@ -144,7 +190,7 @@ subroutine compute_rdf()
                 dy = y(j, time_index) - y(i, time_index)
                 dz = z(j, time_index) - z(i, time_index)
                 r = sqrt(dx**2 + dy**2 + dz**2)
-                print *, 'r:',r                    ! check the calculated r
+                !print *, 'r:',r                    ! check the calculated r
 
                 if (r < maximum_radius) then
                     bin_index = int(r / dr) + 1
