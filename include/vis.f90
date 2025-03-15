@@ -2,70 +2,29 @@
 ! Also it ensures that these variables can be accessed by the subroutine.
 module var
     implicit none
-    integer :: part_num, system_size, step_num
-    real :: timestep, part_density
-    character(len=50) :: lattice_type
+
+    integer :: part_num, step_num
+    real :: timestep, part_density, temperature, system_size, collision_frequence
+    character(6) :: lattice_type
+    character(50) :: input_file
+
     real, allocatable :: x(:,:), y(:,:), z(:,:), time(:)
-
-contains
-    subroutine read_config()
-        implicit none
-        character(len=100) :: line, var_name, value_str
-        integer :: equal_pos, ios, unit
-
-
-        open(1, file="test_input.dat", status="old", action="read")
-        print *, "Reading configuration file..."
-
-        do
-            read(1, '(A)', IOSTAT=ios) line
-            if (ios /= 0) exit  
-
-            line = trim(line)  ! ignore the space
-            equal_pos = index(line, "=")
-            if (equal_pos > 0) then
-                var_name = trim(line(1:equal_pos-1))
-                value_str = trim(line(equal_pos+1:))
-
-                select case (trim(var_name))
-                    case ("part_num")
-                        read(value_str, *) part_num
-                    case ("system_size")
-                        read(value_str, *) system_size
-                    case ("step_num")
-                        read(value_str, *) step_num
-                    case ("timestep")
-                        read(value_str, *) timestep
-                    case ("lattice_type")
-                        lattice_type = trim(value_str)
-                    case default
-                        print *, "Warning: Unrecognized variable:", var_name
-                end select
-            end if
-        end do
-
-        close(unit)
-        print *, "Configuration Loaded."
-    end subroutine read_config
 end module var
-
 
 program main
     use var
+    use subroutines, only: read_input
+
     implicit none
 
     ! read initial configuration to obtain the parameters of the simulation
-    call read_config()
-
-    ! extrapolate the density of system
-    part_density = part_num / (system_size**3)
-
+    input_file = 'input_parameters.in'
+    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence)
 
     allocate( &
         x(part_num, step_num), y(part_num, step_num), &
         z(part_num, step_num), time(step_num) &
     )
-
 
     call read_trajectory()
 
@@ -83,7 +42,6 @@ program main
 
     ! Release the stored memory
     deallocate(x, y, z, time)
-
 end program main
 
 
@@ -95,7 +53,7 @@ subroutine read_trajectory()
     integer :: i, j, ios
     real :: t
 
-    open(1, file = 'traj.xyz', status = 'old', action = 'read')
+    open(1, file = 'positions.xyz', status = 'old', action = 'read')
 
     ! Read information line by line.
     ! i.e. at time j=1 or time=1, read n atoms xyz information, then for
@@ -170,7 +128,7 @@ subroutine compute_rdf()
     integer :: i, j, k, time_index
     real(4) :: maximum_radius                      ! maximum radius
     real(4), parameter :: dr = 0.05
-    integer :: bins                                ! Define a number of bins to set the size of rdf and r vectors 
+    integer :: bins                                ! Define a number of bins to set the size of rdf and r vectors
     real(4), allocatable :: rdf(:), r_values(:)    ! dx,dy,dz,dr and dv are respectively x,y,z,r positions variation and volume variation
     real(4) :: r, dx, dy, dz, dv, density
     integer :: bin_index                           ! bin_index correspond to the zone of sphere that this r belongs
@@ -199,7 +157,6 @@ subroutine compute_rdf()
             end do
         end do
     end do
-
 
     do k = 1, bins
         r_values(k) = k * dr                             ! r_values are grid points of r
