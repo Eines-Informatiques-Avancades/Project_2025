@@ -1,4 +1,4 @@
-1     ! part_num
+125     ! part_num
 6.0     ! system_size
 SC      ! lattice_type (SC/BCC)
 0.0001  ! timestep
