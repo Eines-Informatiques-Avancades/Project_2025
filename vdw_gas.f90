@@ -50,7 +50,7 @@ program vdw_gas
     print *, 'Generating initial configuration for a VdW gas from the lattice...'
 
     do step = 1, step_num
-        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities)
+        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities, lj_potential)
         call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
     end do
 
