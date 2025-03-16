@@ -1,26 +1,49 @@
 #!/usr/bin/python3
 
+import os
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_rdf(filename="rdf_data.txt"):
+
+# Plot appearance settings.
+plt.style.use('./mplstyle/science.mplstyle')
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "STIXGeneral"
+})
+
+# Parse arguments.
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description = "Plot RDF from a data file."
+    )
+    parser.add_argument(
+        'filename',
+        type = str,
+        help = "Path to the data file with the RDF data."
+    )
+    return parser.parse_args()
+
+# Plot the data from the data file.
+def plot_rdf(filename):
     data = np.loadtxt(filename)
     r = data[:, 0]
     g_r = data[:, 1]
 
-    plt.figure(figsize=(8,6))
-    plt.plot(r, g_r, label="RDF", color='b')
+    plt.plot(r, g_r, label = 'RDF', color = 'b')
+
     plt.xlabel(r'$r$')
     plt.ylabel(r'$g(r)$')
     plt.title(r'Radial distribution function')
-    plt.legend()
-    plt.grid()
 
-    rdf_output = "rdf_plot.pdf"
-    plt.savefig(rdf_output, format = 'pdf')
-    plt.show()
-    print(f"RDF plots saved successfully.")
+    output_filename = os.path.splitext(filename)[0] + '.pdf'
+    plt.savefig(output_filename, format = 'pdf')
+    plt.close()
+
+    print(f"RDF plot saved as {output_filename}.")
 
 
-plot_rdf()
-
+if __name__ == '__main__':
+    args = parse_args()
+    plot_rdf(args.filename)

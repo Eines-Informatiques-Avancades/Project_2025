@@ -23,16 +23,10 @@ def parse_args():
         type = str,
         help = "Path to the data file with time, x, y, z coordinates"
     )
-    parser.add_argument(
-        '-o', '--output',
-        type = str,
-        default = 'output.gif',
-        help = "Output file name (default: output.gif)"
-    )
     return parser.parse_args()
 
 # Create a GIF of the particle trajectories over time.
-def create_gif(filename, output_filename):
+def create_gif(filename):
     data = np.loadtxt(filename)
     times = np.unique(data[:, 0])
 
@@ -75,6 +69,8 @@ def create_gif(filename, output_filename):
 
         os.remove(temp_file)
 
+    output_filename = os.path.splitext(filename)[0] + '.gif'
+
     # Create the GIF from the list of images.
     # Adjust duration for timing between frames.
     imageio.mimsave(output_filename, images, duration=0.5)
@@ -83,4 +79,4 @@ def create_gif(filename, output_filename):
 
 if __name__ == '__main__':
     args = parse_args()
-    create_gif(args.filename, args.output)
+    create_gif(args.filename)
