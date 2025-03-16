@@ -14,17 +14,24 @@ program vdw_gas
 
     implicit none
 
-    integer :: part_num, step_num, step
+    integer :: part_num, step_num, step, seed_size
     real :: part_density, system_size, volume, cutoff, time, timestep, lj_potential, &
         temperature, temperature_inst, collision_frequence, kinetic_energy, total_energy
     real, allocatable :: positions(:, :), forces(:, :), velocities(:, :)
     real, allocatable :: x(:, :), y(:, :), z(:, :), time_points(:)
     character(6) :: lattice_type
+<<<<<<< HEAD
     character(50) :: positions_file, input_file, rdf_file, rmsd_file
+=======
+    character(3) :: test_mode
+    integer, allocatable :: seed(:)
+    character(50) :: positions_file, input_file
+>>>>>>> 01a9310 (seed added to control thermostat random numbers)
 
     ! System parameters.
     input_file = 'input_parameters.in'
-    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence)
+    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, &
+        collision_frequence, test_mode)
 
     volume = system_size**(3.)  ! System is a cubic box.
     cutoff = 1.5                ! Cutoff radius for molecular interactions.
@@ -49,14 +56,29 @@ program vdw_gas
 
     print *, 'Generating initial configuration for a VdW gas from the lattice...'
 
+    
+    ! seed inizialization for andersen_thermsostat
+    call random_seed(size=seed_size)
+    allocate(seed(seed_size))
+
+    if (test_mode == "ON") then
+        seed = 123456789    ! putting arbitrary seed to all elements
+    endif
+
+    call random_seed(put=seed)
+
     do step = 1, step_num
         call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities, lj_potential)
         call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
     end do
 
+<<<<<<< HEAD
     !
     ! System evolution.
     !
+=======
+    deallocate(seed)
+>>>>>>> 01a9310 (seed added to control thermostat random numbers)
 
     ! Create a new positions_file or replace the existing one.
     positions_file = 'positions.xyz'
