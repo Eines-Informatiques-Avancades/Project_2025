@@ -2,12 +2,11 @@
 
 out_files=("kinetic_energy.dat" "lj_potential.dat" "positions.xyz" "temperature_inst.dat" "total_energy.dat")
 
-cd run_out
-
 echo ' ' 
 echo "comparing files with test outputs..."
 echo ' '
-mv *.dat positions.xyz ./run_out
+
+cd run_out
 
 for file in "${out_files[@]}"; do
    if [ -f $file ]; then
