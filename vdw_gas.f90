@@ -97,6 +97,7 @@ program vdw_gas
     ! Post-trajectory analysis (RDF and RMSD computation).
     !
 
+    print *
     print *, 'Performing post-trajectory analysis...'
 
     allocate( &
