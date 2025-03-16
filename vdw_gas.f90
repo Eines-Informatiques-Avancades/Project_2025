@@ -20,13 +20,9 @@ program vdw_gas
     real, allocatable :: positions(:, :), forces(:, :), velocities(:, :)
     real, allocatable :: x(:, :), y(:, :), z(:, :), time_points(:)
     character(6) :: lattice_type
-<<<<<<< HEAD
     character(50) :: positions_file, input_file, rdf_file, rmsd_file
-=======
     character(3) :: test_mode
     integer, allocatable :: seed(:)
-    character(50) :: positions_file, input_file
->>>>>>> 01a9310 (seed added to control thermostat random numbers)
 
     ! System parameters.
     input_file = 'input_parameters.in'
@@ -71,13 +67,11 @@ program vdw_gas
         call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
     end do
 
-<<<<<<< HEAD
+    deallocate(seed)
+
     !
     ! System evolution.
     !
-=======
-    deallocate(seed)
->>>>>>> 01a9310 (seed added to control thermostat random numbers)
 
     ! Create a new positions_file or replace the existing one.
     positions_file = 'positions.xyz'

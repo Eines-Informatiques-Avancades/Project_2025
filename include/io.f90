@@ -34,12 +34,8 @@ end subroutine
 ! Itziar Rabal, Ricard Rodriguez
 !
 ! Reads external input files that follow the structure of input_parameters.in
-<<<<<<< HEAD
 subroutine read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence, &
     cutoff, test_mode)
-=======
-subroutine read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence)
->>>>>>> e6a36c2 (small update : refered to input)
     implicit none
 
     character(*), intent(in) :: input_file
