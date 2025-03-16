@@ -1,6 +1,6 @@
 #!/bin/sh
 
-out_files=("kinetic_energy.dat" "lj_potential.dat" "positions.xyz" "temperature_inst.dat" "total_energy.dat")
+out_files=("kinetic_energy.dat" "lj_potential.dat" "positions.xyz" "temperature_inst.dat" "total_energy.dat" "rdf.dat" "rmsd.dat")
 
 echo sampling data for tests
 
