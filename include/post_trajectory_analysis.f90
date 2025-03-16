@@ -19,11 +19,11 @@ subroutine read_trajectory(part_num, step_num, positions_file, x, y, z, time)
 
     print *, 'Reading trajectory data from ', positions_file
 
-    open(1, file = positions_file, status = 'old', action = 'read')
+    open(4, file = positions_file, status = 'old', action = 'read')
 
     do step = 1, step_num
         do part = 1, part_num
-            read(1, *, iostat = ios) t, x(part, step), y(part, step), z(part, step)
+            read(4, *, iostat = ios) t, x(part, step), y(part, step), z(part, step)
 
             ! Store the different values of t (once for each different time).
             if (part == 1) then
@@ -32,7 +32,7 @@ subroutine read_trajectory(part_num, step_num, positions_file, x, y, z, time)
         end do
     end do
 
-    close(1)
+    close(4)
 end subroutine read_trajectory
 
 ! Test to proove that the program has access to all the stored xyz information.
@@ -127,11 +127,11 @@ subroutine compute_rdf(part_num, step_num, system_size, x, y, z, rdf_file)
         rdf(k) = rdf(k) / (density * part_num * dv )     ! normalize the rdf
     end do
 
-    open(2, file = rdf_file, status = 'replace')
+    open(12, file = rdf_file, status = 'replace')
     do k = 1, bins
-        write(2, *) r_values(k), rdf(k)
+        write(12, *) r_values(k), rdf(k)
     end do
-    close(2)
+    close(12)
 
     print *, 'RDF calculation completed and saved to ', rdf_file
 
@@ -166,11 +166,11 @@ subroutine compute_rmsd(part_num, step_num, x, y, z, time, rmsd_file)
         rmsd(j) = sqrt(sum_sq / part_num)               ! rmsd=sqrt(summation(r-r')^2 / n)
     end do
 
-    open(2, file = rmsd_file, status = 'replace')
+    open(12, file = rmsd_file, status = 'replace')
     do j = 1, step_num
-        write(2, *) time(j), rmsd(j)
+        write(12, *) time(j), rmsd(j)
     end do
-    close(2)
+    close(12)
 
     print *, 'RMSD calculation completed and saved to ', rmsd_file
 

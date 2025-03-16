@@ -64,10 +64,10 @@ program vdw_gas
     write(4, *) '# time, particle coordinates'
     close(4)
 
-    open(5, file = 'temperature_inst.dat', status = 'replace')
-    open(6, file = 'lj_potential.dat', status = 'replace')
-    open(7, file = 'kinetic_energy.dat', status = 'replace')
-    open(8, file = 'total_energy.dat', status = 'replace')
+    open(10, file = 'temperature_inst.dat', status = 'replace')
+    open(11, file = 'lj_potential.dat', status = 'replace')
+    open(12, file = 'kinetic_energy.dat', status = 'replace')
+    open(13, file = 'total_energy.dat', status = 'replace')
     time = 0
     do step = 1, step_num
         time = time + timestep
@@ -80,16 +80,16 @@ program vdw_gas
 
         temperature_inst = instantaneous_temperature(part_num, kinetic_energy)
 
-        write(5, *) time, temperature_inst
-        write(6, *) time, lj_potential
-        write(7, *) time, kinetic_energy
-        write(8, *) time, total_energy
+        write(10, *) time, temperature_inst
+        write(11, *) time, lj_potential
+        write(12, *) time, kinetic_energy
+        write(13, *) time, total_energy
         call write_positions_xyz(part_num, time, positions, positions_file)
     end do
-    close(5)
-    close(6)
-    close(7)
-    close(8)
+    close(10)
+    close(11)
+    close(12)
+    close(13)
 
     deallocate(positions, velocities, forces)
 
