@@ -1,7 +1,0 @@
-125     ! part_num
-6.0     ! system_size
-SC      ! lattice_type
-0.0001  ! timestep
-10000   ! step_num
-300.0   ! temperature (Andersen thermostat)
-0.1     ! collision_frequence (Andersen thermostat)
