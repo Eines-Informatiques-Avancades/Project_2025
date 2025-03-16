@@ -5,8 +5,8 @@
 #
 
 # Paths relative to the 'plot/' subdirectory.
-results_dir="../output"
-plot_dir="."
+plot_dir="$(dirname $(realpath "$0"))" # Full path to plot/
+results_dir=".."
 
 
 # Print error message to stderr and exit the script.
@@ -24,7 +24,13 @@ exec_exists() {
 
 exec_exists 'python'
 
-# python "$plot_dir/visualize_coordinates.py" "../positions.xyz"
-python "$plot_dir/system_energy_evolution.py"
-python "$plot_dir/temperature_evolution.py"
-# python "$plot_dir/particle_movement_animation.py" "../positions.xyz"
+printf "%s\\n" 'Executing plot scripts...'
+
+cd "$plot_dir"
+
+python "system_energy_evolution.py"
+python "temperature_evolution.py"
+python "rdf.py" "$results_dir/rdf.dat"
+python "rmsd.py" "$results_dir/rmsd.dat"
+# python "visualize_coordinates.py" "$results_dir/positions.xyz"
+# python "particle_movement_animation.py" "$results_dir/positions.xyz"
