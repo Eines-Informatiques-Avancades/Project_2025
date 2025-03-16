@@ -21,6 +21,7 @@ subroutine verlet(part_num, dt, system_size, cutoff, positions, positions_old, v
     positions_aux = positions
     positions = 2*positions - positions_old + forces*dt*dt
     positions_old = positions_aux
+    velocities = (positions - positions_old)/dt
 
     call apply_pbc(positions, system_size)
 end subroutine verlet
