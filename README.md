@@ -16,11 +16,22 @@ $ cd Project_2025
 $ make
 ```
 
-This will produce the `vdw_gas` executable file, which can be ran by:
+Compiling this project will produce several independent binaries
+which can be used to perform different tasks.
 
-```
-$ ./vdw_gas
-```
+- `vdw_gas`: the main simulation program. Will perform the simulation and
+    output the results into different text files.
+
+- `binning`: performs data sampling of the results of the Monte Carlo simulation
+    from a given text file outputted by `vdw_gas`.
+
+- `jackknife`: performs data resampling of the results of the Van der Waals gas
+    molecular dynamics simulation from a given text file outputted by `binning`.
+
+
+The user might want to execute the different parts of the program sequentally.
+In order to ease and automatize this process, the `run.sh` shell script is
+included.
 
 Edit the `input_parameters.in` file before running the simulation to set the
 system parameters. There's no need to recompile the program once this file is
