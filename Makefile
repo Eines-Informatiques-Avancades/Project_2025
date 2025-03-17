@@ -11,7 +11,7 @@ OBJ = ${SRC:.f90=.o} ${MOD:.f90=.o}
 .PHONY: all clean
 .INTERMEDIATE: .o .mod
 
-all: ${PROG}
+all: ${PROG} binning jackknife
 
 modules: ${MOD}
 	$(FC) $(FCFLAGS) -c $<
@@ -22,10 +22,16 @@ modules: ${MOD}
 $(PROG): ${OBJ}
 	$(FC) $(FCFLAGS) -o $@ ${@:=.o} ${MOD:.f90=.o}
 
+binning: binning.o
+	$(FC) $(FCFLAGS) -o $@ ${@:=.o}
+
+jackknife: jackknife.o
+	$(FC) $(FCFLAGS) -o $@ ${@:=.o}
+
 ${OBJ}: modules
 
 clean:
-	rm ${PROG} ${OBJ} *.mod
+	rm ${PROG} *.o binning jackknife *.mod
 
 clean-output:
 	rm *.xyz *.dat
