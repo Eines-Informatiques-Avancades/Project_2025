@@ -65,16 +65,20 @@ scripts are provided. These scripts have the following dependencies:
 
 ## Project structure
 
-The project consists of a main file (`vdw_gas.f90`) and a subroutines file
-(`subroutines.f90`) that sources the contents of the `include/` directory, which
-stores all the different subroutines used in the code, separated into different
-files by topic or task.
+The main simulation program consists of a main file (`vdw_gas.f90`) and a
+subroutines file (`subroutines.f90`) that sources the contents of the `include/`
+directory, which stores all the different subroutines used in the code,
+separated into different files by topic or task.
 
 A single module called `subroutines` is used due to the fact that different
 subroutines might interact with each other.
 
 As previously mentioned, system parameters are set under `input_parameters.in`,
 which is read at runtime.
+
+To other standalone programs, `binning.f90` and `jackknife.f90`, are also
+included to perform the statistical analysis of the result produced by the
+simulation.
 
 The project tree has the following structure (excluding git-related files, such
 as this README).
