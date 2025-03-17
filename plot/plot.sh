@@ -6,7 +6,7 @@
 
 # Paths relative to the 'plot/' subdirectory.
 plot_dir="$(dirname $(realpath "$0"))" # Full path to plot/
-results_dir=".."
+results_dir="../output"
 
 
 # Print error message to stderr and exit the script.

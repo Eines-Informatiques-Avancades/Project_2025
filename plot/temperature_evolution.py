@@ -22,9 +22,9 @@ def plot_temperature(data_file, label, color):
 
 output_file = 'temperature_evolution.pdf'
 
-plot_temperature('../temperature_inst.dat', 'T', '#0C5DA5')
+plot_temperature('../output/temperature_inst.dat', 'T', '#0C5DA5')
 
 plt.savefig(output_file, format = 'pdf')
 plt.close()
 
-print("Temperature plot saved successfully.")
+print(f"Temperature plot saved as {output_file}")

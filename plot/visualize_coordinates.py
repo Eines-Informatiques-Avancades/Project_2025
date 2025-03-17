@@ -55,7 +55,7 @@ def plot_particles(filename):
     plt.savefig(output_filename, format = 'pdf')
     plt.close()
 
-    print(f"Plot saved as {output_filename}")
+    print(f"Particle coordinates plot saved as {output_filename}")
 
 if __name__ == '__main__':
     args = parse_args()
