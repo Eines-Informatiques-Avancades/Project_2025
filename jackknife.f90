@@ -1,21 +1,13 @@
-!
-! jackknife.f90
-! Molecular Dynamics Simulation of a Van der Waals Gas
-! Ricard Rodriguez, Joan Serrano
-!
-! Jackknife program corresponding to the final project for the Advanced
-! Computer Tools subject.
-!
-
 program jackknife
     implicit none
 
-    integer(8) :: i, j, bin_size, ios, line_num, header_lines, num_values
+    integer(8) :: i, j, bin_size, ios, line_num, header_lines
     integer(8), allocatable :: bin_size_values(:)
     real(8) :: mean_x2, mean_x_2, diff_x
     real(8) :: fm_x, fv_x, fe_x  ! Jackknife estimators
-    real(8), allocatable :: x(:), x2(:), xj(:), x2j(:)  ! Data arrays
+    real(8), allocatable :: x(:), x2(:), xj(:), x2j(:)
     character(80) :: input_datafile, output_file, line
+    logical :: file_exists
 
     print *
     print *, repeat('-', 80)
@@ -24,16 +16,32 @@ program jackknife
     print *
 
     ! Input file
-    input_datafile = 'binning_lj.out'
+    input_datafile = 'output/binning_lj.out'
     print *, 'Reading data from ', trim(adjustl(input_datafile))
+
+    ! Check if the file exists
+    inquire(file=input_datafile, exist=file_exists)
+    if (.not. file_exists) then
+        print *, 'Error: Input file not found!'
+        stop
+    end if
 
     ! Number of header lines
     header_lines = 1
 
     ! Open file and count lines
-    open(4, file = input_datafile, status = 'old')
+    open(4, file = input_datafile, status = 'old', iostat=ios)
+    if (ios /= 0) then
+        print *, 'Error: Cannot open input file!'
+        stop
+    end if
+
     do i = 1, header_lines
-        read(4, fmt = '(A)')  ! Skip header
+        read(4, fmt = '(A)', iostat=ios)  ! Skip header
+        if (ios /= 0) then
+            print *, 'Error: Unexpected EOF while skipping headers!'
+            stop
+        end if
     end do
 
     line_num = 0
@@ -42,6 +50,11 @@ program jackknife
         if (ios /= 0) exit
         line_num = line_num + 1
     end do
+
+    if (line_num == 0) then
+        print *, 'Error: No data found in file!'
+        stop
+    end if
 
     allocate(bin_size_values(line_num), x(line_num), x2(line_num))
 
@@ -52,7 +65,11 @@ program jackknife
     end do
 
     do i = 1, line_num
-        read(4, *) bin_size_values(i), x(i), x2(i)
+        read(4, *, iostat=ios) bin_size_values(i), x(i), x2(i)
+        if (ios /= 0) then
+            print *, 'Error: Unexpected EOF while reading data at line ', i
+            stop
+        end if
     end do
 
     close(4)
@@ -89,14 +106,7 @@ program jackknife
         print *, 'Jackknife error bar (X) = ', fe_x
 
         ! Write results
-        write(12, '(A)') repeat('-', 30)
-        write(12, '(A, I10)') 'm = ', bin_size
-        write(12, '(A, ES20.10)') '<X^2> = ', mean_x2
-        write(12, '(A, ES20.10)') '<X>^2 = ', mean_x_2
-        write(12, '(A, ES20.10)') '<X^2> - <X>^2 = ', diff_x
-        write(12, '(A, ES20.10)') 'Jackknife mean (X) = ', fm_x
-        write(12, '(A, ES20.10)') 'Jackknife variance (X) = ', fv_x
-        write(12, '(A, ES20.10)') 'Jackknife error bar (X) = ', fe_x
+        write(12, '(I10, ES20.10, ES20.10, ES20.10)') bin_size, fm_x, fv_x, fe_x
     end do
     close(12)
 
@@ -124,7 +134,6 @@ contains
         integer(8), intent(in) :: n
         real(8), intent(in) :: fj(n)
         real(8), intent(out) :: fm, fv, fe
-        integer(8) :: i
         
         fm = sum(fj) / n
         fv = sum((fj - fm)**2) * (n - 1) / n
@@ -132,3 +141,4 @@ contains
     end subroutine stebj0
 
 end program jackknife
+
