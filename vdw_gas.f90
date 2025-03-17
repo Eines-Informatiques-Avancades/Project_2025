@@ -18,8 +18,9 @@ program vdw_gas
     real :: part_density, system_size, volume, cutoff, time, timestep, lj_potential, &
         temperature, temperature_inst, collision_frequence, kinetic_energy, total_energy
     real, allocatable :: positions(:, :), forces(:, :), velocities(:, :)
+    real, allocatable :: x(:, :), y(:, :), z(:, :), time_points(:)
     character(6) :: lattice_type
-    character(50) :: positions_file, input_file
+    character(50) :: positions_file, input_file, rdf_file, rmsd_file
 
     ! System parameters.
     input_file = 'input_parameters.in'
@@ -49,7 +50,7 @@ program vdw_gas
     print *, 'Generating initial configuration for a VdW gas from the lattice...'
 
     do step = 1, step_num
-        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities)
+        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities, lj_potential)
         call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
     end do
 
@@ -63,31 +64,53 @@ program vdw_gas
     write(4, *) '# time, particle coordinates'
     close(4)
 
-    open(5, file = 'temperature_inst.dat', status = 'replace')
-    open(6, file = 'lj_potential.dat', status = 'replace')
-    open(7, file = 'kinetic_energy.dat', status = 'replace')
-    open(8, file = 'total_energy.dat', status = 'replace')
+    open(10, file = 'temperature_inst.dat', status = 'replace')
+    open(11, file = 'lj_potential.dat', status = 'replace')
+    open(12, file = 'kinetic_energy.dat', status = 'replace')
+    open(13, file = 'total_energy.dat', status = 'replace')
     time = 0
     do step = 1, step_num
         time = time + timestep
 
-        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities)
+        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities, lj_potential)
         call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
 
-        call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
         call compute_total_kinetic_energy(part_num, velocities, kinetic_energy)
         total_energy = lj_potential + kinetic_energy
 
         temperature_inst = instantaneous_temperature(part_num, kinetic_energy)
 
-        write(5, *) time, temperature_inst
-        write(6, *) time, lj_potential
-        write(7, *) time, kinetic_energy
-        write(8, *) time, total_energy
+        write(10, *) time, temperature_inst
+        write(11, *) time, lj_potential
+        write(12, *) time, kinetic_energy
+        write(13, *) time, total_energy
         call write_positions_xyz(part_num, time, positions, positions_file)
     end do
-    close(5)
-    close(6)
-    close(7)
-    close(8)
+    close(10)
+    close(11)
+    close(12)
+    close(13)
+
+    deallocate(positions, velocities, forces)
+
+    !
+    ! Post-trajectory analysis (RDF and RMSD computation).
+    !
+
+    print *
+    print *, 'Performing post-trajectory analysis...'
+
+    allocate( &
+        x(part_num, step_num), y(part_num, step_num), &
+        z(part_num, step_num), time_points(step_num) &
+    )
+
+    call read_trajectory(part_num, step_num, positions_file, x, y, z, time_points)
+
+    rdf_file = 'rdf.dat'
+    rmsd_file = 'rmsd.dat'
+    call compute_rdf(part_num, step_num, system_size, x, y, z, rdf_file)
+    call compute_rmsd(part_num, step_num, x, y, z, time_points, rmsd_file)
+
+    deallocate(x, y, z, time_points)
 end program vdw_gas

@@ -29,9 +29,9 @@ def plot_energy(data_file, label, color):
 output_file = 'energy_evolution.pdf'
 
 energy_inputfiles = [
-    ('../lj_potential.dat', 'U', '#00B945'),
-    ('../kinetic_energy.dat', 'K', '#0C5DA5'),
-    ('../total_energy.dat', 'E', '#FF2C00')
+    ('../output/lj_potential.dat', 'U', '#00B945'),
+    ('../output/kinetic_energy.dat', 'K', '#0C5DA5'),
+    ('../output/total_energy.dat', 'E', '#FF2C00')
 ]
 
 for data_file, label, color in energy_inputfiles:
@@ -40,4 +40,4 @@ for data_file, label, color in energy_inputfiles:
 plt.savefig(output_file, format = 'pdf')
 plt.close()
 
-print("Energy plots saved successfully.")
+print(f"Energy plot saved as {output_file}")

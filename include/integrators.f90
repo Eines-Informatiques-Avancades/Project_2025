@@ -7,32 +7,33 @@
 ! A 3-dimensional cubic system is assumed.
 !
 
-subroutine verlet(part_num, dt, system_size, cutoff, positions, positions_old, velocities)
+subroutine verlet(part_num, dt, system_size, cutoff, positions, positions_old, velocities, lj_potential)
     implicit none
 
     integer, intent(in) :: part_num
     real, intent(in) :: dt, system_size, cutoff
     real, allocatable, intent(inout) :: positions(:, :), positions_old(:, :), velocities(:, :)
 
-    real :: lj_potential
+    real,intent(out) :: lj_potential
     real, allocatable :: positions_aux(:, :), forces(:, :)
 
     call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
     positions_aux = positions
     positions = 2*positions - positions_old + forces*dt*dt
     positions_old = positions_aux
+    velocities = (positions - positions_old)/dt
 
     call apply_pbc(positions, system_size)
 end subroutine verlet
 
-subroutine velocity_verlet(dt, part_num, system_size, cutoff, positions, velocities)
+subroutine velocity_verlet(dt, part_num, system_size, cutoff, positions, velocities, lj_potential)
     implicit none
 
     integer, intent(in) :: part_num
     real, intent(in) :: dt, system_size, cutoff
     real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
 
-    real :: lj_potential
+    real, intent(out) :: lj_potential
     real, allocatable :: forces(:, :)
 
     call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
@@ -44,14 +45,14 @@ subroutine velocity_verlet(dt, part_num, system_size, cutoff, positions, velocit
     velocities = velocities + 0.5 * forces*dt
 end subroutine velocity_verlet
 
-subroutine euler(dt, part_num, system_size, cutoff, positions, velocities)
+subroutine euler(dt, part_num, system_size, cutoff, positions, velocities, lj_potential)
     implicit none
 
     integer,intent(in) :: part_num
     real, intent(in) :: dt, system_size, cutoff
     real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
 
-    real :: lj_potential
+    real, intent(out) :: lj_potential
     real, allocatable :: forces(:, :)
 
     call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)

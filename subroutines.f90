@@ -18,5 +18,6 @@ module subroutines
         include 'include/integrators.f90'
         include 'include/thermostat.f90'
         include 'include/thermodynamics.f90'
+        include 'include/post_trajectory_analysis.f90'
 
 end module subroutines
