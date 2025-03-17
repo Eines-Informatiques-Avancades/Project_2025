@@ -81,21 +81,23 @@ as this README).
 ```
 .
 |-- include/
-|   |-- forces.f90
-|   |-- geometry.f90
-|   |-- initial_conf.f90
-|   |-- integrators.f90
-|   |-- io.f90
-|   |-- thermodynamics.f90
-|   `-- thermostat.f90
-|-- plot/
+|   |-- forces.f90          <- Lennard-Jones forces computation.
+|   |-- geometry.f90        <- PBC
+|   |-- initial_conf.f90    <- Initial configuration generation.
+|   |-- integrators.f90     <- Time-step integrators.
+|   |-- io.f90              <- Read/write from/to external files.
+|   |-- thermodynamics.f90  <- Computation of different measures.
+|   `-- thermostat.f90      <- Implementation of the Andersen thermostat.
+|-- plot/                   <- Python plotting scripts for the results.
 |   `-- ...
-|-- test/
+|-- test/                   <- Files related to the program testing.
 |   `-- ...
 |-- Makefile
-|-- input_parameters.in
-|-- subroutines.f90
-`-- vdw_gas.f90
+|-- binning.f90             <- Binning statistical analysis of the results.
+|-- input_parameters.in     <- System and simulation parameter definition.
+|-- jackknife.f90           <- Jackknife statistical analysis of the results.
+|-- subroutines.f90         <- Subroutines module. Sources 'include/' contents.
+`-- vdw_gas.f90             <- Main simulation program.
 ```
 
 ## Credits and contributors
