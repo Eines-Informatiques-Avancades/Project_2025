@@ -31,7 +31,8 @@ which can be used to perform different tasks.
 
 The user might want to execute the different parts of the program sequentally.
 In order to ease and automatize this process, the `run.sh` shell script is
-included.
+included. This will log the program's execution and move the output files into a
+separate folder.
 
 Edit the `input_parameters.in` file before running the simulation to set the
 system parameters. There's no need to recompile the program once this file is
@@ -96,6 +97,7 @@ as this README).
 |-- binning.f90             <- Binning statistical analysis of the results.
 |-- input_parameters.in     <- System and simulation parameter definition.
 |-- jackknife.f90           <- Jackknife statistical analysis of the results.
+|-- run.sh                  <- Wrapper script for executing the full program.
 |-- subroutines.f90         <- Subroutines module. Sources 'include/' contents.
 `-- vdw_gas.f90             <- Main simulation program.
 ```
