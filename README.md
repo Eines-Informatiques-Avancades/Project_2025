@@ -22,8 +22,8 @@ which can be used to perform different tasks.
 - `vdw_gas`: the main simulation program. Will perform the simulation and
     output the results into different text files.
 
-- `binning`: performs data sampling of the results of the Monte Carlo simulation
-    from a given text file outputted by `vdw_gas`.
+- `binning`: performs data sampling of the results of the Van der Waals gas
+    molecular dynamics simulation from a given text file outputted by `vdw_gas`.
 
 - `jackknife`: performs data resampling of the results of the Van der Waals gas
     molecular dynamics simulation from a given text file outputted by `binning`.
