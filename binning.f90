@@ -11,14 +11,14 @@ program binning
     implicit none
 
     character(50) :: output_file, input_datafile
-    integer(8) :: i, j, k, num_values, step, max_num_bins, num_bins, bin_size, bin_start, bin_end
-    real(8) :: sum_bin_energy, var_energy, sum_var_energy, mean_energy, step_value
-    real(8), allocatable :: energy(:), avg_bin_energy(:)
+    integer(8) :: i, j, k, num_values, max_num_bins, num_bins, bin_size, bin_start, bin_end
+    real(8) :: sum_bin_variable, var_variable, sum_var_variable, mean_variable, step_value
+    real(8), allocatable :: variable_name(:), avg_bin_variable_name(:)
 
     print *, 'Binning data analysis for LJ potential data.'
 
     ! Define the input file name
-    input_datafile = 'lj_potential.dat'
+    input_datafile = 'output/lj_potential.dat'
     print *, 'Reading data from ', trim(adjustl(input_datafile))
 
     open(4, file = input_datafile, status = 'old')
@@ -32,17 +32,17 @@ program binning
 10  continue
     rewind(4)
 
-    allocate(energy(num_values))
+    allocate(variable_name(num_values))
 
     ! Read data from file
     do i = 1, num_values
-        read(4, *) step_value, energy(i)  ! step_value is now real(8)
+        read(4, *) step_value, variable_name(i)  ! step_value is now real(8)
     end do
     close(4)
 
-    output_file = 'binning_lj.out'
+    output_file = 'output/binning_lj.out'
     open(6, file = output_file)
-    write(6, *) '# Bin size, Mean energy, Energy variance, Energy stddev'
+    write(6, *) '# Bin size, Mean, Variance, stddev'
 
     ! Determine the maximum amount of bins that can be used
     max_num_bins = 1
@@ -55,38 +55,38 @@ program binning
         bin_size = 2**i
         num_bins = num_values/bin_size
 
-        allocate(avg_bin_energy(num_bins))
+        allocate(avg_bin_variable_name(num_bins))
 
         ! Iterate over all bins (for current bin size)
         do j = 1, num_bins
             bin_start = (j - 1)*bin_size + 1
             bin_end = j*bin_size
 
-            sum_bin_energy = 0
+            sum_bin_variable = 0
 
             do k = bin_start, bin_end
-                sum_bin_energy = sum_bin_energy + energy(k)
+                sum_bin_variable = sum_bin_variable + variable_name(k)
             end do
 
-            avg_bin_energy(j) = sum_bin_energy/bin_size
+            avg_bin_variable_name(j) = sum_bin_variable/bin_size
         end do
 
-        mean_energy = sum(avg_bin_energy)/num_bins
+        mean_variable = sum(avg_bin_variable_name)/num_bins
 
         ! Compute variance
-        sum_var_energy = 0
+        sum_var_variable = 0
         do j = 1, num_bins
-            sum_var_energy = sum_var_energy + (avg_bin_energy(j) - mean_energy)**2
+            sum_var_variable = sum_var_variable + (avg_bin_variable_name(j) - mean_variable)**2
         end do
 
-        var_energy = sum_var_energy/real(((int(num_bins, 16) - 1)*int(num_bins, 16)), 8)
+        var_variable = sum_var_variable/real(((int(num_bins, 16) - 1)*int(num_bins, 16)), 8)
 
-        write(6, *) bin_size, mean_energy, var_energy, sqrt(var_energy)
+        write(6, *) bin_size, mean_variable, var_variable, sqrt(var_variable)
 
-        deallocate(avg_bin_energy)
+        deallocate(avg_bin_variable_name)
     end do
 
-    deallocate(energy)
+    deallocate(variable_name)
     close(6)
 
 end program binning
