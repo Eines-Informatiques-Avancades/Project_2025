@@ -14,20 +14,22 @@ program vdw_gas
 
     implicit none
 
-    integer :: part_num, step_num, step
+    integer :: part_num, step_num, step, seed_size
     real :: part_density, system_size, volume, cutoff, time, timestep, lj_potential, &
         temperature, temperature_inst, collision_frequence, kinetic_energy, total_energy
     real, allocatable :: positions(:, :), forces(:, :), velocities(:, :)
     real, allocatable :: x(:, :), y(:, :), z(:, :), time_points(:)
     character(6) :: lattice_type
     character(50) :: positions_file, input_file, rdf_file, rmsd_file
+    character(3) :: test_mode
+    integer, allocatable :: seed(:)
 
     ! System parameters.
     input_file = 'input_parameters.in'
-    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, collision_frequence)
+    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, &
+        collision_frequence, cutoff, test_mode)
 
     volume = system_size**(3.)  ! System is a cubic box.
-    cutoff = 1.5                ! Cutoff radius for molecular interactions.
 
     !
     ! Generate initial system configuration.
@@ -49,10 +51,22 @@ program vdw_gas
 
     print *, 'Generating initial configuration for a VdW gas from the lattice...'
 
+    ! Seed initialization for the Andersen_thermsostat.
+    call random_seed(size = seed_size)
+    allocate(seed(seed_size))
+
+    if (test_mode == "ON") then
+        seed = 123456789    ! putting arbitrary seed to all elements
+    endif
+
+    call random_seed(put=seed)
+
     do step = 1, step_num
         call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities, lj_potential)
         call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
     end do
+
+    deallocate(seed)
 
     !
     ! System evolution.
@@ -68,6 +82,7 @@ program vdw_gas
     open(11, file = 'lj_potential.dat', status = 'replace')
     open(12, file = 'kinetic_energy.dat', status = 'replace')
     open(13, file = 'total_energy.dat', status = 'replace')
+
     time = 0
     do step = 1, step_num
         time = time + timestep

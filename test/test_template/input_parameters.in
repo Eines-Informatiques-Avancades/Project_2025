@@ -5,3 +5,5 @@ SC      ! lattice_type
 10000   ! step_num
 300.0   ! temperature (Andersen thermostat)
 0.1     ! collision_frequence (Andersen thermostat)
+1.5     ! cutoff
+ON      ! test_mode (ON/OFF)
