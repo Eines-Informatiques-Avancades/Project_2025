@@ -8,7 +8,7 @@ MOD = subroutines.f90
 OBJ = ${SRC:.f90=.o} ${MOD:.f90=.o}
 
 .SUFFIXES: .f90 .o
-.PHONY: all clean
+.PHONY: all clean plot
 .INTERMEDIATE: .o .mod
 
 all: ${PROG} binning jackknife
@@ -29,6 +29,9 @@ jackknife: jackknife.o
 	$(FC) $(FCFLAGS) -o $@ ${@:=.o}
 
 ${OBJ}: modules
+
+plot:
+	sh ./plot/plot.sh
 
 clean:
 	rm ${PROG} *.o binning jackknife *.mod
