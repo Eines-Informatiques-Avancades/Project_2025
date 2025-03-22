@@ -13,8 +13,9 @@ subroutine read_trajectory(part_num, step_num, positions_file, x, y, z, time)
     integer, intent(in) :: part_num, step_num
     character(50), intent(in) :: positions_file
     real, allocatable, intent(inout) :: x(:, :), y(:, :), z(:, :), time(:)
+    character(50), allocatable :: atom_type(:)
 
-    integer :: part, step, ios
+    integer :: part, step, ios, n 
     real :: t
 
     print *, 'Reading trajectory data from ', positions_file
@@ -23,7 +24,9 @@ subroutine read_trajectory(part_num, step_num, positions_file, x, y, z, time)
 
     do step = 1, step_num
         do part = 1, part_num
-            read(4, *, iostat = ios) t, x(part, step), y(part, step), z(part, step)
+            read(4,*,iostat=ios) n
+            read(4,*,iostat=ios) t
+            read(4, *, iostat = ios) atom_type, x(part, step), y(part, step), z(part, step)
 
             ! Store the different values of t (once for each different time).
             if (part == 1) then
@@ -55,28 +58,6 @@ subroutine test_access_xyz_data(part_num, step_num, x, y, z, time)
     end do
 end subroutine test_access_xyz_data
 
-! Test to access specific step xyz information.
-subroutine test_access_xyz_frame(part_num, step_num, x, y, z, time)
-    implicit none
-
-    integer, intent(in) :: part_num, step_num
-    real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
-
-    integer :: i, j
-
-    print *, 'Testing specific step xyz information...'
-
-    do j = 1, step_num
-        if (j == 3) then                            ! test for step = 3
-            print *, 'time:', time(j)
-
-            do i = 1, part_num
-                print *, 'x', x(i, j), 'y', y(i, j), 'z', z(i, j)
-            end do
-        end if
-    end do
-end subroutine test_access_xyz_frame
-
 ! Compute RDF using the stored data.
 ! Must be executed after read_trajectory, as it depends on the arrays it
 ! creates.
@@ -89,54 +70,80 @@ subroutine compute_rdf(part_num, step_num, system_size, x, y, z, rdf_file)
     character(50), intent(in) :: rdf_file
 
     integer :: i, j, k, time_index
-    real(4) :: maximum_radius                      ! maximum radius
-    real(4), parameter :: dr = 0.05
-    integer :: bins                                ! Define a number of bins to set the size of rdf and r vectors
-    real(4), allocatable :: rdf(:), r_values(:)    ! dx,dy,dz,dr and dv are respectively x,y,z,r positions variation and volume variation
-    real(4) :: r, dx, dy, dz, dv, density
-    integer :: bin_index                           ! bin_index correspond to the zone of sphere that this r belongs
-    real(4) :: volume                              ! volume refers to the sphere's volume
+    real(8), parameter :: dr = 0.1
+    real(8) :: maximum_radius, volume, density
+    integer :: bins
+    real(8), allocatable :: h(:), rdf(:), r_values(:)
+    real(8) :: r, r_sq, dx, dy, dz, dv, h_id, r_lo, r_hi, const,nid
+    integer :: bin_index
 
-    maximum_radius = 0.5 * system_size
+    ! Parameters
+    maximum_radius =  system_size
     bins = int(maximum_radius / dr)
-    volume = (4.0/3.0) * 3.1415926 * maximum_radius**3
+    volume = system_size**3
     density = part_num / volume
 
-    allocate(rdf(bins), r_values(bins))
-    rdf = 0.0
+    ! Allocate arrays
+    allocate(h(bins), rdf(bins), r_values(bins))
+    h = 0.0
 
-    do time_index = 1, step_num                    ! loop for all registered time
-        do i = 1, part_num - 1                     ! loop for all atoms i.e. i=1 j=2 dx=x1-x2 ...
-            do j = i + 1, part_num                 ! loop for the next atom (atom j) of atom i
+    ! Compute histogram h(k)
+    do time_index = 1, step_num
+        do i = 1, part_num - 1
+            do j = i + 1, part_num
+                ! Compute minimum image distance between particles with PBC
                 dx = x(j, time_index) - x(i, time_index)
                 dy = y(j, time_index) - y(i, time_index)
                 dz = z(j, time_index) - z(i, time_index)
-                r = sqrt(dx**2 + dy**2 + dz**2)
-
+                
+                dx = dx - system_size * anint(dx / system_size)
+                dy = dy - system_size * anint(dy / system_size)
+                dz = dz - system_size * anint(dz / system_size)
+                
+                r_sq = dx**2 + dy**2 + dz**2
+                r = sqrt(r_sq)
+                
                 if (r < maximum_radius) then
-                    bin_index = int(r / dr) + 1
-                    rdf(bin_index) = rdf(bin_index) + 1
+                    bin_index = floor(r / dr) + 1
+                endif
+                if (r >= dr .and. r < maximum_radius) then ! avoid huge rdf at small range.
+                    h(bin_index) = h(bin_index) + 2  ! Double counting for efficiency
                 end if
             end do
         end do
     end do
 
+    ! Normalize RDF
+    const = 4.0 * 3.14159265358979 * density / 3.0
     do k = 1, bins
-        r_values(k) = k * dr                             ! r_values are grid points of r
-        dv = 4.0 * 3.14159 * r_values(k)**2 * dr         ! volume between r to r + dr to normalize the rdf
-        rdf(k) = rdf(k) / (density * part_num * dv )     ! normalize the rdf
+        r_lo = (k - 1) * dr
+        r_hi = r_lo + dr
+        dv = const * (r_hi**3 - r_lo**3)  ! Shell volume
+        nid = density * dv  
+        
+        if (nid > 1.0E-10 .and. h(k) > 0) then  ! avoid huge rdf at small range.
+            rdf(k) = (h(k) / (part_num * step_num)) / nid
+        else
+            rdf(k) = 0.0
+        end if
+        
+        r_values(k) = (k - 0.5) * dr  ! Bin center
     end do
 
+    ! Save RDF results to file
     open(12, file = rdf_file, status = 'replace')
     do k = 1, bins
-        write(12, *) r_values(k), rdf(k)
+        write(12, '(F10.5, F15.8)') r_values(k), rdf(k)
     end do
     close(12)
 
     print *, 'RDF calculation completed and saved to ', rdf_file
 
-    deallocate(rdf, r_values)
+    ! Deallocate memory
+    deallocate(h, rdf, r_values)
+
 end subroutine compute_rdf
+
 
 ! Compute RMSD using the stored data.
 ! Must be executed after read_trajectory, as it depends on the arrays it
