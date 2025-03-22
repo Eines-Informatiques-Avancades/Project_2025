@@ -119,7 +119,7 @@ subroutine compute_rdf(part_num, step_num, system_size, x, y, z, rdf_file)
         r_lo = (k - 1) * dr
         r_hi = r_lo + dr
         dv = const * (r_hi**3 - r_lo**3)  ! Shell volume
-        nid = density * dv  
+        nid = dv  
         
         if (nid > 1.0E-10 .and. h(k) > 0) then  ! avoid huge rdf at small range.
             rdf(k) = (h(k) / (part_num * step_num)) / nid
