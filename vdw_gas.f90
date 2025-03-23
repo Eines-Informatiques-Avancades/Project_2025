@@ -29,7 +29,7 @@ program vdw_gas
     character(2) :: atom_type
     character(3) :: test_mode
     character(6) :: lattice_type
-    character(50) :: positions_file, input_file, rdf_file, rmsd_file
+    character(50) :: input_file, positions_file, thermodynamics_file, rdf_file, rmsd_file
     integer, allocatable :: seed(:)
 
     ! System parameters.
@@ -86,10 +86,9 @@ program vdw_gas
     write(4, *) '# Particle trajectories in XYZ format (VMD standard)'
     close(4)
 
-    open(10, file = 'temperature_inst.dat', status = 'replace')
-    open(11, file = 'lj_potential.dat', status = 'replace')
-    open(12, file = 'kinetic_energy.dat', status = 'replace')
-    open(13, file = 'total_energy.dat', status = 'replace')
+    thermodynamics_file = 'thermodynamics.dat'
+    open(12, file = thermodynamics_file, status = 'replace')
+    write(12, *) '# time, lj_potential, kinetic_energy, total_energy, temperature_inst'
 
     time = 0
     do step = 1, step_num
@@ -103,16 +102,11 @@ program vdw_gas
 
         temperature_inst = instantaneous_temperature(part_num, kinetic_energy)
 
-        write(10, *) time, temperature_inst
-        write(11, *) time, lj_potential
-        write(12, *) time, kinetic_energy
-        write(13, *) time, total_energy
+        write(12, *) time, lj_potential, kinetic_energy, total_energy, temperature_inst
         call write_positions_xyz(part_num, time, positions, atom_type, positions_file)
     end do
-    close(10)
-    close(11)
+
     close(12)
-    close(13)
 
     deallocate(positions, velocities, forces)
 
