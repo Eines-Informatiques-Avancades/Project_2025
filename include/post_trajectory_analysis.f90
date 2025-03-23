@@ -24,8 +24,8 @@ subroutine read_trajectory(part_num, step_num, positions_file, x, y, z, time)
 
     do step = 1, step_num
         do part = 1, part_num
-            read(4,*,iostat=ios) n
-            read(4,*,iostat=ios) t
+            read(4, *, iostat = ios) n
+            read(4, *, iostat = ios) t
             read(4, *, iostat = ios) atom_type, x(part, step), y(part, step), z(part, step)
 
             ! Store the different values of t (once for each different time).
@@ -53,7 +53,7 @@ subroutine test_access_xyz_data(part_num, step_num, x, y, z, time)
         print *, 'time:', time(j)
 
         do i = 1, part_num
-            print *,'(', x(i, j), y(i, j), z(i, j), ')'
+            print *, '(', x(i, j), y(i, j), z(i, j), ')'
         end do
     end do
 end subroutine test_access_xyz_data
@@ -74,11 +74,11 @@ subroutine compute_rdf(part_num, step_num, system_size, x, y, z, rdf_file)
     real(8) :: maximum_radius, volume, density
     integer :: bins
     real(8), allocatable :: h(:), rdf(:), r_values(:)
-    real(8) :: r, r_sq, dx, dy, dz, dv, h_id, r_lo, r_hi, const,nid
+    real(8) :: r, r_sq, dx, dy, dz, dv, h_id, r_lo, r_hi, const, nid
     integer :: bin_index
 
     ! Parameters
-    maximum_radius =  system_size
+    maximum_radius = system_size
     bins = int(maximum_radius / dr)
     volume = system_size**3
     density = part_num / volume
@@ -143,7 +143,6 @@ subroutine compute_rdf(part_num, step_num, system_size, x, y, z, rdf_file)
     deallocate(h, rdf, r_values)
 
 end subroutine compute_rdf
-
 
 ! Compute RMSD using the stored data.
 ! Must be executed after read_trajectory, as it depends on the arrays it
