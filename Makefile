@@ -63,7 +63,7 @@ plot:
 	sh ./plot/plot.sh
 
 clean:
-	rm ${PROG} binning jackknife ${OBJ} ${OBJ:.o=.mod} ${ANC} *.o
+	rm -f ${PROG} binning jackknife ${OBJ} ${OBJ:.o=.mod} ${ANC} *.o
 
 clean-output:
 	rm *.xyz *.dat
