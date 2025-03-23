@@ -64,10 +64,9 @@ program vdw_gas
     allocate(seed(seed_size))
 
     if (test_mode == "ON") then
-        seed = 123456789    ! putting arbitrary seed to all elements
+        seed = 123456789    ! Set arbitrary seed to all elements.
+        call random_seed(put = seed)
     endif
-
-    call random_seed(put=seed)
 
     do step = 1, step_num
         call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities, lj_potential)
