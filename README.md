@@ -98,7 +98,6 @@ as this README).
 |-- input_parameters.in     <- System and simulation parameter definition.
 |-- jackknife.f90           <- Jackknife statistical analysis of the results.
 |-- run.sh                  <- Wrapper script for executing the full program.
-|-- subroutines.f90         <- Subroutines module. Sources 'include/' contents.
 `-- vdw_gas.f90             <- Main simulation program.
 ```
 
