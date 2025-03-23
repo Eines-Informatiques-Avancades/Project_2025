@@ -30,28 +30,28 @@ $(PROG): ${OBJ}
 	$(FC) $(FCFLAGS) -c -o $@ $(<:.anc=.f90)
 	@touch $@
 
-include/lj_forces.anc: include/global_vars.anc include/geometry.anc include/lj_forces.mod
-include/geometry.anc: include/global_vars.anc include/geometry.mod
-include/global_vars.anc: include/global_vars.mod
-include/initial_conf.anc:include/global_vars.anc include/initial_conf.mod
-include/integrators.anc: include/global_vars.anc include/lj_forces.anc include/geometry.anc include/integrators.mod
-include/io.anc: include/global_vars.anc include/io.mod
-include/post_trajectory_analysis.anc: include/global_vars.anc include/post_trajectory_analysis.mod
-include/thermodynamics.anc: include/global_vars.anc include/thermodynamics.mod
-include/thermostat.anc: include/global_vars.anc include/thermostat.mod
-vdw_gas.anc: include/lj_forces.anc include/geometry.anc include/initial_conf.anc \
-	include/integrators.anc include/io.anc include/post_trajectory_analysis.anc \
-	include/thermodynamics.anc include/thermostat.anc include/global_vars.anc
+${MODDIR}/lj_forces.anc: ${MODDIR}/global_vars.anc ${MODDIR}/geometry.anc ${MODDIR}/lj_forces.mod
+${MODDIR}/geometry.anc: ${MODDIR}/global_vars.anc ${MODDIR}/geometry.mod
+${MODDIR}/global_vars.anc: ${MODDIR}/global_vars.mod
+${MODDIR}/initial_conf.anc:${MODDIR}/global_vars.anc ${MODDIR}/initial_conf.mod
+${MODDIR}/integrators.anc: ${MODDIR}/global_vars.anc ${MODDIR}/lj_forces.anc ${MODDIR}/geometry.anc ${MODDIR}/integrators.mod
+${MODDIR}/io.anc: ${MODDIR}/global_vars.anc ${MODDIR}/io.mod
+${MODDIR}/post_trajectory_analysis.anc: ${MODDIR}/global_vars.anc ${MODDIR}/post_trajectory_analysis.mod
+${MODDIR}/thermodynamics.anc: ${MODDIR}/global_vars.anc ${MODDIR}/thermodynamics.mod
+${MODDIR}/thermostat.anc: ${MODDIR}/global_vars.anc ${MODDIR}/thermostat.mod
+vdw_gas.anc: ${MODDIR}/lj_forces.anc ${MODDIR}/geometry.anc ${MODDIR}/initial_conf.anc \
+	${MODDIR}/integrators.anc ${MODDIR}/io.anc ${MODDIR}/post_trajectory_analysis.anc \
+	${MODDIR}/thermodynamics.anc ${MODDIR}/thermostat.anc ${MODDIR}/global_vars.anc
 
-include/lj_forces.mod:
-include/geometry.mod:
-include/global_vars.mod:
-include/initial_conf.mod:
-include/integrators.mod:
-include/io.mod:
-include/post_trajectory_analysis.mod:
-include/thermodynamics.mod:
-include/thermostat.mod:
+${MODDIR}/lj_forces.mod:
+${MODDIR}/geometry.mod:
+${MODDIR}/global_vars.mod:
+${MODDIR}/initial_conf.mod:
+${MODDIR}/integrators.mod:
+${MODDIR}/io.mod:
+${MODDIR}/post_trajectory_analysis.mod:
+${MODDIR}/thermodynamics.mod:
+${MODDIR}/thermostat.mod:
 
 # Statistical analysis
 
