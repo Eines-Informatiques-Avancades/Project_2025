@@ -7,39 +7,44 @@
 ! A 3-dimensional cubic system is assumed.
 !
 
-! Andersen thermostat. Updates the velocity magnitude and direction of a random
-! number of particles to one that follows the Maxwell-Boltzmann distribution.
-subroutine andersen_thermostat(part_num, temperature, collision_frequence, velocities)
+module thermostat
     implicit none
 
-    integer, intent(in) :: part_num
-    real, allocatable, intent(inout) :: velocities(:,:)
-    real, intent(in) :: temperature, collision_frequence
+    contains
+        ! Andersen thermostat. Updates the velocity magnitude and direction of a random
+        ! number of particles to one that follows the Maxwell-Boltzmann distribution.
+        subroutine andersen_thermostat(part_num, temperature, collision_frequence, velocities)
+            implicit none
 
-    real :: sigma, rnumber
-    integer :: i
+            integer, intent(in) :: part_num
+            real, allocatable, intent(inout) :: velocities(:,:)
+            real, intent(in) :: temperature, collision_frequence
 
-    sigma = sqrt(temperature)
+            real :: sigma, rnumber
+            integer :: i
 
-    do i = 1, part_num
-        call random_number(rnumber)
+            sigma = sqrt(temperature)
 
-        if (rnumber < collision_frequence) then
-            velocities(i, 1) = sigma * random_gaussian()
-            velocities(i, 2) = sigma * random_gaussian()
-            velocities(i, 3) = sigma * random_gaussian()
-        end if
-    end do
-end subroutine andersen_thermostat
+            do i = 1, part_num
+                call random_number(rnumber)
 
-! Function that returns a random number following the gaussian distribution.
-function random_gaussian() result(r)
-    implicit none
+                if (rnumber < collision_frequence) then
+                    velocities(i, 1) = sigma * random_gaussian()
+                    velocities(i, 2) = sigma * random_gaussian()
+                    velocities(i, 3) = sigma * random_gaussian()
+                end if
+            end do
+        end subroutine andersen_thermostat
 
-    real :: r, u1, u2
+        ! Function that returns a random number following the gaussian distribution.
+        function random_gaussian() result(r)
+            implicit none
 
-    call random_number(u1)
-    call random_number(u2)
+            real :: r, u1, u2
 
-    r = real(sqrt(-2.0d0 * log(u1)) * cos(2.0d0 * 3.141592653589793d0 * u2))
-end function random_gaussian
+            call random_number(u1)
+            call random_number(u2)
+
+            r = real(sqrt(-2.0d0 * log(u1)) * cos(2.0d0 * 3.141592653589793d0 * u2))
+        end function random_gaussian
+end module thermostat

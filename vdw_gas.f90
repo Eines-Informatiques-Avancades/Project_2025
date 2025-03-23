@@ -10,7 +10,14 @@
 !
 
 program vdw_gas
-    use subroutines
+    use lj_forces
+    use geometry
+    use initial_conf
+    use integrators
+    use io
+    use post_trajectory_analysis
+    use thermodynamics
+    use thermostat
 
     implicit none
 

@@ -65,13 +65,9 @@ scripts are provided. These scripts have the following dependencies:
 
 ## Project structure
 
-The main simulation program consists of a main file (`vdw_gas.f90`) and a
-subroutines file (`subroutines.f90`) that sources the contents of the `include/`
-directory, which stores all the different subroutines used in the code,
-separated into different files by topic or task.
-
-A single module called `subroutines` is used due to the fact that different
-subroutines might interact with each other.
+The main simulation program consists of a main file (`vdw_gas.f90`) and several
+modules stored under the `include/` directory, which contain the necessary
+subroutines needed for the simulation separated by topic or task.
 
 As previously mentioned, system parameters are set under `input_parameters.in`,
 which is read at runtime.
@@ -86,7 +82,7 @@ as this README).
 ```
 .
 |-- include/
-|   |-- forces.f90          <- Lennard-Jones forces computation.
+|   |-- lj_forces.f90       <- Lennard-Jones forces computation.
 |   |-- geometry.f90        <- PBC
 |   |-- initial_conf.f90    <- Initial configuration generation.
 |   |-- integrators.f90     <- Time-step integrators.

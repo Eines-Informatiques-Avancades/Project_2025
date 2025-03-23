@@ -7,79 +7,84 @@
 ! A 3-dimensional cubic system is assumed.
 !
 
-! Generate an initial lattice for the system (either SC or BCC).
-subroutine gen_initial_conf(lattice_type, system_size, part_num, part_density, positions)
+module initial_conf
     implicit none
 
-    integer, intent(in) ::  part_num
-    real, intent(in) :: system_size
-    character(5), intent(in) :: lattice_type
-    real, intent(out) :: part_density
-    real, allocatable, intent(out) :: positions(:, :)
+    contains
+        ! Generate an initial lattice for the system (either SC or BCC).
+        subroutine gen_initial_conf(lattice_type, system_size, part_num, part_density, positions)
+            implicit none
 
-    integer :: i, j, k, uc_onedim, part_index
-    real :: lattice_spacing
+            integer, intent(in) ::  part_num
+            real, intent(in) :: system_size
+            character(5), intent(in) :: lattice_type
+            real, intent(out) :: part_density
+            real, allocatable, intent(out) :: positions(:, :)
 
-    print *, 'Initializing configuration for ', trim(lattice_type), ' lattice...'
+            integer :: i, j, k, uc_onedim, part_index
+            real :: lattice_spacing
 
-    allocate(positions(part_num, 3))
+            print *, 'Initializing configuration for ', trim(lattice_type), ' lattice...'
 
-    ! Generate the specified lattice type for the specified number of atoms with
-    ! the specified particle density.
-    select case (trim(lattice_type))
-        ! Simple cubic lattice.
-        case("SC")
+            allocate(positions(part_num, 3))
 
-            ! Lattice parameters.
-            uc_onedim = int(part_num**(1./3.))
-            part_density = (part_num/system_size**(3.))
-            lattice_spacing = system_size/uc_onedim
+            ! Generate the specified lattice type for the specified number of atoms with
+            ! the specified particle density.
+            select case (trim(lattice_type))
+                ! Simple cubic lattice.
+                case("SC")
 
-            part_index = 1
-            do i = 1, uc_onedim
-                do j = 1, uc_onedim
-                    do k = 1, uc_onedim
-                        positions(part_index, 1) = i - 1
-                        positions(part_index, 2) = j - 1
-                        positions(part_index, 3) = k - 1
+                    ! Lattice parameters.
+                    uc_onedim = int(part_num**(1./3.))
+                    part_density = (part_num/system_size**(3.))
+                    lattice_spacing = system_size/uc_onedim
 
-                        part_index = part_index + 1
+                    part_index = 1
+                    do i = 1, uc_onedim
+                        do j = 1, uc_onedim
+                            do k = 1, uc_onedim
+                                positions(part_index, 1) = i - 1
+                                positions(part_index, 2) = j - 1
+                                positions(part_index, 3) = k - 1
+
+                                part_index = part_index + 1
+                            end do
+                        end do
                     end do
-                end do
-            end do
 
-        ! Body-centered cubic lattice.
-        case("BCC")
+                ! Body-centered cubic lattice.
+                case("BCC")
 
-            ! Lattice parameters.
-            uc_onedim = int((part_num/2)**(1./3.))
-            part_density = (part_num/system_size**(3.))
-            lattice_spacing = system_size/uc_onedim
+                    ! Lattice parameters.
+                    uc_onedim = int((part_num/2)**(1./3.))
+                    part_density = (part_num/system_size**(3.))
+                    lattice_spacing = system_size/uc_onedim
 
-            part_index = 1
-            do i = 1, uc_onedim
-                do j = 1, uc_onedim
-                    do k = 1, uc_onedim
-                        positions(part_index, 1) = i - 1
-                        positions(part_index, 2) = j - 1
-                        positions(part_index, 3) = k - 1
+                    part_index = 1
+                    do i = 1, uc_onedim
+                        do j = 1, uc_onedim
+                            do k = 1, uc_onedim
+                                positions(part_index, 1) = i - 1
+                                positions(part_index, 2) = j - 1
+                                positions(part_index, 3) = k - 1
 
-                        part_index = part_index + 1
+                                part_index = part_index + 1
 
-                        ! Add central atom
-                        positions(part_index, 1) = i - 1 + 0.5
-                        positions(part_index, 2) = j - 1 + 0.5
-                        positions(part_index, 3) = k - 1 + 0.5
+                                ! Add central atom
+                                positions(part_index, 1) = i - 1 + 0.5
+                                positions(part_index, 2) = j - 1 + 0.5
+                                positions(part_index, 3) = k - 1 + 0.5
 
-                        part_index = part_index + 1
+                                part_index = part_index + 1
+                            end do
+                        end do
                     end do
-                end do
-            end do
 
-        case default
-            print *, 'Invalid value for lattice_type: ', lattice_type
-            stop
-    end select
+                case default
+                    print *, 'Invalid value for lattice_type: ', lattice_type
+                    stop
+            end select
 
-    positions(:, :) = lattice_spacing * positions(:, :)
-end subroutine gen_initial_conf
+            positions(:, :) = lattice_spacing * positions(:, :)
+        end subroutine gen_initial_conf
+end module initial_conf

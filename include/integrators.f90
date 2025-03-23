@@ -7,57 +7,65 @@
 ! A 3-dimensional cubic system is assumed.
 !
 
-subroutine verlet(part_num, dt, system_size, cutoff, positions, positions_old, velocities, lj_potential)
+module integrators
+    use lj_forces
+    use geometry
+
     implicit none
 
-    integer, intent(in) :: part_num
-    real, intent(in) :: dt, system_size, cutoff
-    real, allocatable, intent(inout) :: positions(:, :), positions_old(:, :), velocities(:, :)
+    contains
+        subroutine verlet(part_num, dt, system_size, cutoff, positions, positions_old, velocities, lj_potential)
+            implicit none
 
-    real,intent(out) :: lj_potential
-    real, allocatable :: positions_aux(:, :), forces(:, :)
+            integer, intent(in) :: part_num
+            real, intent(in) :: dt, system_size, cutoff
+            real, allocatable, intent(inout) :: positions(:, :), positions_old(:, :), velocities(:, :)
 
-    call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
-    positions_aux = positions
-    positions = 2*positions - positions_old + forces*dt*dt
-    positions_old = positions_aux
-    velocities = (positions - positions_old)/dt
+            real,intent(out) :: lj_potential
+            real, allocatable :: positions_aux(:, :), forces(:, :)
 
-    call apply_pbc(positions, system_size)
-end subroutine verlet
+            call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
+            positions_aux = positions
+            positions = 2*positions - positions_old + forces*dt*dt
+            positions_old = positions_aux
+            velocities = (positions - positions_old)/dt
 
-subroutine velocity_verlet(dt, part_num, system_size, cutoff, positions, velocities, lj_potential)
-    implicit none
+            call apply_pbc(positions, system_size)
+        end subroutine verlet
 
-    integer, intent(in) :: part_num
-    real, intent(in) :: dt, system_size, cutoff
-    real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
+        subroutine velocity_verlet(dt, part_num, system_size, cutoff, positions, velocities, lj_potential)
+            implicit none
 
-    real, intent(out) :: lj_potential
-    real, allocatable :: forces(:, :)
+            integer, intent(in) :: part_num
+            real, intent(in) :: dt, system_size, cutoff
+            real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
 
-    call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
-    positions = positions + velocities*dt + 0.5 * forces*dt*dt
+            real, intent(out) :: lj_potential
+            real, allocatable :: forces(:, :)
 
-    call apply_pbc(positions, system_size)
+            call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
+            positions = positions + velocities*dt + 0.5 * forces*dt*dt
 
-    call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
-    velocities = velocities + 0.5 * forces*dt
-end subroutine velocity_verlet
+            call apply_pbc(positions, system_size)
 
-subroutine euler(dt, part_num, system_size, cutoff, positions, velocities, lj_potential)
-    implicit none
+            call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
+            velocities = velocities + 0.5 * forces*dt
+        end subroutine velocity_verlet
 
-    integer,intent(in) :: part_num
-    real, intent(in) :: dt, system_size, cutoff
-    real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
+        subroutine euler(dt, part_num, system_size, cutoff, positions, velocities, lj_potential)
+            implicit none
 
-    real, intent(out) :: lj_potential
-    real, allocatable :: forces(:, :)
+            integer,intent(in) :: part_num
+            real, intent(in) :: dt, system_size, cutoff
+            real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
 
-    call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
-    positions = positions + velocities * dt + 0.5 * forces*dt*dt
-    velocities = velocities + forces*dt
+            real, intent(out) :: lj_potential
+            real, allocatable :: forces(:, :)
 
-    call apply_pbc(positions, system_size)
-end subroutine euler
+            call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
+            positions = positions + velocities * dt + 0.5 * forces*dt*dt
+            velocities = velocities + forces*dt
+
+            call apply_pbc(positions, system_size)
+        end subroutine euler
+end module integrators
