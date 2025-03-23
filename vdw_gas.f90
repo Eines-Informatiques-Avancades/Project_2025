@@ -26,15 +26,16 @@ program vdw_gas
         temperature, temperature_inst, collision_frequence, kinetic_energy, total_energy
     real, allocatable :: positions(:, :), forces(:, :), velocities(:, :)
     real, allocatable :: x(:, :), y(:, :), z(:, :), time_points(:)
+    character(2) :: atom_type
+    character(3) :: test_mode
     character(6) :: lattice_type
     character(50) :: positions_file, input_file, rdf_file, rmsd_file
-    character(3) :: test_mode
     integer, allocatable :: seed(:)
 
     ! System parameters.
     input_file = 'input_parameters.in'
-    call read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, temperature, &
-        collision_frequence, cutoff, test_mode)
+    call read_input(input_file, part_num, atom_type, system_size, lattice_type, timestep, step_num, &
+        temperature, collision_frequence, cutoff, test_mode)
 
     volume = system_size**(3.)  ! System is a cubic box.
 
@@ -82,7 +83,7 @@ program vdw_gas
     ! Create a new positions_file or replace the existing one.
     positions_file = 'positions.xyz'
     open(4, file = positions_file, status = 'replace')
-    write(4, *) '# time, particle coordinates'
+    write(4, *) '# Particle trajectories in XYZ format (VMD standard)'
     close(4)
 
     open(10, file = 'temperature_inst.dat', status = 'replace')
@@ -106,7 +107,7 @@ program vdw_gas
         write(11, *) time, lj_potential
         write(12, *) time, kinetic_energy
         write(13, *) time, total_energy
-        call write_positions_xyz(part_num, time, positions, positions_file)
+        call write_positions_xyz(part_num, time, positions, atom_type, positions_file)
     end do
     close(10)
     close(11)

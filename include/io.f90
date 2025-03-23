@@ -16,11 +16,12 @@ module io
         ! Write the coordinates of all particles of the system in the current point of
         ! time in an specified external file with an XYZ format.
         ! The external file must already exist and results will be appended to it.
-        subroutine write_positions_xyz(part_num, time, positions, output_file)
+        subroutine write_positions_xyz(part_num, time, positions, atom_type, output_file)
             implicit none
 
             integer, intent(in) :: part_num
             real, intent(in) :: time
+            character(2), intent(in) :: atom_type
             character(50), intent(in) :: output_file
             real, allocatable, intent(in) :: positions(:, :)
 
@@ -28,25 +29,28 @@ module io
 
             open(4, file = output_file, status = 'old', action = 'write', access = 'append')
 
+            write(4, *) part_num
+            write(4, *) time
             do i = 1, part_num
-                write(4, *) time, positions(i, :)
+                write(4, *) trim(atom_type), positions(i, :)
             end do
 
             close(4)
-        end subroutine
+        end subroutine write_positions_xyz
 
         ! Itziar Rabal, Ricard Rodriguez
         !
         ! Reads external input files that follow the structure of input_parameters.in
-        subroutine read_input(input_file, part_num, system_size, lattice_type, timestep, step_num, &
+        subroutine read_input(input_file, part_num, atom_type, system_size, lattice_type, timestep, step_num, &
                 temperature, collision_frequence, cutoff, test_mode)
             implicit none
 
             character(*), intent(in) :: input_file
             integer, intent(out) :: part_num, step_num
             real, intent(out) :: system_size, timestep, temperature, collision_frequence, cutoff
-            character(6), intent(out) :: lattice_type
+            character(2), intent(out) :: atom_type
             character(3), intent(out) :: test_mode
+            character(6), intent(out) :: lattice_type
 
             integer :: ios
 
@@ -63,6 +67,7 @@ module io
             ! it should also be added here below and added as an
             ! argument of the subroutine as 'intent(out)'.
             read(10, fmt = *) part_num
+            read(10, fmt = *) atom_type
             read(10, fmt = *) system_size
             read(10, fmt = *) lattice_type
             read(10, fmt = *) timestep
