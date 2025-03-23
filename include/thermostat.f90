@@ -8,17 +8,17 @@
 !
 
 module thermostat
+    use global_vars
+
     implicit none
 
     contains
         ! Andersen thermostat. Updates the velocity magnitude and direction of a random
         ! number of particles to one that follows the Maxwell-Boltzmann distribution.
-        subroutine andersen_thermostat(part_num, temperature, collision_frequence, velocities)
+        subroutine andersen_thermostat(velocities)
             implicit none
 
-            integer, intent(in) :: part_num
             real, allocatable, intent(inout) :: velocities(:,:)
-            real, intent(in) :: temperature, collision_frequence
 
             real :: sigma, rnumber
             integer :: i

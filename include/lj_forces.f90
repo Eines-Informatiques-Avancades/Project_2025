@@ -12,11 +12,9 @@ module lj_forces
     implicit none
 
     contains
-        subroutine compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
+        subroutine compute_forces(positions, forces, lj_potential)
             implicit none
 
-            integer, intent(in) :: part_num
-            real, intent(in) :: system_size, cutoff
             real, allocatable, intent(in) :: positions(:, :)
             real, allocatable, intent(out) :: forces(:, :)
             real, intent(out) :: lj_potential

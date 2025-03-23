@@ -8,6 +8,8 @@
 !
 
 module io
+    use global_vars
+
     implicit none
 
     contains
@@ -16,12 +18,10 @@ module io
         ! Write the coordinates of all particles of the system in the current point of
         ! time in an specified external file with an XYZ format.
         ! The external file must already exist and results will be appended to it.
-        subroutine write_positions_xyz(part_num, time, positions, atom_type, output_file)
+        subroutine write_positions_xyz(time, positions, output_file)
             implicit none
 
-            integer, intent(in) :: part_num
             real, intent(in) :: time
-            character(2), intent(in) :: atom_type
             character(50), intent(in) :: output_file
             real, allocatable, intent(in) :: positions(:, :)
 
@@ -41,16 +41,10 @@ module io
         ! Itziar Rabal, Ricard Rodriguez
         !
         ! Reads external input files that follow the structure of input_parameters.in
-        subroutine read_input(input_file, part_num, atom_type, system_size, lattice_type, timestep, step_num, &
-                temperature, collision_frequence, cutoff, test_mode)
+        subroutine read_input(input_file)
             implicit none
 
             character(*), intent(in) :: input_file
-            integer, intent(out) :: part_num, step_num
-            real, intent(out) :: system_size, timestep, temperature, collision_frequence, cutoff
-            character(2), intent(out) :: atom_type
-            character(3), intent(out) :: test_mode
-            character(6), intent(out) :: lattice_type
 
             integer :: ios
 

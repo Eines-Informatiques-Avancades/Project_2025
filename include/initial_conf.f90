@@ -8,16 +8,15 @@
 !
 
 module initial_conf
+    use global_vars
+
     implicit none
 
     contains
         ! Generate an initial lattice for the system (either SC or BCC).
-        subroutine gen_initial_conf(lattice_type, system_size, part_num, part_density, positions)
+        subroutine gen_initial_conf(part_density, positions)
             implicit none
 
-            integer, intent(in) ::  part_num
-            real, intent(in) :: system_size
-            character(5), intent(in) :: lattice_type
             real, intent(out) :: part_density
             real, allocatable, intent(out) :: positions(:, :)
 

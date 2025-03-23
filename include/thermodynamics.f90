@@ -7,15 +7,16 @@
 !
 
 module thermodynamics
+    use global_vars
+
     implicit none
 
     contains
         ! Compute the system's kinetic energy in an specific instant, given a matrix of
         ! velocities.
-        subroutine compute_total_kinetic_energy(part_num, velocities, kinetic_energy)
+        subroutine compute_total_kinetic_energy(velocities, kinetic_energy)
             implicit none
 
-            integer, intent(in) :: part_num
             real, allocatable, intent(in) :: velocities(:, :)
             real, intent(out) :: kinetic_energy
 
@@ -32,10 +33,10 @@ module thermodynamics
 
         ! Compute the system's instantaneous temperature, given the system's particle
         ! number and the system's total kinetic energy.
-        function instantaneous_temperature(part_num, kinetic_energy) result(temperature_inst)
+        function instantaneous_temperature(kinetic_energy) result(temperature_inst)
             implicit none
 
-            integer :: part_num, n_f
+            integer :: n_f
             real :: kinetic_energy, temperature_inst
 
             n_f = 3*part_num - 3

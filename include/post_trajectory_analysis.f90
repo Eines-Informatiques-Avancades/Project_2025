@@ -5,19 +5,19 @@
 !
 
 module post_trajectory_analysis
+    use global_vars
+
     implicit none
 
     contains
         ! Read data from the positions file and store it into arrays.
         ! Particle positions in time are stored in columns: time x y z
         ! Each row refers to a particle in an specific time.
-        subroutine read_trajectory(part_num, step_num, positions_file, x, y, z, time)
+        subroutine read_trajectory(positions_file, x, y, z, time)
             implicit none
 
-            integer, intent(in) :: part_num, step_num
             character(50), intent(in) :: positions_file
             real, allocatable, intent(inout) :: x(:, :), y(:, :), z(:, :), time(:)
-            character(50), allocatable :: atom_type(:)
 
             integer :: part, step, ios, n
             real :: t
@@ -43,10 +43,9 @@ module post_trajectory_analysis
         end subroutine read_trajectory
 
         ! Test to proove that the program has access to all the stored xyz information.
-        subroutine test_access_xyz_data(part_num, step_num, x, y, z, time)
+        subroutine test_access_xyz_data(x, y, z, time)
             implicit none
 
-            integer, intent(in) :: part_num, step_num
             real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
 
             integer :: i, j
@@ -65,11 +64,9 @@ module post_trajectory_analysis
         ! Compute RDF using the stored data.
         ! Must be executed after read_trajectory, as it depends on the arrays it
         ! creates.
-        subroutine compute_rdf(part_num, step_num, system_size, x, y, z, rdf_file)
+        subroutine compute_rdf(x, y, z, rdf_file)
             implicit none
 
-            integer, intent(in) :: part_num, step_num
-            real, intent(in) :: system_size
             real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :)
             character(50), intent(in) :: rdf_file
 
@@ -151,10 +148,9 @@ module post_trajectory_analysis
         ! Compute RMSD using the stored data.
         ! Must be executed after read_trajectory, as it depends on the arrays it
         ! creates.
-        subroutine compute_rmsd(part_num, step_num, x, y, z, time, rmsd_file)
+        subroutine compute_rmsd(x, y, z, time, rmsd_file)
             implicit none
 
-            integer, intent(in) :: part_num, step_num
             real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
             character(50), intent(in) :: rmsd_file
 

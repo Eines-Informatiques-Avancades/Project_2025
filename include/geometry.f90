@@ -7,16 +7,17 @@
 !
 
 module geometry
+    use global_vars
+
     implicit none
 
     contains
         ! Apply PBC conditions to the positions array.
         ! This subroutine must be run everytime the positions of the particles are
         ! updated.
-        subroutine apply_pbc(positions, system_size)
+        subroutine apply_pbc(positions)
             implicit none
 
-            real, intent(in) :: system_size
             real, allocatable, intent(inout) :: positions(:, :)
 
             integer :: i, j, part_num, spatial_dim

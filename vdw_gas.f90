@@ -10,6 +10,7 @@
 !
 
 program vdw_gas
+    use global_vars
     use lj_forces
     use geometry
     use initial_conf
@@ -21,21 +22,17 @@ program vdw_gas
 
     implicit none
 
-    integer :: part_num, step_num, step, seed_size
-    real :: part_density, system_size, volume, cutoff, time, timestep, lj_potential, &
-        temperature, temperature_inst, collision_frequence, kinetic_energy, total_energy
+    integer :: step, seed_size
+    integer, allocatable :: seed(:)
+    real :: part_density, volume, time, lj_potential, temperature_inst, &
+        kinetic_energy, total_energy
     real, allocatable :: positions(:, :), forces(:, :), velocities(:, :)
     real, allocatable :: x(:, :), y(:, :), z(:, :), time_points(:)
-    character(2) :: atom_type
-    character(3) :: test_mode
-    character(6) :: lattice_type
     character(50) :: input_file, positions_file, thermodynamics_file, rdf_file, rmsd_file
-    integer, allocatable :: seed(:)
 
     ! System parameters.
     input_file = 'input_parameters.in'
-    call read_input(input_file, part_num, atom_type, system_size, lattice_type, timestep, step_num, &
-        temperature, collision_frequence, cutoff, test_mode)
+    call read_input(input_file)
 
     volume = system_size**(3.)  ! System is a cubic box.
 
@@ -44,18 +41,18 @@ program vdw_gas
     !
 
     ! Generate the initial configuration from a lattice.
-    call gen_initial_conf(lattice_type, system_size, part_num, part_density, positions)
+    call gen_initial_conf(part_density, positions)
     print *, 'Initial lattice particle density: ', part_density
     print *
 
     ! Center initial config at the origin of coordinates.
-    call apply_pbc(positions, system_size)
+    call apply_pbc(positions)
 
     allocate(velocities(part_num, 3))
     velocities(:, :) = 0
 
     print *, 'Computing initial Lennard-Jones forces...'
-    call compute_forces(part_num, positions, forces, lj_potential, system_size, cutoff)
+    call compute_forces(positions, forces, lj_potential)
 
     print *, 'Generating initial configuration for a VdW gas from the lattice...'
 
@@ -69,8 +66,8 @@ program vdw_gas
     endif
 
     do step = 1, step_num
-        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities, lj_potential)
-        call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
+        call velocity_verlet(timestep, positions, velocities, lj_potential)
+        call andersen_thermostat(velocities)
     end do
 
     deallocate(seed)
@@ -93,16 +90,16 @@ program vdw_gas
     do step = 1, step_num
         time = time + timestep
 
-        call velocity_verlet(timestep, part_num, system_size, cutoff, positions, velocities, lj_potential)
-        call andersen_thermostat(part_num, temperature, collision_frequence, velocities)
+        call velocity_verlet(timestep, positions, velocities, lj_potential)
+        call andersen_thermostat(velocities)
 
-        call compute_total_kinetic_energy(part_num, velocities, kinetic_energy)
+        call compute_total_kinetic_energy(velocities, kinetic_energy)
         total_energy = lj_potential + kinetic_energy
 
-        temperature_inst = instantaneous_temperature(part_num, kinetic_energy)
+        temperature_inst = instantaneous_temperature(kinetic_energy)
 
         write(12, *) time, lj_potential, kinetic_energy, total_energy, temperature_inst
-        call write_positions_xyz(part_num, time, positions, atom_type, positions_file)
+        call write_positions_xyz(time, positions, positions_file)
     end do
 
     close(12)
@@ -121,12 +118,12 @@ program vdw_gas
         z(part_num, step_num), time_points(step_num) &
     )
 
-    call read_trajectory(part_num, step_num, positions_file, x, y, z, time_points)
+    call read_trajectory(positions_file, x, y, z, time_points)
 
     rdf_file = 'rdf.dat'
     rmsd_file = 'rmsd.dat'
-    call compute_rdf(part_num, step_num, system_size, x, y, z, rdf_file)
-    call compute_rmsd(part_num, step_num, x, y, z, time_points, rmsd_file)
+    call compute_rdf(x, y, z, rdf_file)
+    call compute_rmsd(x, y, z, time_points, rmsd_file)
 
     deallocate(x, y, z, time_points)
 end program vdw_gas
