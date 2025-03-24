@@ -53,6 +53,7 @@ program binning_multi_columns
     ! 2.1 Parsear la línea de encabezado para encontrar cuántas columnas hay
     !     y guardar sus nombres en col_names(1..n_cols).
     !     Suponemos que el archivo está separado por comas o espacios.
+    !     Se ha agregado una rutina para remover el carácter '#' si está presente.
     ! ---------------------------------------------------------------------
     n_cols = 0
     call parse_header(header_line, col_names, n_cols)
@@ -130,6 +131,7 @@ contains
     ! SUBRUTINA: parse_header
     !   - Recibe la línea de cabecera (header_line)
     !   - Extrae nombres de columna y cuenta cuántos hay
+    !   - Si la cabecera comienza con '#' se elimina.
     !======================================================================
     subroutine parse_header(header_line, col_names, n_cols)
         implicit none
@@ -142,8 +144,14 @@ contains
         character(len=1024) :: tmp_line
 
         tmp_line = header_line
-        len_line = len_trim(tmp_line)
+        ! Remover espacios a la izquierda
+        tmp_line = adjustl(tmp_line)
+        ! Si la línea comienza con '#', eliminarla
+        if (len_trim(tmp_line) > 0 .and. tmp_line(1:1) == '#') then
+            tmp_line = adjustl(tmp_line(2:))
+        end if
 
+        len_line = len_trim(tmp_line)
         n_cols = 0
         pos = 1
 
