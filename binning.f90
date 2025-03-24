@@ -1,14 +1,20 @@
-program binning_multi_columns
+!
+! binning.f90
+! Molecular Dynamics Simulation of a Van der Waals Gas
+! Joan Serrano
+!
+! Binning program corresponding to the final project for the Advanced Computer
+! Tools subject.
+!
+
+program binning
     implicit none
 
-    !----------------------------------------------------------------------
-    ! Declaración de variables
-    !----------------------------------------------------------------------
-    character(len=256) :: input_file, output_file
-    character(len=1024) :: line, header_line
     integer :: i, j
     integer :: n_rows, n_cols
     integer :: ios, unit_in, unit_out
+    character(len=256) :: input_file, output_file
+    character(len=1024) :: line, header_line
 
     ! Máximo posible de columnas que leeremos (ajústalo si necesitas más)
     integer, parameter :: MAX_COLS = 50
@@ -18,13 +24,13 @@ program binning_multi_columns
 
     ! Aquí guardaremos los datos en un arreglo 2D:
     ! data(row, col)
-    real(8), allocatable :: data(:,:)
+    real(8), allocatable :: data(:, :)
 
     !----------------------------------------------------------------------
-    ! 1. Definir el archivo de entrada (CSV) y de salida
+    ! 1. Definir el archivo de entrada y de salida
     !----------------------------------------------------------------------
     input_file  = 'thermodynamics.dat'
-    output_file = 'binning_columns.out' ! Archivo de salida con resultados
+    output_file = 'binning_' // trim(input_file) ! Archivo de salida con resultados
 
     print *, 'Binning for multi-column file: ', trim(input_file)
     print *, 'Resultados se guardarán en:    ', trim(output_file)
@@ -289,6 +295,4 @@ contains
             deallocate(avg_bin)
         end do
     end subroutine do_binning_for_column
-
-end program binning_multi_columns
-
+end program binning
