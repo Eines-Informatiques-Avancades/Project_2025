@@ -33,7 +33,7 @@ def plot_rdf(filename):
 
     plt.plot(r, g_r, label = 'RDF', color = 'b')
 
-    plt.xlabel(r'$r$')
+    plt.xlabel(r'$r(Å)$')
     plt.ylabel(r'$g(r)$')
     plt.title(r'Radial distribution function')
 
