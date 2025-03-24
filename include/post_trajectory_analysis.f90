@@ -107,9 +107,7 @@ module post_trajectory_analysis
                         if (r < maximum_radius) then
                             bin_index = floor(r / dr) + 1
                         endif
-                        if (r >= dr .and. r < maximum_radius) then ! avoid huge rdf at small range.
-                            h(bin_index) = h(bin_index) + 2  ! Double counting for efficiency
-                        end if
+                            h(bin_index) = h(bin_index) + 2  ! pairwise counting
                     end do
                 end do
             end do
@@ -121,13 +119,7 @@ module post_trajectory_analysis
                 r_hi = r_lo + dr
                 dv = const * (r_hi**3 - r_lo**3)  ! Shell volume
                 nid = dv
-
-                if (nid > 1.0E-10 .and. h(k) > 0) then  ! avoid huge rdf at small range.
-                    rdf(k) = (h(k) / (part_num * step_num)) / nid
-                else
-                    rdf(k) = 0.0
-                end if
-
+                rdf(k) = (h(k) / (part_num * step_num)) / nid
                 r_values(k) = (k - 0.5) * dr  ! Bin center
             end do
 
