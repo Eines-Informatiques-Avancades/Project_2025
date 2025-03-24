@@ -1,7 +1,7 @@
 !
 ! binning.f90
 ! Molecular Dynamics Simulation of a Van der Waals Gas
-! Joan Serrano
+! Joan Serrano, Ricard Rodríguez
 !
 ! Binning program corresponding to the final project for the Advanced Computer
 ! Tools subject.
