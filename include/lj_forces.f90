@@ -7,6 +7,7 @@
 !
 
 module lj_forces
+    use global_vars
     use geometry
 
     implicit none
@@ -29,7 +30,7 @@ module lj_forces
             forces = 0.0
             lj_potential = 0.0
 
-            do i = 1, part_num - 1
+            do i = 1, part_num
                 do j = i + 1, part_num
                     ! Compute distance between particles i and j.
                     r_vec(:) = positions(i, :) - positions(j, :)

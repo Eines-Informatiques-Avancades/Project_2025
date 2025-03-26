@@ -8,6 +8,7 @@
 !
 
 module integrators
+    use global_vars
     use lj_forces
     use geometry
 
