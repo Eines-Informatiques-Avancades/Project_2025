@@ -14,16 +14,19 @@ module integrators
     implicit none
 
     contains
-        subroutine verlet(dt, positions, positions_old, velocities, lj_potential)
+        subroutine verlet(dt, positions, positions_old, velocities)
             implicit none
 
             real, intent(in) :: dt
-            real, allocatable, intent(inout) :: positions(:, :), positions_old(:, :), velocities(:, :)
-            real, intent(out) :: lj_potential
+            real, allocatable, intent(inout) :: positions(:), positions_old(:), velocities(:)
 
-            real, allocatable :: positions_aux(:, :), forces(:, :)
+            real, allocatable :: positions_aux(:), forces(:)
+            integer :: dims(1)
 
-            call compute_forces(positions, forces, lj_potential)
+            dims = shape(positions)
+            allocate(positions_aux(dims(1)))
+
+            call compute_forces(positions, forces)
             positions_aux = positions
             positions = 2*positions - positions_old + forces*dt*dt
             positions_old = positions_aux
@@ -32,34 +35,32 @@ module integrators
             call apply_pbc(positions)
         end subroutine verlet
 
-        subroutine velocity_verlet(dt, positions, velocities, lj_potential)
+        subroutine velocity_verlet(dt, positions, velocities)
             implicit none
 
             real, intent(in) :: dt
-            real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
-            real, intent(out) :: lj_potential
+            real, allocatable, intent(inout) :: positions(:), velocities(:)
 
-            real, allocatable :: forces(:, :)
+            real, allocatable :: forces(:)
 
-            call compute_forces(positions, forces, lj_potential)
+            call compute_forces(positions, forces)
             positions = positions + velocities*dt + 0.5 * forces*dt*dt
 
             call apply_pbc(positions)
 
-            call compute_forces(positions, forces, lj_potential)
+            call compute_forces(positions, forces)
             velocities = velocities + 0.5 * forces*dt
         end subroutine velocity_verlet
 
-        subroutine euler(dt, positions, velocities, lj_potential)
+        subroutine euler(dt, positions, velocities)
             implicit none
 
             real, intent(in) :: dt
-            real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
-            real, intent(out) :: lj_potential
+            real, allocatable, intent(inout) :: positions(:), velocities(:)
 
-            real, allocatable :: forces(:, :)
+            real, allocatable :: forces(:)
 
-            call compute_forces(positions, forces, lj_potential)
+            call compute_forces(positions, forces)
             positions = positions + velocities * dt + 0.5 * forces*dt*dt
             velocities = velocities + forces*dt
 
