@@ -81,7 +81,7 @@ program vdw_gas
         call random_seed(put = seed)
     endif
 
-    do step = 1, step_num
+    do step = 1, equilibration_step_num
 
         call velocity_verlet(timestep, positions_x, velocities_x)
         call andersen_thermostat(velocities_x)

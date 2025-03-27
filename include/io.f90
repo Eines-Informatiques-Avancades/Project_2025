@@ -74,6 +74,7 @@ module io
             read(10, fmt = *) lattice_type
             read(10, fmt = *) timestep
             read(10, fmt = *) step_num
+            read(10, fmt = *) equilibration_step_num
             read(10, fmt = *) temperature
             read(10, fmt = *) collision_frequence
             read(10, fmt = *) cutoff
