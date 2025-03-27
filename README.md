@@ -68,9 +68,8 @@ subroutines needed for the simulation separated by topic or task.
 As previously mentioned, system parameters are set under `input_parameters.in`,
 which is read at runtime.
 
-To other standalone programs, `binning.f90` and `jackknife.f90`, are also
-included to perform the statistical analysis of the result produced by the
-simulation.
+Another standalone program, `binning.f90`, is also included to perform the
+statistical analysis of the results produced by the simulation.
 
 The project tree has the following structure (excluding git-related files, such
 as this README).
@@ -92,7 +91,6 @@ as this README).
 |-- Makefile
 |-- binning.f90             <- Binning statistical analysis of the results.
 |-- input_parameters.in     <- System and simulation parameter definition.
-|-- jackknife.f90           <- Jackknife statistical analysis of the results.
 |-- run.sh                  <- Wrapper script for executing the full program.
 `-- vdw_gas.f90             <- Main simulation program.
 ```
