@@ -1,3 +1,7 @@
 *.mod
 *.o
+*.anc
 vdw_gas
+binning
+jackknife
+log/*

@@ -96,9 +96,10 @@ program vdw_gas
     !
 
     ! Create a new positions_file or replace the existing one.
+    ! This needs to be done previously, as the write_positions_xyz subroutine
+    ! appends the positions to an existing file.
     positions_file = 'positions.xyz'
     open(4, file = positions_file, status = 'replace')
-    write(4, *) '# Particle trajectories in XYZ format (VMD standard)'
     close(4)
 
     thermodynamics_file = 'thermodynamics.dat'

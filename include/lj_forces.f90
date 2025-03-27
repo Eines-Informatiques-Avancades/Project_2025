@@ -7,6 +7,7 @@
 !
 
 module lj_forces
+    use global_vars
     use geometry
 
     implicit none

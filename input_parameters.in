@@ -1,5 +1,6 @@
 125     ! part_num
 Kr      ! atom_type
+
 10.0     ! system_size
 SC      ! lattice_type (SC/BCC)
 0.0001  ! timestep
