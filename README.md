@@ -25,10 +25,6 @@ which can be used to perform different tasks.
 - `binning`: performs data sampling of the results of the Van der Waals gas
     molecular dynamics simulation from a given text file outputted by `vdw_gas`.
 
-- `jackknife`: performs data resampling of the results of the Van der Waals gas
-    molecular dynamics simulation from a given text file outputted by `binning`.
-
-
 The user might want to execute the different parts of the program sequentally.
 In order to ease and automatize this process, the `run.sh` shell script is
 included. This will log the program's execution and move the output files into a

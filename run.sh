@@ -24,7 +24,6 @@ exec_exists() {
 # Check that the necessary programs have been compiled.
 exec_exists 'vdw_gas'
 exec_exists 'binning'
-exec_exists 'jackknife'
 
 cat > "$log_file" << EOF
 # run.sh
