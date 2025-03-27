@@ -34,7 +34,6 @@ EOF
 
 ./vdw_gas | tee -a "$log_file"
 ./binning | tee -a "$log_file"
-./jackknife | tee -a "$log_file"
 
 # Move program output and logs over to a specific directory where they can be
 # stored.
