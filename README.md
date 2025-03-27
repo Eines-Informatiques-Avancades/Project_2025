@@ -20,7 +20,8 @@ Compiling this project will produce several independent binaries
 which can be used to perform different tasks.
 
 - `vdw_gas`: the main simulation program. Will perform the simulation and
-    output the results into different text files.
+    output the results into different text files. Results are outputted in
+    reduced units.
 
 - `binning`: performs data sampling of the results of the Van der Waals gas
     molecular dynamics simulation from a given text file outputted by `vdw_gas`.
