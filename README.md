@@ -57,6 +57,7 @@ scripts are provided. These scripts have the following dependencies:
   - [NumPy](https://numpy.org/)
   - [Matplotlib](https://matplotlib.org/)
   - [imageio](https://imageio.readthedocs.io/en/stable/)
+  - [pandas](https://pandas.pydata.org/)
 - [cm-super TeX font package](https://ctan.org/pkg/cm-super)
 
 ## Project structure
