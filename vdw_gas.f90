@@ -46,7 +46,7 @@ program vdw_gas
     call gen_initial_conf(part_density, initial_positions)
     print *, 'Initial lattice particle density: ', part_density
     print *
-
+ 
     allocate(positions_x(part_num), positions_y(part_num), positions_z(part_num))
 
     do i = 1, part_num
@@ -66,10 +66,7 @@ program vdw_gas
     velocities_y(:) = 0
 
     print *, 'Computing initial Lennard-Jones forces...'
-    call compute_forces(positions_x, forces_x)
-    call compute_forces(positions_y, forces_y)
-    call compute_forces(positions_z, forces_z)
-
+    call compute_forces(positions_x, positions_y, positions_z, forces_x, forces_y, forces_z)
     print *, 'Generating initial configuration for a VdW gas from the lattice...'
 
     ! Seed initialization for the Andersen_thermsostat.
@@ -83,11 +80,12 @@ program vdw_gas
 
     do step = 1, equilibration_step_num
 
-        call velocity_verlet(timestep, positions_x, velocities_x)
+        call compute_forces(positions_x, positions_y, positions_z, forces_x, forces_y, forces_z)
+        call velocity_verlet(timestep, positions_x, velocities_x, forces_x)
         call andersen_thermostat(velocities_x)
-        call velocity_verlet(timestep, positions_y, velocities_y)
+        call velocity_verlet(timestep, positions_y, velocities_y, forces_y)
         call andersen_thermostat(velocities_y)
-        call velocity_verlet(timestep, positions_z, velocities_z)
+        call velocity_verlet(timestep, positions_z, velocities_z, forces_z)
         call andersen_thermostat(velocities_z)
     end do
 
@@ -111,11 +109,12 @@ program vdw_gas
     do step = 1, step_num
         time = time + timestep
 
-        call velocity_verlet(timestep, positions_x, velocities_x)
+        call compute_forces(positions_x, positions_y, positions_z, forces_x, forces_y, forces_z)
+        call velocity_verlet(timestep, positions_x, velocities_x, forces_x)
         call andersen_thermostat(velocities_x)
-        call velocity_verlet(timestep, positions_y, velocities_y)
+        call velocity_verlet(timestep, positions_y, velocities_y, forces_y)
         call andersen_thermostat(velocities_y)
-        call velocity_verlet(timestep, positions_z, velocities_z)
+        call velocity_verlet(timestep, positions_z, velocities_z, forces_z)
         call andersen_thermostat(velocities_z)
 
         call compute_lj(positions_x, positions_y, positions_z, lj_potential)
