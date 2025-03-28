@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -14,15 +15,19 @@ plt.rcParams.update({
 def plot_temperature(data_file, label, color):
     data = np.loadtxt(data_file)
 
-    plt.plot(data[:, 0], data[:, 1], label = label, color = color)
+    plt.plot(data[:, 0], data[:, 4], label = label, color = color)
 
     plt.xlabel(r'$t$')
     plt.ylabel(r'$T_{inst}$')
 
 
-output_file = 'temperature_evolution.pdf'
+input_file = '../output/thermodynamics.dat'
+output_file = os.path.join(
+    os.path.dirname(input_file),
+    'temperature_evolution.pdf'
+)
 
-plot_temperature('../output/temperature_inst.dat', 'T', '#0C5DA5')
+plot_temperature(input_file, 'T', '#0C5DA5')
 
 plt.savefig(output_file, format = 'pdf')
 plt.close()

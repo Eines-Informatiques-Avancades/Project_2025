@@ -24,7 +24,6 @@ exec_exists() {
 # Check that the necessary programs have been compiled.
 exec_exists 'vdw_gas'
 exec_exists 'binning'
-exec_exists 'jackknife'
 
 cat > "$log_file" << EOF
 # run.sh
@@ -35,12 +34,11 @@ EOF
 
 ./vdw_gas | tee -a "$log_file"
 ./binning | tee -a "$log_file"
-./jackknife | tee -a "$log_file"
 
 # Move program output and logs over to a specific directory where they can be
 # stored.
 [ ! -d  "$results_dir" ] && mkdir -p "$results_dir"
-mv *.dat *.xyz *.out "$results_dir"
+mv *.dat *.xyz "$results_dir"
 
 [ ! -d  "$log_dir" ] && mkdir -p "$log_dir"
 mv *.log "$log_dir"

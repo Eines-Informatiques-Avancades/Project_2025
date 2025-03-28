@@ -20,14 +20,11 @@ Compiling this project will produce several independent binaries
 which can be used to perform different tasks.
 
 - `vdw_gas`: the main simulation program. Will perform the simulation and
-    output the results into different text files.
+    output the results into different text files. Results are outputted in
+    reduced units.
 
 - `binning`: performs data sampling of the results of the Van der Waals gas
     molecular dynamics simulation from a given text file outputted by `vdw_gas`.
-
-- `jackknife`: performs data resampling of the results of the Van der Waals gas
-    molecular dynamics simulation from a given text file outputted by `binning`.
-
 
 The user might want to execute the different parts of the program sequentally.
 In order to ease and automatize this process, the `run.sh` shell script is
@@ -61,6 +58,7 @@ scripts are provided. These scripts have the following dependencies:
   - [NumPy](https://numpy.org/)
   - [Matplotlib](https://matplotlib.org/)
   - [imageio](https://imageio.readthedocs.io/en/stable/)
+  - [pandas](https://pandas.pydata.org/)
 - [cm-super TeX font package](https://ctan.org/pkg/cm-super)
 
 ## Project structure
@@ -72,9 +70,8 @@ subroutines needed for the simulation separated by topic or task.
 As previously mentioned, system parameters are set under `input_parameters.in`,
 which is read at runtime.
 
-To other standalone programs, `binning.f90` and `jackknife.f90`, are also
-included to perform the statistical analysis of the result produced by the
-simulation.
+Another standalone program, `binning.f90`, is also included to perform the
+statistical analysis of the results produced by the simulation.
 
 The project tree has the following structure (excluding git-related files, such
 as this README).
@@ -96,7 +93,6 @@ as this README).
 |-- Makefile
 |-- binning.f90             <- Binning statistical analysis of the results.
 |-- input_parameters.in     <- System and simulation parameter definition.
-|-- jackknife.f90           <- Jackknife statistical analysis of the results.
 |-- run.sh                  <- Wrapper script for executing the full program.
 `-- vdw_gas.f90             <- Main simulation program.
 ```

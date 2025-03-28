@@ -15,7 +15,7 @@ ANC = ${OBJ:.o=.anc}
 
 .PHONY: all clean plot
 
-all: ${PROG} binning jackknife
+all: ${PROG} binning
 
 # Main program compilation
 
