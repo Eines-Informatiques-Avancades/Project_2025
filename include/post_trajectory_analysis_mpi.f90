@@ -32,9 +32,9 @@ module post_trajectory_analysis
          open(4, file = positions_file, status = 'old', action = 'read')
 
          do step = 1, step_num
+            read(4, *, iostat = ios) n
+            read(4, *, iostat = ios) t
             do part = 1, part_num
-                read(4, *, iostat = ios) n
-                read(4, *, iostat = ios) t
                 read(4, *, iostat = ios) atom_type, x(part, step), y(part, step), z(part, step)
 
                 if (part == 1) then
@@ -141,8 +141,9 @@ module post_trajectory_analysis
 
                         if (r < maximum_radius) then
                             bin_index = floor(r / dr) + 1
-                        endif
                             h(bin_index) = h(bin_index) + 2  ! pairwise counting
+                        endif
+
                     end do
                 end do
             end do
