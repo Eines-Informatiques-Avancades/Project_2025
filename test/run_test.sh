@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
 read -p 'Enter test name: ' test_name
 
 cd $test_name
 
 ./../../vdw_gas
+./../../binning
 
 echo " "
 
-mv *.dat positions.xyz ./run_out
+mv *.dat positions.xyz run_out
 
-bash ./../invalid_out_test.sh g
-bash ./../reproductibility_test.sh g
-bash ./../conservation_test.sh g
+./../invalid_out_test.sh 
+./../reproductibility_test.sh 

@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-out_files=("kinetic_energy.dat" "lj_potential.dat" "positions.xyz" "temperature_inst.dat" "total_energy.dat" "rdf.dat" "rmsd.dat")
+out_files=( "positions.xyz" "thermodynamics.dat" "rdf.dat" "rmsd.dat" "binning_thermodynamics.dat")
 
 echo ' ' 
 echo "comparing files with test outputs..."

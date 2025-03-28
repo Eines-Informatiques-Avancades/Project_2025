@@ -1,13 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
-out_files=("kinetic_energy.dat" "lj_potential.dat" "positions.xyz" "temperature_inst.dat" "total_energy.dat" "rdf.dat" "rmsd.dat")
+out_files=("positions.xyz" "thermodynamics.dat" "rdf.dat" "rmsd.dat" "binning_thermodynamics.dat")
 
 echo sampling data for tests
 
 read -p "Enter number of desired sample lines: " n_samples
 
 for file in ${out_files[@]}; do
-    shuf -n $n_samples $file > $n_samples"rand_"$file
+    if ! [ -f $file ]; then
+        echo $file for sampling not found
+    else
+        shuf -n $n_samples $file > $n_samples"rand_"$file
+    fi
 done
 
 echo sampling accomplished
