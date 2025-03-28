@@ -1,18 +1,11 @@
-125    ! part_num
+125     ! part_num
 Kr      ! atom_type
-<<<<<<< HEAD
-10.0     ! system_size
-SC      ! lattice_type (SC/BCC)
-0.01  ! timestep
-10000     ! step_num
-1   ! temperature (Andersen thermostat)
-=======
 10.0    ! system_size
 SC      ! lattice_type (SC/BCC)
 0.01    ! timestep
 10000   ! step_num
 3.0     ! temperature (Andersen thermostat)
->>>>>>> 7ed83b039c5cd791188405b2639b02883d10a33d
 0.1     ! collision_frequence (Andersen thermostat)
 5.5     ! cutoff
 OFF     ! test_mode (ON/OFF)
+
