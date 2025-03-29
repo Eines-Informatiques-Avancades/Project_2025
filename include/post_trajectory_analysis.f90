@@ -26,10 +26,10 @@ module post_trajectory_analysis
 
             open(4, file = positions_file, status = 'old', action = 'read')
 
-            do step = 1, step_num 
+            do step = 1, step_num
                 read(4, *, iostat = ios) n
                 read(4, *, iostat = ios) t
-                
+
                 do part = 1, part_num
                     read(4, *, iostat = ios) atom_type, x(part, step), y(part, step), z(part, step)
 
@@ -39,7 +39,7 @@ module post_trajectory_analysis
                     end if
                 end do
             end do
-            
+
             close(4)
         end subroutine read_trajectory
 
@@ -76,7 +76,7 @@ module post_trajectory_analysis
             real(8) :: maximum_radius, volume, density
             integer :: bins
             real(8), allocatable :: h(:), rdf(:), r_values(:)
-            real(8) :: r, r_sq, dx, dy, dz, dv, h_id, r_lo, r_hi, const, nid
+            real(8) :: r, r_sq, dx, dy, dz, dv, r_lo, r_hi, const, nid
             integer :: bin_index
 
             ! Parameters
@@ -108,7 +108,7 @@ module post_trajectory_analysis
                         if (r < maximum_radius) then
                             bin_index = floor(r / dr) + 1
                             h(bin_index) = h(bin_index) + 2   ! pairwise counting
-                        endif  
+                        endif
                     end do
                 end do
             end do
