@@ -8,3 +8,4 @@ SC      ! lattice_type (SC/BCC)
 0.1     ! collision_frequence (Andersen thermostat)
 5.5     ! cutoff
 OFF     ! test_mode (ON/OFF)
+
