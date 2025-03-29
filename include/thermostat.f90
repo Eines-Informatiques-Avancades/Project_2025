@@ -18,7 +18,7 @@ module thermostat
         subroutine andersen_thermostat(velocities)
             implicit none
 
-            real, allocatable, intent(inout) :: velocities(:,:)
+            real, allocatable, intent(inout) :: velocities(:)
 
             real :: sigma, rnumber
             integer :: i
@@ -29,9 +29,7 @@ module thermostat
                 call random_number(rnumber)
 
                 if (rnumber < collision_frequence) then
-                    velocities(i, 1) = sigma * random_gaussian()
-                    velocities(i, 2) = sigma * random_gaussian()
-                    velocities(i, 3) = sigma * random_gaussian()
+                    velocities(i) = sigma * random_gaussian()
                 end if
             end do
         end subroutine andersen_thermostat

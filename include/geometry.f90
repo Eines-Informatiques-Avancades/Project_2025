@@ -18,19 +18,17 @@ module geometry
         subroutine apply_pbc(positions)
             implicit none
 
-            real, allocatable, intent(inout) :: positions(:, :)
+            real, allocatable, intent(inout) :: positions(:)
 
-            integer :: i, j, part_num, spatial_dim
+            integer :: i, part_num
 
             ! Retrieve the number of particles and spatial dimensions from the
             ! positions array.
             part_num = size(positions, 1)
-            spatial_dim = size(positions, 2)
+
 
             do i = 1, part_num
-                do j = 1, spatial_dim
-                    positions(i, j) = pbc(positions(i, j), system_size)
-                end do
+                positions(i) = pbc(positions(i), system_size)
             end do
         end subroutine apply_pbc
 
