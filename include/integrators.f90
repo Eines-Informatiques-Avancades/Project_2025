@@ -24,6 +24,8 @@ module integrators
 
             real, allocatable :: positions_aux(:, :), forces(:, :)
 
+            allocate(positions_aux(part_num, 3))
+
             call compute_forces(positions, forces, lj_potential)
             positions_aux = positions
             positions = 2*positions - positions_old + forces*dt*dt
