@@ -108,8 +108,7 @@ module post_trajectory_analysis
                         if (r < maximum_radius) then
                             bin_index = floor(r / dr) + 1
                             h(bin_index) = h(bin_index) + 2   ! pairwise counting
-                        endif
-                             
+                        endif  
                     end do
                 end do
             end do
@@ -127,9 +126,9 @@ module post_trajectory_analysis
 
             ! Save RDF results to file
             open(12, file = rdf_file, status = 'replace')
-             do k = 1, bins
+            do k = 1, bins
                 write(12, '(F10.5, F15.8)') r_values(k), rdf(k)
-             end do
+            end do
             close(12)
 
             print *, 'RDF calculation completed and saved to ', rdf_file
@@ -167,9 +166,9 @@ module post_trajectory_analysis
             end do
 
             open(12, file = rmsd_file, status = 'replace')
-             do j = 1, step_num
+            do j = 1, step_num
                 write(12, *) time(j), rmsd(j)
-             end do
+            end do
             close(12)
 
             print *, 'RMSD calculation completed and saved to ', rmsd_file
