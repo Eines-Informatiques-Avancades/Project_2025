@@ -27,11 +27,11 @@ module post_trajectory_analysis
             open(4, file = positions_file, status = 'old', action = 'read')
 
             do step = 1, step_num 
-                    read(4, *, iostat = ios) n
-                    read(4, *, iostat = ios) t
+                read(4, *, iostat = ios) n
+                read(4, *, iostat = ios) t
+                
                 do part = 1, part_num
                     read(4, *, iostat = ios) atom_type, x(part, step), y(part, step), z(part, step)
-
 
                     ! Store the different values of t (once for each different time).
                     if (part == 1) then
@@ -39,6 +39,7 @@ module post_trajectory_analysis
                     end if
                 end do
             end do
+            
             close(4)
         end subroutine read_trajectory
 
