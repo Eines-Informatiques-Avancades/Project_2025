@@ -61,9 +61,9 @@ program vdw_gas
     call apply_pbc(positions_z)
 
     allocate(velocities_x(part_num), velocities_y(part_num), velocities_z(part_num))
-    velocities_x(:) = 0
-    velocities_z(:) = 0
-    velocities_y(:) = 0
+    call gen_velocities_bimodal_distr(velocities_x)
+    call gen_velocities_bimodal_distr(velocities_y)
+    call gen_velocities_bimodal_distr(velocities_z)
 
     print *, 'Computing initial Lennard-Jones forces...'
     call compute_forces(positions_x, positions_y, positions_z, forces_x, forces_y, forces_z)

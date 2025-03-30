@@ -86,4 +86,32 @@ module initial_conf
 
             positions(:, :) = lattice_spacing * positions(:, :)
         end subroutine gen_initial_conf
+
+        ! Generate a bimodal distribution of velocities, where particles either have a
+        ! velocity of -v_norm or +v_norm, which is assigned randomly.
+        ! v_norm absolute value is given by the temperature.
+        subroutine gen_velocities_bimodal_distr(velocities)
+            implicit none
+
+            real, intent(out), allocatable :: velocities(:)
+
+            integer :: i
+            real :: random_num, v_norm
+
+            allocate(velocities(part_num))
+
+            v_norm = sqrt(temperature)
+
+            ! Assign velocities to each coordinate of each particle based on generating
+            ! a random number between 0 and 1.
+            do i = 1, part_num
+                call random_number(random_num)
+
+                if (random_num > 0.5) then
+                    velocities(i) = v_norm
+                else
+                    velocities(i) = -v_norm
+                end if
+            end do
+        end subroutine
 end module initial_conf
