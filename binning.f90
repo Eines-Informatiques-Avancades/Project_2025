@@ -33,7 +33,6 @@ program binning
     output_file = 'binning_' // trim(input_file) ! Archivo de salida con resultados
 
     print *, 'Binning for multi-column file: ', trim(input_file)
-    print *, 'Resultados se guardarán en:    ', trim(output_file)
 
     !----------------------------------------------------------------------
     ! 2. Abrir el archivo de entrada para:
@@ -44,14 +43,14 @@ program binning
     unit_in = 10
     open(unit_in, file=input_file, status='old', action='read', iostat=ios)
     if (ios /= 0) then
-        print *, 'Error al abrir el archivo: ', trim(input_file)
+        print *, 'Error opening file: ', trim(input_file)
         stop
     end if
 
     ! Lee la primera línea como encabezado
     read(unit_in, '(A)', iostat=ios) header_line
     if (ios /= 0) then
-        print *, 'Error leyendo la cabecera del archivo.'
+        print *, 'Error reading file header.'
         stop
     end if
 
@@ -65,7 +64,7 @@ program binning
     call parse_header(header_line, col_names, n_cols)
 
     if (n_cols < 1) then
-        print *, 'No se encontraron columnas en la cabecera.'
+        print *, 'Error: header not found.'
         stop
     end if
 
@@ -83,7 +82,7 @@ program binning
     close(unit_in)
 
     if (n_rows == 0) then
-        print *, 'No hay filas de datos en el archivo.'
+        print *, 'Error: no data in file.'
         stop
     end if
 
@@ -104,7 +103,7 @@ program binning
         ! Leemos la línea completa como texto
         read(unit_in, '(A)', iostat=ios) line
         if (ios /= 0) then
-            print *, 'Error leyendo línea ', i
+            print *, 'Error reading line:', i
             exit
         end if
         ! Parseamos esta línea para extraer n_cols valores reales
@@ -130,7 +129,7 @@ program binning
     close(unit_out)
     deallocate(data)
 
-    print *, 'Proceso de binning completado. Revisa ', trim(output_file)
+    print *, 'Binning calculation completed and saved to ', trim(output_file)
 
 contains
     !======================================================================
@@ -185,7 +184,7 @@ contains
             if (n_cols <= size(col_names)) then
                 col_names(n_cols) = token
             else
-                print *, 'ADVERTENCIA: más columnas de las esperadas.'
+                print *, 'WARNING: exceded number of expected columns.'
                 exit
             end if
         end do
@@ -212,7 +211,7 @@ contains
         ! Ahora leemos con list-directed I/O (asume n_cols valores reales)
         read(tmp_line, *, iostat=ios) (arr(j), j=1,n_cols)
         if (ios /= 0) then
-            print *, 'Error parseando la línea: ', trim(line)
+            print *, 'Parse error in line: ', trim(line)
         end if
     end subroutine parse_data_line
 

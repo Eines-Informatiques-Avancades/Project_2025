@@ -26,6 +26,7 @@ module integrators
 
             allocate(positions_aux(part_num))
 
+
             positions_aux = positions
             positions = 2*positions - positions_old + forces*dt*dt
             positions_old = positions_aux

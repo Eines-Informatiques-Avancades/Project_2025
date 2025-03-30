@@ -3,10 +3,11 @@ Kr      ! atom_type
 
 10.0     ! system_size
 SC      ! lattice_type (SC/BCC)
-0.0001  ! timestep
+0.01    ! timestep
 10000   ! step_num
 1000   ! equilibration_step_num
 1.0   ! temperature (Andersen thermostat)
 0.1     ! collision_frequence (Andersen thermostat)
 5.5     ! cutoff
 OFF     ! test_mode (ON/OFF)
+

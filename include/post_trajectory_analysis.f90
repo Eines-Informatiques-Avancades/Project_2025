@@ -27,9 +27,10 @@ module post_trajectory_analysis
             open(4, file = positions_file, status = 'old', action = 'read')
 
             do step = 1, step_num
+                read(4, *, iostat = ios) n
+                read(4, *, iostat = ios) t
+
                 do part = 1, part_num
-                    read(4, *, iostat = ios) n
-                    read(4, *, iostat = ios) t
                     read(4, *, iostat = ios) atom_type, x(part, step), y(part, step), z(part, step)
 
                     ! Store the different values of t (once for each different time).
@@ -71,15 +72,15 @@ module post_trajectory_analysis
             character(50), intent(in) :: rdf_file
 
             integer :: i, j, k, time_index
-            real(8), parameter :: dr = 0.1
+            real(8), parameter :: dr = 0.01
             real(8) :: maximum_radius, volume, density
             integer :: bins
             real(8), allocatable :: h(:), rdf(:), r_values(:)
-            real(8) :: r, r_sq, dx, dy, dz, dv, h_id, r_lo, r_hi, const, nid
+            real(8) :: r, r_sq, dx, dy, dz, dv, r_lo, r_hi, const, nid
             integer :: bin_index
 
             ! Parameters
-            maximum_radius = system_size
+            maximum_radius = system_size / 2
             bins = int(maximum_radius / dr)
             volume = system_size**3
             density = part_num / volume
@@ -106,28 +107,20 @@ module post_trajectory_analysis
 
                         if (r < maximum_radius) then
                             bin_index = floor(r / dr) + 1
+                            h(bin_index) = h(bin_index) + 2   ! pairwise counting
                         endif
-                        if (r >= dr .and. r < maximum_radius) then ! avoid huge rdf at small range.
-                            h(bin_index) = h(bin_index) + 2  ! Double counting for efficiency
-                        end if
                     end do
                 end do
             end do
 
             ! Normalize RDF
-            const = 4.0 * 3.14159265358979 * density / 3.0
+            const = 4.0 * 3.14159265358979 / 3.0
             do k = 1, bins
                 r_lo = (k - 1) * dr
                 r_hi = r_lo + dr
                 dv = const * (r_hi**3 - r_lo**3)  ! Shell volume
-                nid = dv
-
-                if (nid > 1.0E-10 .and. h(k) > 0) then  ! avoid huge rdf at small range.
-                    rdf(k) = (h(k) / (part_num * step_num)) / nid
-                else
-                    rdf(k) = 0.0
-                end if
-
+                nid = density * dv
+                rdf(k) = h(k) / (part_num * step_num * nid)
                 r_values(k) = (k - 0.5) * dr  ! Bin center
             end do
 

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -11,31 +12,36 @@ plt.rcParams.update({
 })
 
 # Function to plot the energy data
-def plot_energy(data_file, label, color):
+def plot_energy(data_file, column, label, color):
     data = np.loadtxt(data_file)
 
-    plt.plot(data[:, 0], data[:, 1], label = label, color = color)
+    plt.plot(data[:, 0], data[:, column], label = label, color = color)
 
     plt.xlabel(r'$t$')
     plt.ylabel(r'$E$')
-    #  plt.legend(loc = 'lower right', fontsize = 10)
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fontsize=10, ncol = 3)
+
+    plt.legend(
+        loc='upper center',
+        bbox_to_anchor=(0.5, -0.15),
+        fontsize=10,
+        ncol = 3
+    )
 
 
 #
 # Plot the kinetic, potential and total energies in a single plot.
 #
 
-output_file = 'energy_evolution.pdf'
-
 energy_inputfiles = [
-    ('../output/lj_potential.dat', 'U', '#00B945'),
-    ('../output/kinetic_energy.dat', 'K', '#0C5DA5'),
-    ('../output/total_energy.dat', 'E', '#FF2C00')
+    ('../output/thermodynamics.dat', 1, 'U', '#00B945'),
+    ('../output/thermodynamics.dat', 2, 'K', '#0C5DA5'),
+    ('../output/thermodynamics.dat', 3, 'E', '#FF2C00')
 ]
 
-for data_file, label, color in energy_inputfiles:
-    plot_energy(data_file, label, color)
+for data_file, column, label, color in energy_inputfiles:
+    plot_energy(data_file, column, label, color)
+
+output_file = os.path.join(os.path.dirname(data_file), 'energy_evolution.pdf')
 
 plt.savefig(output_file, format = 'pdf')
 plt.close()

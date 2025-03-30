@@ -38,7 +38,7 @@ EOF
 # Move program output and logs over to a specific directory where they can be
 # stored.
 [ ! -d  "$results_dir" ] && mkdir -p "$results_dir"
-mv *.dat *.xyz *.out "$results_dir"
+mv *.dat *.xyz "$results_dir"
 
 [ ! -d  "$log_dir" ] && mkdir -p "$log_dir"
 mv *.log "$log_dir"
