@@ -288,7 +288,7 @@ contains
             var_variable = sum_var_variable / real((num_bins - 1)*num_bins, 8)
 
             ! Escribimos la línea en el archivo de salida
-            write(unit_out, '(A, 1X, I6, 1X, ES15.8, 1X, ES15.8, 1X, ES15.8)') &
+            write(unit_out, '(A, 1X, I6, 1X, F15.8, 1X, F15.8, 1X, F15.8)') &
                 trim(col_name), bin_size, mean_variable, var_variable, sqrt(var_variable)
 
             deallocate(avg_bin)

@@ -69,3 +69,4 @@ clean:
 
 clean-output:
 	rm *.xyz *.dat
+	rm output/*.xyz output/*.dat output/*.pdf
