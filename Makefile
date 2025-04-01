@@ -68,4 +68,4 @@ clean:
 	rm -f ${PROG} binning jackknife ${OBJ} ${OBJ:.o=.mod} ${ANC} *.o
 
 clean-output:
-	rm *.xyz *.dat
+	rm output/*.xyz output/*.dat output/*.pdf
