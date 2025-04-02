@@ -28,22 +28,22 @@ module post_trajectory_analysis
         call MPI_Comm_size(MPI_COMM_WORLD, size, ierr)
 
         if (rank == 0) then
-         print *, 'Reading trajectory data from ', positions_file
-         open(4, file = positions_file, status = 'old', action = 'read')
+            print *, 'Reading trajectory data from ', positions_file
+            open(4, file = positions_file, status = 'old', action = 'read')
 
-         do step = 1, step_num
-            read(4, *, iostat = ios) n
-            read(4, *, iostat = ios) t
-            do part = 1, part_num
-                read(4, *, iostat = ios) atom_type, x(part, step), y(part, step), z(part, step)
+            do step = 1, step_num
+                read(4, *, iostat = ios) n
+                read(4, *, iostat = ios) t
+                do part = 1, part_num
+                    read(4, *, iostat = ios) atom_type, x(part, step), y(part, step), z(part, step)
 
-                if (part == 1) then
-                    time(step) = t
-                end if
+                    if (part == 1) then
+                        time(step) = t
+                    end if
+                end do
             end do
-         end do
 
-        close(4)
+            close(4)
         end if
 
     ! Broadcast arrays of information to other processes
@@ -51,7 +51,6 @@ module post_trajectory_analysis
         call MPI_Bcast(y, part_num * step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)  ! same with y, z and time arrays
         call MPI_Bcast(z, part_num * step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
         call MPI_Bcast(time, step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-
     
     ! call MPI_Finalize(ierr)     ! MOVE THIS TO THE MAIN
     end subroutine read_trajectory
@@ -105,7 +104,6 @@ module post_trajectory_analysis
             bins = int(maximum_radius / dr)
             volume = system_size**3
             density = part_num / volume
-
 
             call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
             call MPI_Comm_size(MPI_COMM_WORLD, size, ierr)
