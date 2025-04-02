@@ -51,8 +51,6 @@ module lj_forces
                     r = sqrt(dot_product(r_vec, r_vec))
 
                     if (r < cutoff .and. r > 0.0) then
-
-
                         ! Force related to a Lennard-Jones potential.
                         f = 48.0 / (r**14) - 24.0 / (r**8)
 
