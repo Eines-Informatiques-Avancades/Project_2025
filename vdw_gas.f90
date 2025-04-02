@@ -79,12 +79,14 @@ program vdw_gas
     endif
 
     do step = 1, equilibration_step_num
-
         call compute_forces(positions_x, positions_y, positions_z, forces_x, forces_y, forces_z)
+        
         call velocity_verlet(timestep, positions_x, velocities_x, forces_x)
         call andersen_thermostat(velocities_x)
+        
         call velocity_verlet(timestep, positions_y, velocities_y, forces_y)
         call andersen_thermostat(velocities_y)
+        
         call velocity_verlet(timestep, positions_z, velocities_z, forces_z)
         call andersen_thermostat(velocities_z)
     end do
@@ -111,10 +113,13 @@ program vdw_gas
         time = time + timestep
 
         call compute_forces(positions_x, positions_y, positions_z, forces_x, forces_y, forces_z)
+        
         call velocity_verlet(timestep, positions_x, velocities_x, forces_x)
         call andersen_thermostat(velocities_x)
+        
         call velocity_verlet(timestep, positions_y, velocities_y, forces_y)
         call andersen_thermostat(velocities_y)
+        
         call velocity_verlet(timestep, positions_z, velocities_z, forces_z)
         call andersen_thermostat(velocities_z)
 
@@ -122,10 +127,9 @@ program vdw_gas
         call compute_total_kinetic_energy(velocities_x, kinetic_energy_x)
         call compute_total_kinetic_energy(velocities_y, kinetic_energy_y)
         call compute_total_kinetic_energy(velocities_z, kinetic_energy_z)
+        
         kinetic_energy = kinetic_energy_x + kinetic_energy_y + kinetic_energy_z
-
         total_energy = lj_potential + kinetic_energy
-
         temperature_inst = instantaneous_temperature(kinetic_energy)
 
         write(12, *) time, lj_potential, kinetic_energy, total_energy, temperature_inst
@@ -134,7 +138,11 @@ program vdw_gas
 
     close(12)
 
-    deallocate(positions_x, positions_y, positions_z, velocities_x, velocities_y, velocities_z, forces_x, forces_y, forces_z)
+    deallocate( &
+        positions_x, positions_y, positions_z, &
+        velocities_x, velocities_y, velocities_z, &
+        forces_x, forces_y, forces_z &
+    )
 
     !
     ! Post-trajectory analysis (RDF and RMSD computation).
