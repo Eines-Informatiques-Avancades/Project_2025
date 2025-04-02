@@ -20,10 +20,7 @@ module geometry
 
             real, allocatable, intent(inout) :: positions(:)
 
-            integer :: i, part_num
-
-            ! Retrieve the number of particles from the positions array.
-            part_num = size(positions, 1)
+            integer :: i
 
             do i = 1, part_num
                 positions(i) = pbc(positions(i), system_size)
