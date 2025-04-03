@@ -11,7 +11,6 @@ module integrators
     use global_vars
     use lj_forces
     use geometry
-    use global_vars
 
     implicit none
 
