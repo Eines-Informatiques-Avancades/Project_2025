@@ -7,6 +7,7 @@
 !
 
 module lj_potentials
+    use global_vars
     use geometry
 
     implicit none
@@ -26,9 +27,9 @@ module lj_potentials
             allocate(positions(part_num, 3))
 
             do l = 1, part_num
-                positions(l,1) = positions_x(l) 
-                positions(l,2) = positions_y(l) 
-                positions(l,3) = positions_z(l) 
+                positions(l,1) = positions_x(l)
+                positions(l,2) = positions_y(l)
+                positions(l,3) = positions_z(l)
             end do
 
             ! In reduced units: epsilon = sigma = 1.
