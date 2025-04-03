@@ -18,14 +18,22 @@ module io
         ! Write the coordinates of all particles of the system in the current point of
         ! time in an specified external file with an XYZ format.
         ! The external file must already exist and results will be appended to it.
-        subroutine write_positions_xyz(time, positions, output_file)
+        subroutine write_positions_xyz(time, positions_x, positions_y, positions_z, output_file)
             implicit none
 
             real, intent(in) :: time
             character(50), intent(in) :: output_file
-            real, allocatable, intent(in) :: positions(:, :)
+            real, allocatable, intent(in) :: positions_x(:), positions_y(:), positions_z(:)
+            real, allocatable :: positions(:,:)
+            integer :: i, j
 
-            integer :: i
+            allocate(positions(part_num, 3))
+
+            do j = 1, part_num
+                positions(j,1) = positions_x(j)
+                positions(j,2) = positions_y(j)
+                positions(j,3) = positions_z(j)
+            end do
 
             open(4, file = output_file, status = 'old', action = 'write', access = 'append')
 
@@ -66,6 +74,7 @@ module io
             read(10, fmt = *) lattice_type
             read(10, fmt = *) timestep
             read(10, fmt = *) step_num
+            read(10, fmt = *) equilibration_step_num
             read(10, fmt = *) temperature
             read(10, fmt = *) collision_frequence
             read(10, fmt = *) cutoff
