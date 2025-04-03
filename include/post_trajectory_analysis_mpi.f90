@@ -11,50 +11,49 @@ module post_trajectory_analysis
         ! Read data from the positions file and store it into arrays.
         ! Particle positions in time are stored in columns: time x y z
         ! Each row refers to a particle in an specific time.
-    subroutine read_trajectory(positions_file, x, y, z, time)
-        use mpi
-        implicit none
+        subroutine read_trajectory(positions_file, x, y, z, time)
+            use mpi
+            implicit none
 
-        character(50), intent(in) :: positions_file
-        real, allocatable, intent(inout) :: x(:, :), y(:, :), z(:, :), time(:)
+            character(50), intent(in) :: positions_file
+            real, allocatable, intent(inout) :: x(:, :), y(:, :), z(:, :), time(:)
 
-        integer :: part, step, ios, n, ierr
-        integer :: rank, size
-        real :: t
+            integer :: part, step, ios, n, ierr
+            integer :: rank, size
+            real :: t
 
-        ! Initialize MPI
-        !!call MPI_Init(ierr)          ! MOVE THIS TO THE MAIN
-        call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
-        call MPI_Comm_size(MPI_COMM_WORLD, size, ierr)
+            ! Initialize MPI
+            !!call MPI_Init(ierr)          ! MOVE THIS TO THE MAIN
+            call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
+            call MPI_Comm_size(MPI_COMM_WORLD, size, ierr)
 
-        if (rank == 0) then
-         print *, 'Reading trajectory data from ', positions_file
-         open(4, file = positions_file, status = 'old', action = 'read')
+            if (rank == 0) then
+                print *, 'Reading trajectory data from ', positions_file
+                open(4, file = positions_file, status = 'old', action = 'read')
 
-         do step = 1, step_num
-            read(4, *, iostat = ios) n
-            read(4, *, iostat = ios) t
-            do part = 1, part_num
-                read(4, *, iostat = ios) atom_type, x(part, step), y(part, step), z(part, step)
+                do step = 1, step_num
+                    read(4, *, iostat = ios) n
+                    read(4, *, iostat = ios) t
+                    do part = 1, part_num
+                        read(4, *, iostat = ios) atom_type, x(part, step), y(part, step), z(part, step)
 
-                if (part == 1) then
-                    time(step) = t
-                end if
-            end do
-         end do
+                        if (part == 1) then
+                            time(step) = t
+                        end if
+                    end do
+                end do
 
-        close(4)
-        end if
+                close(4)
+            end if
 
-    ! Broadcast arrays of information to other processes
-        call MPI_Bcast(x, part_num * step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)  ! (x array, (xarray component1) * (xarray component2), type, 'the thread rank that bcast', mpi_comm_world, ierr )
-        call MPI_Bcast(y, part_num * step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)  ! same with y, z and time arrays
-        call MPI_Bcast(z, part_num * step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-        call MPI_Bcast(time, step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
+        ! Broadcast arrays of information to other processes
+            call MPI_Bcast(x, part_num * step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)  ! (x array, (xarray component1) * (xarray component2), type, 'the thread rank that bcast', mpi_comm_world, ierr )
+            call MPI_Bcast(y, part_num * step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)  ! same with y, z and time arrays
+            call MPI_Bcast(z, part_num * step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
+            call MPI_Bcast(time, step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
 
-    
-    ! call MPI_Finalize(ierr)     ! MOVE THIS TO THE MAIN
-    end subroutine read_trajectory
+        ! call MPI_Finalize(ierr)     ! MOVE THIS TO THE MAIN
+        end subroutine read_trajectory
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                                                   !
@@ -62,8 +61,8 @@ module post_trajectory_analysis
 !                                                                   !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    ! Test to proove that the program has access to all the stored xyz information.
-    subroutine test_access_xyz_data(x, y, z, time)
+        ! Test to proove that the program has access to all the stored xyz information.
+        subroutine test_access_xyz_data(x, y, z, time)
             implicit none
 
             real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
@@ -79,12 +78,12 @@ module post_trajectory_analysis
                     print *, '(', x(i, j), y(i, j), z(i, j), ')'
                 end do
             end do
-    end subroutine test_access_xyz_data
+        end subroutine test_access_xyz_data
 
         ! Compute RDF using the stored data.
         ! Must be executed after read_trajectory, as it depends on the arrays it
         ! creates.
-    subroutine compute_rdf(x, y, z, rdf_file)
+        subroutine compute_rdf(x, y, z, rdf_file)
             implicit none
 
             real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :)
@@ -116,12 +115,12 @@ module post_trajectory_analysis
             frame_chunk = step_num / size               ! divide the work, chunk is the amount of work for each thread.
             start = rank * frame_chunk + 1              ! start and fin are index for the mpi loop, this line ensures beginning index of each thread .
             fin = start + frame_chunk - 1               ! this line ensures the ending index.
-                                                        ! i.e  100 steps in 4 size, meaning we have 4 loops for each thread,  
+                                                        ! i.e  100 steps in 4 size, meaning we have 4 loops for each thread,
                                                         !|rank=0, start=0*25+1=1, fin= 1+25-1=25| |rank=1, start=1*25+1=26, fin= 26+25-1=50| , ...
 
-            if (rank == size - 1) then              
+            if (rank == size - 1) then
                 fin = step_num                          ! ensuring for step_num is not divisible by size (like 100/7) the ending index is the step_num.
-            endif                                       ! 100//7 = 14   14*7 = 98, if this condition were not imposed, the loop is incomplete.        
+            endif                                       ! 100//7 = 14   14*7 = 98, if this condition were not imposed, the loop is incomplete.
 
             ! Compute histogram h(k)
             do time_index = start, fin
@@ -151,10 +150,9 @@ module post_trajectory_analysis
             ! Here the reduction is applied to all local values of h, converting it to h_total at rank 0
             call mpi_reduce(h,h_total,bins, mpi_real, mpi_sum, 0, mpi_comm_world, ierr)
 
-
             ! Normalize RDF
-            ! Now normalize the h stored in h_total 
-            if (rank == 0) then 
+            ! Now normalize the h stored in h_total
+            if (rank == 0) then
                 const = 4.0 * 3.14159265358979 * density / 3.0
                 do k = 1, bins
                     r_lo = (k - 1) * dr
@@ -177,15 +175,13 @@ module post_trajectory_analysis
 
             ! Deallocate memory
             deallocate(h,h_total, rdf, r_values)
-
-    end subroutine compute_rdf
-
+        end subroutine compute_rdf
 
 
         ! Compute RMSD using the stored data.
         ! Must be executed after read_trajectory, as it depends on the arrays it
         ! creates.
-    subroutine compute_rmsd(x, y, z, time, rmsd_file)
+        subroutine compute_rmsd(x, y, z, time, rmsd_file)
             implicit none
 
             real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
@@ -202,25 +198,24 @@ module post_trajectory_analysis
             start = rank * frame_chunk + 1              ! Start and fin are index for the mpi loop, this line ensures beginning index of each thread .
             fin = start + frame_chunk - 1               ! This line ensures the ending index.
 
-
-            if (rank == size - 1) then              
+            if (rank == size - 1) then
                 fin = step_num                          ! Ensuring for step_num is not divisible by size (like 100/7) the ending index is the step_num.
-            endif                                       ! 100//7 = 14   14*7 = 98, if this condition were not imposed, the loop is incomplete.        
+            endif                                       ! 100//7 = 14   14*7 = 98, if this condition were not imposed, the loop is incomplete.
 
-        
-            partial_steps = fin - start + 1             ! To divide the work and not spending so much memory, a partial step definition is then needed. 
+
+            partial_steps = fin - start + 1             ! To divide the work and not spending so much memory, a partial step definition is then needed.
             allocate(partial_rmsd(partial_steps))
 
             if (rank == 0) then                         ! When rank 0 can merge all partial rmsd happens the following
                 allocate(total_rmsd(step_num))          ! Ensure that the total_rmsd has the total indexation size.
             endif
 
-                                                                   
+
             do j = 1, partial_steps                             ! For each partial steps.
 
                 actual_step = start + j - 1                     ! i.e.  start = 1 and fin = 5, do j = 1,5 , actual step = 1 + 1 -1 = 1, then do all loop of i with step = 1.
                                                                 ! then repeating for others j.
-                                                                
+
                 sum_sq = 0.0                                    ! Summation using the acumulation.
                 do i = 1, part_num
                     dx = x(i, actual_step) - x(i, 1)
@@ -229,7 +224,7 @@ module post_trajectory_analysis
                     sum_sq = sum_sq + (dx**2 + dy**2 + dz**2)
                 end do
 
-                partial_rmsd(j) = sqrt(sum_sq / part_num)               ! accumulate partials rmsd 
+                partial_rmsd(j) = sqrt(sum_sq / part_num)               ! accumulate partials rmsd
             end do                                                    ! rmsd=sqrt(summation(r-r')^2 / n)
 
             ! Merge the partial rmsd to totalrmsd
@@ -247,9 +242,9 @@ module post_trajectory_analysis
             endif
 
             deallocate(partial_rmsd)
+
             if (rank == 0) then
                 deallocate(total_rmsd)
             endif
-
-    end subroutine compute_rmsd
+        end subroutine compute_rmsd
 end module post_trajectory_analysis

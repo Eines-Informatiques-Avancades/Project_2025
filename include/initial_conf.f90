@@ -93,25 +93,27 @@ module initial_conf
         subroutine gen_velocities_bimodal_distr(velocities)
             implicit none
 
-            real, intent(out), allocatable :: velocities(:)
+            real, intent(out), allocatable :: velocities(:, :)
 
-            integer :: i
+            integer :: i, j
             real :: random_num, v_norm
 
-            allocate(velocities(part_num))
+            allocate(velocities(part_num, 3))
 
             v_norm = sqrt(temperature)
 
             ! Assign velocities to each coordinate of each particle based on generating
             ! a random number between 0 and 1.
             do i = 1, part_num
-                call random_number(random_num)
+                do j = 1, 3
+                    call random_number(random_num)
 
-                if (random_num > 0.5) then
-                    velocities(i) = v_norm
-                else
-                    velocities(i) = -v_norm
-                end if
+                    if (random_num > 0.5) then
+                        velocities(i, j) = v_norm
+                    else
+                        velocities(i, j) = -v_norm
+                    end if
+                end do
             end do
         end subroutine
 end module initial_conf

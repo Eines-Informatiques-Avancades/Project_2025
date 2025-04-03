@@ -15,16 +15,18 @@ module integrators
     implicit none
 
     contains
-        subroutine verlet(dt, positions, positions_old, velocities, forces)
+        subroutine verlet(dt, positions, positions_old, velocities, lj_potential)
             implicit none
 
             real, intent(in) :: dt
-            real, allocatable, intent(inout) :: positions(:), positions_old(:), velocities(:)
+            real, allocatable, intent(inout) :: positions(:, :), positions_old(:, :), velocities(:, :)
+            real, intent(out) :: lj_potential
 
-            real, allocatable :: forces(:), positions_aux(:)
+            real, allocatable :: positions_aux(:, :), forces(:, :)
 
-            allocate(positions_aux(part_num))
+            allocate(positions_aux(part_num, 3))
 
+            call compute_forces(positions, forces, lj_potential)
             positions_aux = positions
             positions = 2*positions - positions_old + forces*dt*dt
             positions_old = positions_aux
@@ -33,29 +35,34 @@ module integrators
             call apply_pbc(positions)
         end subroutine verlet
 
-        subroutine velocity_verlet(dt, positions, velocities, forces)
+        subroutine velocity_verlet(dt, positions, velocities, lj_potential)
             implicit none
 
             real, intent(in) :: dt
-            real, allocatable, intent(inout) :: positions(:), velocities(:)
+            real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
+            real, intent(out) :: lj_potential
 
-            real, allocatable :: forces(:)
+            real, allocatable :: forces(:, :)
 
+            call compute_forces(positions, forces, lj_potential)
             positions = positions + velocities*dt + 0.5 * forces*dt*dt
 
             call apply_pbc(positions)
 
+            call compute_forces(positions, forces, lj_potential)
             velocities = velocities + 0.5 * forces*dt
         end subroutine velocity_verlet
 
-        subroutine euler(dt, positions, velocities, forces)
+        subroutine euler(dt, positions, velocities, lj_potential)
             implicit none
 
             real, intent(in) :: dt
-            real, allocatable, intent(inout) :: positions(:), velocities(:)
+            real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
+            real, intent(out) :: lj_potential
 
-            real, allocatable :: forces(:)
+            real, allocatable :: forces(:, :)
 
+            call compute_forces(positions, forces, lj_potential)
             positions = positions + velocities * dt + 0.5 * forces*dt*dt
             velocities = velocities + forces*dt
 
