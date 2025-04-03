@@ -80,9 +80,8 @@ program vdw_gas
         call random_seed(put = seed)
     endif
 
+    call compute_forces(positions_x, positions_y, positions_z, forces_x, forces_y, forces_z)
     do step = 1, equilibration_step_num
-        call compute_forces(positions_x, positions_y, positions_z, forces_x, forces_y, forces_z)
-
         call velocity_verlet(timestep, positions_x, velocities_x, forces_x)
         call andersen_thermostat(velocities_x)
 
@@ -110,11 +109,11 @@ program vdw_gas
     open(12, file = thermodynamics_file, status = 'replace')
     write(12, *) '# time, lj_potential, kinetic_energy, total_energy, temperature_inst'
 
+    call compute_forces(positions_x, positions_y, positions_z, forces_x, forces_y, forces_z)
+
     time = 0
     do step = 1, step_num
         time = time + timestep
-
-        call compute_forces(positions_x, positions_y, positions_z, forces_x, forces_y, forces_z)
 
         call velocity_verlet(timestep, positions_x, velocities_x, forces_x)
         call andersen_thermostat(velocities_x)
