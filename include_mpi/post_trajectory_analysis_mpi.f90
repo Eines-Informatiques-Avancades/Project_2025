@@ -151,7 +151,6 @@ module post_trajectory_analysis
             ! Here the reduction is applied to all local values of h, converting it to h_total at rank 0
             call mpi_reduce(h,h_total,bins, mpi_real, mpi_sum, 0, mpi_comm_world, ierr)
 
-
             ! Normalize RDF
             ! Now normalize the h stored in h_total 
             if (rank == 0) then 
@@ -179,8 +178,6 @@ module post_trajectory_analysis
             deallocate(h,h_total, rdf, r_values)
 
     end subroutine compute_rdf
-
-
 
         ! Compute RMSD using the stored data.
         ! Must be executed after read_trajectory, as it depends on the arrays it
@@ -247,7 +244,7 @@ subroutine compute_rmsd(x, y, z, time, rmsd_file)
             write(12, *) time(j), total_rmsd(j)
         end do
         close(12)
-        print *, '📦 RMSD calculation completed and saved to ', rmsd_file
+        print *, 'RMSD calculation completed and saved to ', rmsd_file
         deallocate(total_rmsd, recvcounts, displs)
     end if
 
@@ -255,4 +252,3 @@ subroutine compute_rmsd(x, y, z, time, rmsd_file)
 end subroutine compute_rmsd
 
 end module
-
