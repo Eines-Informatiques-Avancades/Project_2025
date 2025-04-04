@@ -66,7 +66,7 @@ program vdw_gas
     endif
 
     do step = 1, equilibration_step_num
-        call velocity_verlet(timestep, positions, velocities, lj_potential)
+        call velocity_verlet(positions, velocities, lj_potential)
         call andersen_thermostat(velocities)
     end do
 
@@ -91,7 +91,7 @@ program vdw_gas
     do step = 1, step_num
         time = time + timestep
 
-        call velocity_verlet(timestep, positions, velocities, lj_potential)
+        call velocity_verlet(positions, velocities, lj_potential)
         call andersen_thermostat(velocities)
 
         call compute_total_kinetic_energy(velocities, kinetic_energy)
