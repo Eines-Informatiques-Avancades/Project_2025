@@ -18,12 +18,14 @@ module geometry
         subroutine apply_pbc(positions)
             implicit none
 
-            real, allocatable, intent(inout) :: positions(:)
+            real, allocatable, intent(inout) :: positions(:, :)
 
-            integer :: i
+            integer :: i, j
 
             do i = 1, part_num
-                positions(i) = pbc(positions(i), system_size)
+                do j = 1, 3
+                    positions(i, j) = pbc(positions(i, j), system_size)
+                end do
             end do
         end subroutine apply_pbc
 

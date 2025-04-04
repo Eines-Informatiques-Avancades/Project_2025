@@ -17,7 +17,7 @@ module thermodynamics
         subroutine compute_total_kinetic_energy(velocities, kinetic_energy)
             implicit none
 
-            real, allocatable, intent(in) :: velocities(:)
+            real, allocatable, intent(in) :: velocities(:, :)
             real, intent(out) :: kinetic_energy
 
             integer :: i
@@ -25,7 +25,7 @@ module thermodynamics
 
             kinetic_energy = 0
             do i = 1, part_num
-                velocity_norm_sq = velocities(i)**2 
+                velocity_norm_sq = velocities(i, 1)**2 + velocities(i, 2)**2 + velocities(i, 3)**2
                 kinetic_energy_part = 0.5*velocity_norm_sq
                 kinetic_energy = kinetic_energy + kinetic_energy_part
             end do
