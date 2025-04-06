@@ -26,6 +26,7 @@ module post_trajectory_analysis
 
             open(4, file = positions_file, status = 'old', action = 'read')
 
+            ! n is the total number of particles and t is the time
             do step = 1, step_num
                 read(4, *, iostat = ios) n
                 read(4, *, iostat = ios) t
@@ -72,16 +73,15 @@ module post_trajectory_analysis
             character(50), intent(in) :: rdf_file
 
             integer :: i, j, k, time_index
-            real(8), parameter :: dr = 0.01
-            real(8) :: maximum_radius, volume, density
+            real :: maximum_radius, volume, density
             integer :: bins
-            real(8), allocatable :: h(:), rdf(:), r_values(:)
-            real(8) :: r, r_sq, dx, dy, dz, dv, r_lo, r_hi, const, nid
+            real, allocatable :: h(:), rdf(:), r_values(:)
+            real :: r, r_sq, dx, dy, dz, dv, r_lo, r_hi, const, nid
             integer :: bin_index
 
             ! Parameters
             maximum_radius = system_size / 2
-            bins = int(maximum_radius / dr)
+            bins = int(maximum_radius / timestep)
             volume = system_size**3
             density = part_num / volume
 
@@ -93,11 +93,13 @@ module post_trajectory_analysis
             do time_index = 1, step_num
                 do i = 1, part_num - 1
                     do j = i + 1, part_num
-                        ! Compute minimum image distance between particles with PBC
+                        
+                        ! Compute the eucledian distance of each component
                         dx = x(j, time_index) - x(i, time_index)
                         dy = y(j, time_index) - y(i, time_index)
                         dz = z(j, time_index) - z(i, time_index)
 
+                        ! PBC
                         dx = dx - system_size * anint(dx / system_size)
                         dy = dy - system_size * anint(dy / system_size)
                         dz = dz - system_size * anint(dz / system_size)
@@ -106,8 +108,14 @@ module post_trajectory_analysis
                         r = sqrt(r_sq)
 
                         if (r < maximum_radius) then
-                            bin_index = floor(r / dr) + 1
-                            h(bin_index) = h(bin_index) + 2   ! pairwise counting
+                            bin_index = floor(r / timestep) + 1
+
+                            ! Boundary check to prevent out-of-bounds access
+                            if (bin_index >= 1 .and. bin_index <= bins) then
+                                h(bin_index) = h(bin_index) + 2  ! pairwise counting
+                            else
+                                print *, 'Warning: bin_index out of range:', bin_index, ' (max bins:', bins, ')'
+                            endif
                         endif
                     end do
                 end do
@@ -116,12 +124,12 @@ module post_trajectory_analysis
             ! Normalize RDF
             const = 4.0 * 3.14159265358979 / 3.0
             do k = 1, bins
-                r_lo = (k - 1) * dr
-                r_hi = r_lo + dr
-                dv = const * (r_hi**3 - r_lo**3)  ! Shell volume
-                nid = density * dv
-                rdf(k) = h(k) / (part_num * step_num * nid)
-                r_values(k) = (k - 0.5) * dr  ! Bin center
+                r_lo = (k - 1) * timestep         ! inner radius
+                r_hi = r_lo + timestep            ! outer radius
+                dv = const * (r_hi**3 - r_lo**3)  ! shell volume
+                nid = density * dv                ! ideal count
+                rdf(k) = h(k) / (part_num * step_num * nid)  ! rdf = actual counting / ideal counting
+                r_values(k) = (k - 0.5) * timestep  ! Bin center
             end do
 
             ! Save RDF results to file
@@ -148,8 +156,8 @@ module post_trajectory_analysis
             character(50), intent(in) :: rmsd_file
 
             integer :: i, j
-            real(4), allocatable :: rmsd(:)
-            real(4) :: dx, dy, dz, sum_sq
+            real, allocatable :: rmsd(:)
+            real :: dx, dy, dz, sum_sq
 
             allocate(rmsd(step_num))
 
@@ -159,6 +167,11 @@ module post_trajectory_analysis
                     dx = x(i, j) - x(i, 1)
                     dy = y(i, j) - y(i, 1)                      ! difference of positions is between the xj and x1 (as reference).
                     dz = z(i, j) - z(i, 1)
+
+                    ! PBC 
+                    dx = dx - system_size * nint(dx / system_size)
+                    dy = dy - system_size * nint(dy / system_size)
+                    dz = dz - system_size * nint(dz / system_size)
                     sum_sq = sum_sq + (dx**2 + dy**2 + dz**2)
                 end do
 
