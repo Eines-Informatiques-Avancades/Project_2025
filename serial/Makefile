@@ -1,7 +1,7 @@
 .SUFFIXES:
 
 FC = gfortran
-FCFLAGS = -O3 -Wall -Wextra -J$(MODDIR)
+FCFLAGS = -O3 -Wall -Wextra -J$(MODDIR) -fcheck=all
 FLFLAGS =
 MODDIR = ./include
 

@@ -1,7 +1,8 @@
 *.mod
 *.o
 *.anc
-vdw_gas
-binning
-jackknife
-log/*
+serial/vdw_gas
+serial/binning
+parallel/vdw_gas
+parallel/binning
+serial/log/*
