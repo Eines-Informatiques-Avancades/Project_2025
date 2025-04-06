@@ -18,7 +18,7 @@ module geometry
         subroutine apply_pbc(positions)
             implicit none
 
-            real, allocatable, intent(inout) :: positions(:, :)
+            real(8), allocatable, intent(inout) :: positions(:, :)
 
             integer :: i, j
 
@@ -33,13 +33,22 @@ module geometry
         function pbc(distance, box_size)
             implicit none
 
-            real :: distance, box_size, pbc
+            real(8) :: distance, box_size, pbc
 
-            if (distance > box_size/2) then
-                distance = distance - box_size
-            else if (distance < -box_size/2) then
-                distance = distance + box_size
-            end if
+            do while(abs(distance) > box_size/2)
+                if (distance > box_size/2) then
+                    distance = distance - box_size
+                else if (distance < -box_size/2) then
+                    distance = distance + box_size
+                end if
+
+                if (abs(distance) > box_size*100) then
+                    print *, 'System might present unstabilities.'
+                    print *, 'Found one particle with one coordinate of value: ', distance
+                    print *, 'System size: ', box_size
+                    print *, 'Your results might contain incorrect data. Consider using a smaller timestep.'
+                end if
+            end do
 
             pbc = distance
         end function pbc

@@ -11,7 +11,7 @@ module global_vars
     character(2) :: atom_type
     character(3) :: test_mode
     character(6) :: lattice_type
-    real :: system_size, timestep, temperature, collision_frequence, cutoff
+    real(8) :: system_size, timestep, temperature, collision_frequence, cutoff
 
-    real, parameter :: pi = 3.14159265358979
+    real(8), parameter :: pi = 3.14159265358979
 end module global_vars

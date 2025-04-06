@@ -16,13 +16,13 @@ module lj_forces
         subroutine compute_forces(positions, forces, lj_potential)
             implicit none
 
-            real, allocatable, intent(in) :: positions(:, :)
-            real, allocatable, intent(out) :: forces(:, :)
-            real, intent(out) :: lj_potential
+            real(8), allocatable, intent(in) :: positions(:, :)
+            real(8), allocatable, intent(out) :: forces(:, :)
+            real(8), intent(out) :: lj_potential
 
             integer :: i, j, k
-            real :: r, f
-            real :: r_vec(3)
+            real(8) :: r, f
+            real(8) :: r_vec(3)
 
             allocate(forces(part_num, 3))
 
@@ -44,10 +44,10 @@ module lj_forces
 
                     if (r < cutoff .and. r > 0.0) then
                         ! Lennard-Jones potential
-                        lj_potential = lj_potential + 4.0 * (1.0 / (r**12) - 1.0 / (r**6))
+                        lj_potential = lj_potential + 4.0*(1.0/(r**12) - 1.0/(r**6))
 
                         ! Force related to a Lennard-Jones potential.
-                        f = 48.0 / (r**14) - 24.0 / (r**8)
+                        f = 48.0/(r**14) - 24.0/(r**8)
 
                         ! Update forces.
                         forces(i, :) = forces(i, :) + f * r_vec(:)

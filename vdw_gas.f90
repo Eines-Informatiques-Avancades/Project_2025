@@ -24,9 +24,9 @@ program vdw_gas
 
     integer :: step, seed_size
     integer, allocatable :: seed(:)
-    real :: part_density, volume, time, lj_potential, temperature_inst, &
+    real(8) :: part_density, volume, time, lj_potential, temperature_inst, &
         kinetic_energy, total_energy
-    real, allocatable :: positions(:, :), forces(:, :), velocities(:, :), &
+    real(8), allocatable :: positions(:, :), forces(:, :), velocities(:, :), &
         x(:, :), y(:, :), z(:, :), time_points(:)
     character(50) :: input_file, positions_file, thermodynamics_file, rdf_file, rmsd_file
 

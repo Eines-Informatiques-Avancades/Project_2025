@@ -18,10 +18,10 @@ module integrators
         subroutine verlet(positions, positions_old, velocities, lj_potential)
             implicit none
 
-            real, allocatable, intent(inout) :: positions(:, :), positions_old(:, :), velocities(:, :)
-            real, intent(out) :: lj_potential
+            real(8), allocatable, intent(inout) :: positions(:, :), positions_old(:, :), velocities(:, :)
+            real(8), intent(out) :: lj_potential
 
-            real, allocatable :: positions_aux(:, :), forces(:, :)
+            real(8), allocatable :: positions_aux(:, :), forces(:, :)
 
             allocate(positions_aux(part_num, 3))
 
@@ -39,10 +39,10 @@ module integrators
         subroutine velocity_verlet(positions, velocities, lj_potential)
             implicit none
 
-            real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
-            real, intent(out) :: lj_potential
+            real(8), allocatable, intent(inout) :: positions(:, :), velocities(:, :)
+            real(8), intent(out) :: lj_potential
 
-            real, allocatable :: forces(:, :)
+            real(8), allocatable :: forces(:, :)
 
             call compute_forces(positions, forces, lj_potential)
             positions = positions + velocities*timestep + 0.5 * forces*timestep*timestep
@@ -57,10 +57,10 @@ module integrators
         subroutine euler(positions, velocities, lj_potential)
             implicit none
 
-            real, allocatable, intent(inout) :: positions(:, :), velocities(:, :)
-            real, intent(out) :: lj_potential
+            real(8), allocatable, intent(inout) :: positions(:, :), velocities(:, :)
+            real(8), intent(out) :: lj_potential
 
-            real, allocatable :: forces(:, :)
+            real(8), allocatable :: forces(:, :)
 
             call compute_forces(positions, forces, lj_potential)
             positions = positions + velocities*timestep + 0.5 * forces*timestep*timestep

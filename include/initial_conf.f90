@@ -17,11 +17,11 @@ module initial_conf
         subroutine gen_initial_conf(part_density, positions)
             implicit none
 
-            real, intent(out) :: part_density
-            real, allocatable, intent(out) :: positions(:, :)
+            real(8), intent(out) :: part_density
+            real(8), allocatable, intent(out) :: positions(:, :)
 
             integer :: i, j, k, uc_onedim, part_index
-            real :: lattice_spacing
+            real(8) :: lattice_spacing
 
             print *, 'Initializing configuration for ', trim(lattice_type), ' lattice...'
 
@@ -93,10 +93,10 @@ module initial_conf
         subroutine gen_velocities_bimodal_distr(velocities)
             implicit none
 
-            real, intent(out), allocatable :: velocities(:, :)
+            real(8), intent(out), allocatable :: velocities(:, :)
 
             integer :: i, j
-            real :: random_num, v_norm
+            real(8) :: random_num, v_norm
 
             allocate(velocities(part_num, 3))
 

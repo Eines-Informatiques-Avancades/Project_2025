@@ -17,11 +17,11 @@ module thermodynamics
         subroutine compute_total_kinetic_energy(velocities, kinetic_energy)
             implicit none
 
-            real, allocatable, intent(in) :: velocities(:, :)
-            real, intent(out) :: kinetic_energy
+            real(8), allocatable, intent(in) :: velocities(:, :)
+            real(8), intent(out) :: kinetic_energy
 
             integer :: i
-            real :: velocity_norm_sq, kinetic_energy_part
+            real(8) :: velocity_norm_sq, kinetic_energy_part
 
             kinetic_energy = 0
             do i = 1, part_num
@@ -37,7 +37,7 @@ module thermodynamics
             implicit none
 
             integer :: n_f
-            real :: kinetic_energy, temperature_inst
+            real(8) :: kinetic_energy, temperature_inst
 
             n_f = 3*part_num - 3
             temperature_inst = (2*kinetic_energy)/n_f

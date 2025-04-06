@@ -21,9 +21,9 @@ module io
         subroutine write_positions_xyz(time, positions, output_file)
             implicit none
 
-            real, intent(in) :: time
+            real(8), intent(in) :: time
             character(50), intent(in) :: output_file
-            real, allocatable, intent(in) :: positions(:, :)
+            real(8), allocatable, intent(in) :: positions(:, :)
 
             integer :: i
 

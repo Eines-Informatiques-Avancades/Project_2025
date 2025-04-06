@@ -17,10 +17,10 @@ module post_trajectory_analysis
             implicit none
 
             character(50), intent(in) :: positions_file
-            real, allocatable, intent(inout) :: x(:, :), y(:, :), z(:, :), time(:)
+            real(8), allocatable, intent(inout) :: x(:, :), y(:, :), z(:, :), time(:)
 
             integer :: part, step, ios, n
-            real :: t
+            real(8) :: t
 
             print *, 'Reading trajectory data from ', positions_file
 
@@ -48,7 +48,7 @@ module post_trajectory_analysis
         subroutine test_access_xyz_data(x, y, z, time)
             implicit none
 
-            real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
+            real(8), allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
 
             integer :: i, j
 
@@ -69,14 +69,14 @@ module post_trajectory_analysis
         subroutine compute_rdf(x, y, z, rdf_file)
             implicit none
 
-            real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :)
+            real(8), allocatable, intent(in) :: x(:, :), y(:, :), z(:, :)
             character(50), intent(in) :: rdf_file
 
             integer :: i, j, k, time_index
-            real :: maximum_radius, volume, density
+            real(8) :: maximum_radius, volume, density
             integer :: bins
-            real, allocatable :: h(:), rdf(:), r_values(:)
-            real :: r, r_sq, dx, dy, dz, dv, r_lo, r_hi, const, nid
+            real(8), allocatable :: h(:), rdf(:), r_values(:)
+            real(8) :: r, r_sq, dx, dy, dz, dv, r_lo, r_hi, const, nid
             integer :: bin_index
 
             ! Parameters
@@ -93,7 +93,7 @@ module post_trajectory_analysis
             do time_index = 1, step_num
                 do i = 1, part_num - 1
                     do j = i + 1, part_num
-                        
+
                         ! Compute the eucledian distance of each component
                         dx = x(j, time_index) - x(i, time_index)
                         dy = y(j, time_index) - y(i, time_index)
@@ -152,12 +152,12 @@ module post_trajectory_analysis
         subroutine compute_rmsd(x, y, z, time, rmsd_file)
             implicit none
 
-            real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
+            real(8), allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
             character(50), intent(in) :: rmsd_file
 
             integer :: i, j
-            real, allocatable :: rmsd(:)
-            real :: dx, dy, dz, sum_sq
+            real(8), allocatable :: rmsd(:)
+            real(8) :: dx, dy, dz, sum_sq
 
             allocate(rmsd(step_num))
 
@@ -168,7 +168,7 @@ module post_trajectory_analysis
                     dy = y(i, j) - y(i, 1)                      ! difference of positions is between the xj and x1 (as reference).
                     dz = z(i, j) - z(i, 1)
 
-                    ! PBC 
+                    ! PBC
                     dx = dx - system_size * nint(dx / system_size)
                     dy = dy - system_size * nint(dy / system_size)
                     dz = dz - system_size * nint(dz / system_size)

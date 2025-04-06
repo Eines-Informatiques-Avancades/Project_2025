@@ -18,9 +18,9 @@ module thermostat
         subroutine andersen_thermostat(velocities)
             implicit none
 
-            real, allocatable, intent(inout) :: velocities(:, :)
+            real(8), allocatable, intent(inout) :: velocities(:, :)
 
-            real :: sigma, rnumber
+            real(8) :: sigma, rnumber
             integer :: i
 
             sigma = sqrt(temperature)
@@ -40,11 +40,11 @@ module thermostat
         function random_gaussian() result(r)
             implicit none
 
-            real :: r, u1, u2
+            real(8) :: r, u1, u2
 
             call random_number(u1)
             call random_number(u2)
 
-            r = real(sqrt(-2.0d0 * log(u1)) * cos(2.0d0 * 3.141592653589793d0 * u2))
+            r = dble(sqrt(-2.0d0 * log(u1)) * cos(2.0d0 * 3.141592653589793d0 * u2))
         end function random_gaussian
 end module thermostat
