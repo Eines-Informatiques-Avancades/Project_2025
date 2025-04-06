@@ -58,9 +58,6 @@ ${MODDIR}/thermostat.mod:
 binning: binning.o
 	$(FC) $(FCFLAGS) -o $@ ${@:=.o}
 
-jackknife: jackknife.o
-	$(FC) $(FCFLAGS) -o $@ ${@:=.o}
-
 plot:
 	sh ./plot/plot.sh
 
