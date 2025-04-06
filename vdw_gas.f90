@@ -30,11 +30,16 @@ program vdw_gas
         x(:, :), y(:, :), z(:, :), time_points(:)
     character(50) :: input_file, positions_file, thermodynamics_file, rdf_file, rmsd_file
 
+
     ! System parameters.
     input_file = 'input_parameters.in'
     call read_input(input_file)
 
     volume = system_size**(3.)  ! System is a cubic box.
+
+    ! Initialize a flag to let the user know if at a certain time of the
+    ! simulation a particle has escaped the box with infinite velocity.
+    infinite_distance = .false.
 
     !
     ! Generate initial system configuration.
@@ -106,6 +111,12 @@ program vdw_gas
     close(12)
 
     deallocate(positions, velocities, forces)
+
+    if (infinite_distance) then
+        print *, 'Particles escaping really far from the system box have been detected during the simulation.'
+        print *, 'Your system might present unstabilities.'
+        print *, 'Check your simulation results and consider using a smaller timestep.'
+    end if
 
     !
     ! Post-trajectory analysis (RDF and RMSD computation).
