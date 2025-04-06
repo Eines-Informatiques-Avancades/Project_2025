@@ -1,0 +1,23 @@
+#!/bin/csh
+# Environment variables can be set using -v with a comma-separated list of variables.
+# Basic parameters: job name, parallel environment and cores, queue, used shell,
+# # current working directory,output files (.err, .out), email.
+#$ -N vdw_gas_run
+#$ -pe smp 4    # --> $NSLOTS
+#$ -q cerqt01.q
+#$ -S /bin/csh
+#$ -cwd
+#$ -o prime.out
+#$ -e prime.err
+# Remove the first '#' of the following 2 lines if you want to receive an email when the job ends.
+#$ -m e
+##$ -M
+
+source /etc/profile.d/modules.csh
+
+# Load the modules needed
+module load openmpi/4.1.6_ics-2023.0
+
+# Run the job
+mpirun -np $NSLOTS ./vdw_gas
+mpirun -np $NSLOTS ./binning
