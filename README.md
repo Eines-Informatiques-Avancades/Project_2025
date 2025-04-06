@@ -4,15 +4,25 @@ Simple molecular dynamics program that deals with a Van der Waals gas of
 particles. This program was developed as a part of the final assignment of the
 Advanced Computer Tools subject.
 
+The project includes both a serial version of the code and a version
+parallelized using OpenMPI, divided in two folders (`serial/` and `parallel/`).
+
 ## Compiling and running the simulation
 
-This project includes a Makefile which should be used in order to compile its
-source code. In order to download and build this program one should follow the
-next steps:
+Each version of the project includes a Makefile which should be used in order to
+compile its source code. In order to download and build this program one should
+follow the next steps:
 
 ```
 $ git clone https://github.com/Eines-Informatiques-Avancades/Project_2025.git
 $ cd Project_2025
+```
+
+Once inside the root directory of the project one must move into one of the 2
+folder containing either the parallelized version of the code or the serial one
+and run:
+
+```
 $ make
 ```
 
@@ -26,14 +36,27 @@ which can be used to perform different tasks.
 - `binning`: performs data sampling of the results of the Van der Waals gas
     molecular dynamics simulation from a given text file outputted by `vdw_gas`.
 
-The user might want to execute the different parts of the program sequentally.
-In order to ease and automatize this process, the `run.sh` shell script is
-included. This will log the program's execution and move the output files into a
-separate folder.
-
 Edit the `input_parameters.in` file before running the simulation to set the
 system parameters. There's no need to recompile the program once this file is
 edited, as it is read at runtime.
+
+The user might want to execute the different parts of the serial program
+sequentally. In order to ease and automatize this process, the `run.sh` shell
+script is included. This will log the program's execution and move the output
+files into a separate folder.
+
+The Makefile inside the `parallel/` folder also includes rules to compile and
+run the code in the cerqt2 computing cluster. In case one wishes to run the code
+in said cluster, it should be compiled in it too, so that the produced binary is
+optimized for its hardware.
+
+`make cluster-compile` will send a job to compile the parallel version of the
+code in cerqt2.
+
+`make cluster-run-` followed by either 1, 2, 4, 8, 16, 32 or 40 will execute the
+simulation using the number of cores corresponding to that number. `make
+cluster-run-all` will send one job for each of those numbers so that the user
+can compare the performance of the code with different numbers of processors.
 
 ## Plotting the results
 
@@ -50,6 +73,7 @@ script, which will execute all of them sequentially.
 
 - A Fortran compiler (E.g.: [GNU Fortran](https://gcc.gnu.org/fortran/))
 - `make`
+- [OpenMPI](https://www.open-mpi.org/) (parallel code only)
 
 In order to visualize the results of the simulation, several Python plotting
 scripts are provided. These scripts have the following dependencies:
@@ -73,8 +97,7 @@ which is read at runtime.
 Another standalone program, `binning.f90`, is also included to perform the
 statistical analysis of the results produced by the simulation.
 
-The project tree has the following structure (excluding git-related files, such
-as this README).
+The project tree for each of the two versions has the following structure:
 
 ```
 .
