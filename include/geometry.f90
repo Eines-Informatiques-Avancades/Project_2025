@@ -42,11 +42,11 @@ module geometry
                     distance = distance + box_size
                 end if
 
-                if (abs(distance) > box_size*100) then
-                    print *, 'System might present unstabilities.'
-                    print *, 'Found one particle with one coordinate of value: ', distance
-                    print *, 'System size: ', box_size
-                    print *, 'Your results might contain incorrect data. Consider using a smaller timestep.'
+                ! Detect if a particle has escaped really far from the system
+                ! box. In case it has, enable a flag to warn the user at the
+                ! end of the simulation.
+                if (abs(distance) > box_size*1000) then
+                    infinite_distance = .true.
                 end if
             end do
 

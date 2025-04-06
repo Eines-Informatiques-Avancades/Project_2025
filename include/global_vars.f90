@@ -14,4 +14,6 @@ module global_vars
     real(8) :: system_size, timestep, temperature, collision_frequence, cutoff
 
     real(8), parameter :: pi = 3.14159265358979
+
+    logical :: infinite_distance
 end module global_vars
