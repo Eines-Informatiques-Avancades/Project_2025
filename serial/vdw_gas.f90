@@ -22,7 +22,7 @@ program vdw_gas
 
     implicit none
 
-    integer :: step, seed_size
+    integer :: step, seed_size, tclockstart, tclockend, clock_rate
     integer, allocatable :: seed(:)
     real(8) :: part_density, volume, time, lj_potential, temperature_inst, &
         kinetic_energy, total_energy
@@ -30,6 +30,12 @@ program vdw_gas
         x(:, :), y(:, :), z(:, :), time_points(:)
     character(50) :: input_file, positions_file, thermodynamics_file, rdf_file, rmsd_file
 
+    real ::  tcpustart, tcpuend
+
+    call system_clock(count_rate = clock_rate)    ! reference clock rate (tick/s)
+    call system_clock(tclockstart)   ! actual tick couting
+    call cpu_time(tcpustart)         ! actual cpu time (starting)
+    
 
     ! System parameters.
     input_file = 'input_parameters.in'
@@ -77,6 +83,16 @@ program vdw_gas
 
     deallocate(seed)
 
+    call cpu_time(tcpuend)                  ! ending cpu time
+    call system_clock(tclockend)            ! ending tick counting
+
+    ! To know the time spent by cpu, by substracting the ending cputime by the start cputime you can obtain the cpu working duration (time spent).
+    ! The total time spent to 
+    print *, 'Cputime spent for reading input, generating initial configuration, calling random seed and to equilibrate the system:', tcpuend-tcpustart, 's'
+    print *, 'Wallclock time :', real(tclockend - tclockstart) / clock_rate, 's'
+
+
+
     !
     ! System evolution.
     !
@@ -84,6 +100,11 @@ program vdw_gas
     ! Create a new positions_file or replace the existing one.
     ! This needs to be done previously, as the write_positions_xyz subroutine
     ! appends the positions to an existing file.
+
+
+    call cpu_time(tcpustart)
+    call system_clock(tclockstart)
+
     positions_file = 'positions.xyz'
     open(4, file = positions_file, status = 'replace')
     close(4)
@@ -118,9 +139,19 @@ program vdw_gas
         print *, 'Check your simulation results and consider using a smaller timestep.'
     end if
 
+    call cpu_time(tcpuend)
+    call system_clock(tclockend)    
+    print *, 'Cputime spent for system evolution and the output of positions, energies, forces and inst. temperatures:', tcpuend-tcpustart, 's'
+    print *, 'Wallclock time :', real(tclockend - tclockstart) / clock_rate, 's'
+
+
+
     !
     ! Post-trajectory analysis (RDF and RMSD computation).
     !
+
+    call cpu_time(tcpustart)
+    call system_clock(tclockstart)
 
     print *
     print *, 'Performing post-trajectory analysis...'
@@ -138,4 +169,10 @@ program vdw_gas
     call compute_rmsd(x, y, z, time_points, rmsd_file)
 
     deallocate(x, y, z, time_points)
+
+    call cpu_time(tcpuend)
+    call system_clock(tclockend)    
+    print *, 'Cputime spent for posttrajectorial analysis, rmsd and rdf:', tcpuend-tcpustart, 's'
+    print *, 'Wallclock time :', real(tclockend - tclockstart) / clock_rate, 's'
+
 end program vdw_gas
