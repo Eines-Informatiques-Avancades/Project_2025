@@ -10,7 +10,7 @@ module lj_forces
             implicit none
 
             real(8), intent(in) :: positions(:, :)     
-            integer, allocatable, intent(out) :: verlet_list(:,:)  
+            integer, allocatable, intent(out) :: verlet_list(:, :)  
             integer, allocatable, intent(out) :: n_neighbors(:)   
             integer :: i, j, n
             real(8) :: dx, dy, dz, r2, cutoff_verlet
@@ -53,7 +53,6 @@ module lj_forces
                     endif
                 end do
             end do
-
         end subroutine compute_verlet_list
 
         subroutine compute_forces(positions, forces, lj_potential, verlet_list, n_neighbors)
@@ -95,11 +94,13 @@ module lj_forces
             ! Task assigned based on the total number of interactions
             do i = 1, part_num - 1
                 n_inter_acc = n_inter_acc + n_neighbors(i)
+                
                 if (current_proc < mod(tot_inter, nprocs)) then
                     target = local_target + 1
                 else
                     target = local_target
                 endif
+                
                 if (n_inter_acc >= target .and. current_proc < nprocs - 1) then
                     assign_end(current_proc+1) = i
                     current_proc = current_proc + 1
@@ -109,8 +110,8 @@ module lj_forces
             end do
             assign_end(nprocs) = part_num - 1
 
-            i_start = assign_start(rank+1)
-            i_end   = assign_end(rank+1)
+            i_start = assign_start(rank + 1)
+            i_end   = assign_end(rank + 1)
             ! Assign local matrix
             allocate(local_forces(part_num, 3))
             local_forces = 0.0
@@ -149,9 +150,9 @@ module lj_forces
             call mpi_allreduce(local_forces, forces, part_num*3, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, ierr)
             call mpi_allreduce(local_lj_potential, lj_potential, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, ierr)
 
-            deallocate(local_forces)
-            deallocate(assign_start)
-            deallocate(assign_end)
+            deallocate( &
+                local_forces, assign_start, assign_end &
+            )
         end subroutine compute_forces
 
 end module lj_forces
