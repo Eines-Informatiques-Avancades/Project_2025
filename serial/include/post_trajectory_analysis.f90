@@ -168,10 +168,6 @@ module post_trajectory_analysis
                     dy = y(i, j) - y(i, 1)                      ! difference of positions is between the xj and x1 (as reference).
                     dz = z(i, j) - z(i, 1)
 
-                    ! PBC
-                    dx = dx - system_size * nint(dx / system_size)
-                    dy = dy - system_size * nint(dy / system_size)
-                    dz = dz - system_size * nint(dz / system_size)
                     sum_sq = sum_sq + (dx**2 + dy**2 + dz**2)
                 end do
 

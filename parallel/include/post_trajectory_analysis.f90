@@ -219,10 +219,6 @@ module post_trajectory_analysis
                 dy = y(i, actual_step) - y(i, 1)    
                 dz = z(i, actual_step) - z(i, 1)
 
-                ! pbc
-                dx = dx - system_size * nint(dx / system_size)
-                dy = dy - system_size * nint(dy / system_size)
-                dz = dz - system_size * nint(dz / system_size)
                 sum_sq = sum_sq + (dx**2 + dy**2 + dz**2)
             end do
             partial_rmsd(j) = sqrt(sum_sq / part_num)
