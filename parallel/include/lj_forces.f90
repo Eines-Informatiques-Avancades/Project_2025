@@ -5,7 +5,9 @@ module lj_forces
     implicit none
 
     contains
-
+        ! Compute Verlet lists, one for each particle in the system.
+        ! The Verlet list for one particle contains a list of neighbours it interactis with.
+        ! This subroutine must not be run at each step, but every 5 to 15 timesteps.
         subroutine compute_verlet_list(positions, verlet_list, n_neighbors)
             implicit none
 
@@ -15,6 +17,7 @@ module lj_forces
             integer :: i, j, n
             real(8) :: dx, dy, dz, r2, cutoff_verlet
 
+            ! Must be slightly bigger than the Lennard-Jones cutoff.
             cutoff_verlet = cutoff * 1.2
     
             n = part_num
