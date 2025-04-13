@@ -30,8 +30,9 @@ module geometry
             ! Calculate the range of particles each process will handle.
             chunk_size = part_num / size
             start = rank * chunk_size + 1
+
+            ! Ensure the last process handles any remaining particles.
             if (rank == size - 1) then
-                ! Ensure the last process handles any remaining particles
                 end = part_num
             else
                 end = (rank + 1) * chunk_size

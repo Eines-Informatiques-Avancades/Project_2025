@@ -1,3 +1,11 @@
+!
+! lj_forces.f90
+! Molecular Dynamics Simulation of a Van der Waals Gas
+! Alejandro Díaz
+!
+! Compute forces derived from a Lennard-Jones potential using Verlet lists.
+!
+
 module lj_forces
     use global_vars
     use geometry
@@ -11,15 +19,15 @@ module lj_forces
         subroutine compute_verlet_list(positions, verlet_list, n_neighbors)
             implicit none
 
-            real(8), intent(in) :: positions(:, :)     
-            integer, allocatable, intent(out) :: verlet_list(:, :)  
-            integer, allocatable, intent(out) :: n_neighbors(:)   
+            real(8), intent(in) :: positions(:, :)
+            integer, allocatable, intent(out) :: verlet_list(:, :)
+            integer, allocatable, intent(out) :: n_neighbors(:)
             integer :: i, j, n
             real(8) :: dx, dy, dz, r2, cutoff_verlet
 
             ! Must be slightly bigger than the Lennard-Jones cutoff.
             cutoff_verlet = cutoff * 1.2
-    
+
             n = part_num
             if (allocated(n_neighbors)) then
                 deallocate(n_neighbors)
@@ -68,7 +76,7 @@ module lj_forces
             real(8), allocatable, intent(out) :: forces(:, :)
             real(8), intent(out)              :: lj_potential
             integer, intent(in)               :: verlet_list(:, :)
-            integer, intent(in)               :: n_neighbors(:)    
+            integer, intent(in)               :: n_neighbors(:)
             integer :: i, k, j, h, ierr, rank, nprocs
             integer :: tot_inter, local_target, n_inter_acc
             integer, allocatable :: assign_start(:), assign_end(:)
@@ -97,13 +105,13 @@ module lj_forces
             ! Task assigned based on the total number of interactions
             do i = 1, part_num - 1
                 n_inter_acc = n_inter_acc + n_neighbors(i)
-                
+
                 if (current_proc < mod(tot_inter, nprocs)) then
                     target = local_target + 1
                 else
                     target = local_target
                 endif
-                
+
                 if (n_inter_acc >= target .and. current_proc < nprocs - 1) then
                     assign_end(current_proc+1) = i
                     current_proc = current_proc + 1
@@ -157,5 +165,4 @@ module lj_forces
                 local_forces, assign_start, assign_end &
             )
         end subroutine compute_forces
-
 end module lj_forces
