@@ -124,7 +124,8 @@ program vdw_gas
         total_energy = lj_potential + kinetic_energy
         temperature_inst = instantaneous_temperature(kinetic_energy)
 
-        write(12, *) time, lj_potential, kinetic_energy, total_energy, temperature_inst
+        write(12, '(f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6)') &
+            time, lj_potential, kinetic_energy, total_energy, temperature_inst
         call write_positions_xyz(time, positions, positions_file)
     end do
 
