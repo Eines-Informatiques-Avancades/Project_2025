@@ -20,7 +20,7 @@ module geometry
 
             implicit none
 
-            real, allocatable, intent(inout) :: positions(:)
+            real(8), allocatable, intent(inout) :: positions(:)
 
             integer :: i, rank, size, chunk_size, start, end, ierr
 
@@ -63,7 +63,7 @@ module geometry
         function pbc(distance, box_size)
             implicit none
 
-            real :: distance, box_size, pbc
+            real(8) :: distance, box_size, pbc
 
             if (distance > box_size/2) then
                 distance = distance - box_size
