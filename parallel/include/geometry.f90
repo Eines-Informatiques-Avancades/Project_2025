@@ -20,9 +20,10 @@ module geometry
 
             implicit none
 
-            real(8), allocatable, intent(inout) :: positions(:)
+            real(8), allocatable, intent(inout) :: positions(:, :)
 
-            integer :: i, rank, size, chunk_size, start, end, ierr
+            integer :: i, j
+            integer :: rank, size, chunk_size, start, end, ierr
 
             call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
             call mpi_comm_size(MPI_COMM_WORLD, size, ierr)
@@ -40,21 +41,23 @@ module geometry
 
             ! Apply PBC to the assigned chunk of positions
             do i = start, end
-                positions(i) = pbc(positions(i), system_size)
+                do j = 1, 3
+                    positions(i, j) = pbc(positions(i, j), system_size)
+                end do
             end do
 
             ! Gather results back to the root process (rank 0)
             if (rank == 0) then
                 ! Gather the results into the root process
                 call mpi_gather( &
-                    positions(start:end), end-start+1, MPI_REAL, &
-                    positions, end-start+1, MPI_REAL, 0, MPI_COMM_WORLD, ierr &
+                    positions(start:end, :), end-start+1, MPI_REAL8, &
+                    positions, end-start+1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr &
                 )
             else
                 ! Other processes send their results to rank 0
                 call mpi_gather( &
-                    positions(start:end), end-start+1, MPI_REAL, &
-                    positions, end-start+1, MPI_REAL, 0, MPI_COMM_WORLD, ierr &
+                    positions(start:end, :), end-start+1, MPI_REAL8, &
+                    positions, end-start+1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr &
                 )
             end if
         end subroutine apply_pbc
