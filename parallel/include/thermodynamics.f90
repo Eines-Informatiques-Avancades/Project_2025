@@ -21,6 +21,7 @@ module thermodynamics
             real(8), intent(out) :: total_kinetic_energy
 
             integer :: i
+            integer :: rank, size, chunk_size, start, end, ierr
             real(8) :: velocity_norm_sq, kinetic_energy
 
 
