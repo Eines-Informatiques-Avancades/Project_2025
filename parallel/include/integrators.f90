@@ -17,12 +17,12 @@ module integrators
 
     contains
 
-        subroutine velocity_verlet(positions, velocities, lj_potential, verlet_list)
+        subroutine velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors)
             implicit none
 
             real(8), allocatable, intent(inout) :: positions(:, :), velocities(:, :)
             real(8), intent(out) :: lj_potential
-            real(8), intent(in) :: verlet_list(:, :)
+            real(8), intent(in) :: verlet_list(:, :), n_neighbors(:)
 
             real(8), allocatable :: forces(:, :)
 
