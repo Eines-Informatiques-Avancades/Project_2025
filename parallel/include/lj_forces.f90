@@ -22,13 +22,12 @@ module lj_forces
             real(8), intent(in) :: positions(:, :)
             integer, allocatable, intent(out) :: verlet_list(:, :)
             integer, allocatable, intent(out) :: n_neighbors(:)
-            integer :: i, j, n
+            integer :: i, j
             real(8) :: dx, dy, dz, r2, cutoff_verlet
 
             ! Must be slightly bigger than the Lennard-Jones cutoff.
             cutoff_verlet = cutoff * 1.2
 
-            n = part_num
             if (allocated(n_neighbors)) then
                 deallocate(n_neighbors)
             endif
@@ -37,15 +36,15 @@ module lj_forces
             endif
 
             ! Set a long enough list range
-            allocate(n_neighbors(n))
+            allocate(n_neighbors(part_num))
             n_neighbors = 0
 
-            allocate(verlet_list(n, n))
+            allocate(verlet_list(part_num, part_num))
             verlet_list = 0
 
             ! Compute pairs (i, j) with j > i.
-            do i = 1, n - 1
-                do j = i + 1, n
+            do i = 1, part_num - 1
+                do j = i + 1, part_num
                     dx = positions(i, 1) - positions(j, 1)
                     dy = positions(i, 2) - positions(j, 2)
                     dz = positions(i, 3) - positions(j, 3)
@@ -70,6 +69,7 @@ module lj_forces
             use mpi
             use global_vars
             use geometry
+
             implicit none
 
             real(8), allocatable, intent(in)  :: positions(:, :)
@@ -77,6 +77,7 @@ module lj_forces
             real(8), intent(out)              :: lj_potential
             integer, intent(in)               :: verlet_list(:, :)
             integer, intent(in)               :: n_neighbors(:)
+
             integer :: i, k, j, h, ierr, rank, nprocs
             integer :: tot_inter, local_target, n_inter_acc
             integer, allocatable :: assign_start(:), assign_end(:)
@@ -132,18 +133,24 @@ module lj_forces
             do i = i_start, i_end
                 do k = 1, n_neighbors(i)
                     j = verlet_list(i, k)
+
                     ! Compute distance
                     r_vec(:) = positions(i, :) - positions(j, :)
+
                     ! Apply PBC
                     do h = 1, 3
                         r_vec(h) = pbc(r_vec(h), system_size)
                     end do
+
                     r = sqrt(dot_product(r_vec, r_vec))
+
                     if (r < cutoff .and. r > 1.0e-8) then
                         ! Local Lennard-Jones potential
                         local_lj_potential = local_lj_potential + 4.0 * (1.0 / (r**12) - 1.0 / (r**6))
+
                         ! Compute forces
                         f = 48.0 / (r**14) - 24.0 / (r**8)
+
                         ! Update forces
                         local_forces(i, :) = local_forces(i, :) + f * r_vec(:)
                         local_forces(j, :) = local_forces(j, :) - f * r_vec(:)
