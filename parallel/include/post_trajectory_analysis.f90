@@ -199,7 +199,6 @@ module post_trajectory_analysis
         integer, allocatable :: recvcounts(:), displs(:)
         real(8), allocatable :: total_rmsd(:), partial_rmsd(:)
         real(8) :: dx, dy, dz, sum_sq
-        integer, parameter :: part_num = 125
 
         call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
         call MPI_Comm_size(MPI_COMM_WORLD, size, ierr)
