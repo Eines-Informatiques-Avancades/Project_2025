@@ -6,7 +6,9 @@
 
 module post_trajectory_analysis
     use global_vars
+
     implicit none
+
     contains
         ! Read data from the positions file and store it into arrays.
         ! Particle positions in time are stored in columns: time x y z
@@ -16,11 +18,11 @@ module post_trajectory_analysis
         implicit none
 
         character(50), intent(in) :: positions_file
-        real, allocatable, intent(inout) :: x(:, :), y(:, :), z(:, :), time(:)
+        real(8), allocatable, intent(inout) :: x(:, :), y(:, :), z(:, :), time(:)
 
         integer :: part, step, ios, n, ierr
         integer :: rank, size
-        real :: t
+        real(8) :: t
 
         call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
         call MPI_Comm_size(MPI_COMM_WORLD, size, ierr)
@@ -47,9 +49,9 @@ module post_trajectory_analysis
         end if
 
         ! 0 (master) broadcast arrays of information to other processes
-        call MPI_Bcast(x, part_num * step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)  ! (x array, (xarray component1) * (xarray component2), type, 'the thread rank that bcast', mpi_comm_world, ierr )
-        call MPI_Bcast(y, part_num * step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)  ! same with y, z and time arrays
-        call MPI_Bcast(z, part_num * step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
+        call MPI_Bcast(x, part_num * step_num, MPI_REAL8, 0, MPI_COMM_WORLD, ierr)  ! (x array, (xarray component1) * (xarray component2), type, 'the thread rank that bcast', mpi_comm_world, ierr )
+        call MPI_Bcast(y, part_num * step_num, MPI_REAL8, 0, MPI_COMM_WORLD, ierr)  ! same with y, z and time arrays
+        call MPI_Bcast(z, part_num * step_num, MPI_REAL8, 0, MPI_COMM_WORLD, ierr)
         call MPI_Bcast(time, step_num, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
     end subroutine read_trajectory
 
@@ -63,7 +65,7 @@ module post_trajectory_analysis
     subroutine test_access_xyz_data(x, y, z, time)
             implicit none
 
-            real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
+            real(8), allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
 
             integer :: i, j
 
@@ -85,14 +87,14 @@ module post_trajectory_analysis
             use mpi
             implicit none
 
-            real, allocatable, intent(in) :: x(:, :), y(:, :), z(:, :)
+            real(8), allocatable, intent(in) :: x(:, :), y(:, :), z(:, :)
             character(50), intent(in) :: rdf_file
 
             integer :: i, j, k, time_index
-            real :: maximum_radius, volume, density
+            real(8) :: maximum_radius, volume, density
             integer :: bins, start, fin, frame_chunk
-            real, allocatable :: h(:), rdf(:), r_values(:), h_total(:)
-            real :: r, r_sq, dx, dy, dz, dv, r_lo, r_hi, const, nid
+            real(8), allocatable :: h(:), rdf(:), r_values(:), h_total(:)
+            real(8) :: r, r_sq, dx, dy, dz, dv, r_lo, r_hi, const, nid
             integer :: bin_index, size, ierr, rank
 
             ! Parameters
@@ -186,15 +188,17 @@ module post_trajectory_analysis
         ! creates.
     subroutine compute_rmsd(x, y, z, time, rmsd_file)
         use mpi
+
         implicit none
-        real, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
+
+        real(8), allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
         character(50), intent(in) :: rmsd_file
 
         integer :: i, j, p, size, rank, ierr
         integer :: partial_steps, frame_chunk, start, fin, actual_step
         integer, allocatable :: recvcounts(:), displs(:)
-        real, allocatable :: total_rmsd(:), partial_rmsd(:)
-        real :: dx, dy, dz, sum_sq
+        real(8), allocatable :: total_rmsd(:), partial_rmsd(:)
+        real(8) :: dx, dy, dz, sum_sq
         integer, parameter :: part_num = 125
 
         call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
