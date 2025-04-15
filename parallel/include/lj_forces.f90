@@ -22,6 +22,7 @@ module lj_forces
             real(8), intent(in) :: positions(:, :)
             integer, allocatable, intent(out) :: verlet_list(:, :)
             integer, allocatable, intent(out) :: n_neighbors(:)
+
             integer :: i, j
             real(8) :: dx, dy, dz, r2, cutoff_verlet
 

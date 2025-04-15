@@ -22,7 +22,7 @@ module integrators
 
             real(8), allocatable, intent(inout) :: positions(:, :), velocities(:, :)
             real(8), intent(out) :: lj_potential
-            real(8), intent(in) :: verlet_list(:, :), n_neighbors(:)
+            integer, allocatable, intent(in) :: verlet_list(:, :), n_neighbors(:)
 
             real(8), allocatable :: forces(:, :)
 
