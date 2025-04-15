@@ -15,6 +15,8 @@ module thermodynamics
         ! Compute the system's kinetic energy in an specific instant, given a matrix of
         ! velocities.
         subroutine compute_total_kinetic_energy(velocities, total_kinetic_energy)
+            use mpi
+
             implicit none
 
             real(8), allocatable, intent(in) :: velocities(:, :)
