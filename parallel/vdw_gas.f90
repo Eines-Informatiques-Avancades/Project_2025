@@ -39,17 +39,6 @@ program vdw_gas
     call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
     call mpi_comm_size(MPI_COMM_WORLD, nproc, ierr)
 
-    ! Calculate the range of particles each process will handle.
-    chunk_size = part_num / nproc
-    start = rank * chunk_size + 1
-
-    ! Ensure the last process handles any remaining particles.
-    if (rank == nproc - 1) then
-        end = part_num
-    else
-        end = (rank + 1) * chunk_size
-    end if
-
     if (rank == 0) then
         ! Initialize simulation time measurement.
         call system_clock(count_rate = clock_rate)  ! Set reference clock rate (tick/s).
@@ -80,9 +69,18 @@ program vdw_gas
     call mpi_bcast(cutoff                   , 1                 , MPI_REAL8     , 0, MPI_COMM_WORLD, ierr)
     call mpi_bcast(test_mode                , len(test_mode)    , MPI_CHARACTER , 0, MPI_COMM_WORLD, ierr)
 
-    print *, 'Rank: ', rank, 'atom_type: ', atom_type
-    print *, 'Rank: ', rank, 'part_num: ', part_num
-    print *, 'Rank: ', rank, 'system_size: ', system_size
+    ! Calculate the range of particles each process will handle.
+    chunk_size = part_num / nproc
+    start = rank * chunk_size + 1
+
+    ! Ensure the last process handles any remaining particles.
+    if (rank == nproc - 1) then
+        end = part_num
+    else
+        end = (rank + 1) * chunk_size
+    end if
+
+    print *, 'Rank: ', rank, 'start: ', start, 'end: ', end, 'chunk_size: ', chunk_size, 'nproc: ', nproc
 
     call mpi_barrier(MPI_COMM_WORLD, ierr)
     call mpi_finalize(ierr)
