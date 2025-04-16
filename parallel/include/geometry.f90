@@ -23,21 +23,6 @@ module geometry
             real(8), allocatable, intent(inout) :: positions(:, :)
 
             integer :: i, j
-            integer :: rank, size, chunk_size, start, end, ierr
-
-            call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
-            call mpi_comm_size(MPI_COMM_WORLD, size, ierr)
-
-            ! Calculate the range of particles each process will handle.
-            chunk_size = part_num / size
-            start = rank * chunk_size + 1
-
-            ! Ensure the last process handles any remaining particles.
-            if (rank == size - 1) then
-                end = part_num
-            else
-                end = (rank + 1) * chunk_size
-            end if
 
             ! Apply PBC to the assigned chunk of positions
             do i = start, end

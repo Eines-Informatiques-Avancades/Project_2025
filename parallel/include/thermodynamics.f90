@@ -23,23 +23,8 @@ module thermodynamics
             real(8), intent(out) :: total_kinetic_energy
 
             integer :: i
-            integer :: rank, size, chunk_size, start, end, ierr
             real(8) :: velocity_norm_sq, kinetic_energy
 
-
-            call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
-            call mpi_comm_size(MPI_COMM_WORLD, size, ierr)
-
-            ! Calculate the range of particles each process will handle.
-            chunk_size = part_num / size
-            start = rank * chunk_size + 1
-
-            ! Ensure the last process handles any remaining particles.
-            if (rank == size - 1) then
-                end = part_num
-            else
-                end = (rank + 1) * chunk_size
-            end if
 
             kinetic_energy = 0
             total_kinetic_energy = 0

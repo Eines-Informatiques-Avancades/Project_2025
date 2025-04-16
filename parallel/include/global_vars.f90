@@ -16,4 +16,7 @@ module global_vars
     real(8), parameter :: pi = 3.14159265358979
 
     logical :: infinite_distance
+
+    ! MPI variables.
+    integer :: rank, nproc, chunk_size, start, end, ierr
 end module global_vars

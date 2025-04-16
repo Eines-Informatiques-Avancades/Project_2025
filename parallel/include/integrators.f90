@@ -27,12 +27,9 @@ module integrators
             real(8), allocatable :: forces(:, :)
 
             ! From here it will be moved to the main, and the variables passed as parameters.
-            integer :: rank, nproc, ierror, i
+            integer :: i
             integer, allocatable :: counts(:), displs(:)
 
-
-            call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierror)
-            call MPI_Comm_size(MPI_COMM_WORLD, nproc, ierror)
 
             ! MASTER = 0
 
@@ -64,10 +61,10 @@ module integrators
                 velocities(i,3) = velocities(i,3) + 0.5 * forces(i,3)*timestep
             end do
 
-            call MPI_Barrier(MPI_COMM_WORLD, ierror)
+            call MPI_Barrier(MPI_COMM_WORLD, ierr)
             do i = 1, 3
                 call MPI_Allgatherv(positions(displs(rank) + 1 : displs(rank) + counts(rank), i), counts(rank), MPI_REAL8, &
-                                    positions(:,i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierror)
+                                    positions(:,i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierr)
             end do
 
             if (rank == 0) then
@@ -81,7 +78,7 @@ module integrators
             ! to work better in the final versions of the code.
             do i = 1, 3
                 call MPI_Allgatherv(velocities(displs(rank) + 1 : displs(rank) + counts(rank), i), counts(rank), MPI_REAL8, &
-                                    velocities(:, i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierror)
+                                    velocities(:, i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierr)
             end do
         end subroutine velocity_verlet
 end module integrators

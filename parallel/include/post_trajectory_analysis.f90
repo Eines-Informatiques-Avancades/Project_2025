@@ -20,12 +20,9 @@ module post_trajectory_analysis
         character(50), intent(in) :: positions_file
         real(8), allocatable, intent(inout) :: x(:, :), y(:, :), z(:, :), time(:)
 
-        integer :: part, step, ios, n, ierr
-        integer :: rank, size
+        integer :: part, step, ios, n
         real(8) :: t
 
-        call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
-        call MPI_Comm_size(MPI_COMM_WORLD, size, ierr)
 
         if (rank == 0) then
             print *, 'Reading trajectory data from ', positions_file
@@ -95,7 +92,7 @@ module post_trajectory_analysis
             integer :: bins, start, fin, frame_chunk
             real(8), allocatable :: h(:), rdf(:), r_values(:), h_total(:)
             real(8) :: r, r_sq, dx, dy, dz, dv, r_lo, r_hi, const, nid
-            integer :: bin_index, size, ierr, rank
+            integer :: bin_index, nproc, ierr, rank
 
             ! Parameters
             maximum_radius = system_size / 2
@@ -103,22 +100,20 @@ module post_trajectory_analysis
             volume = system_size**3
             density = part_num / volume
 
-            call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
-            call MPI_Comm_size(MPI_COMM_WORLD, size, ierr)
 
             ! Allocate arrays
             allocate(h(bins), rdf(bins), r_values(bins), h_total(bins))
 
             h = 0.0
             h_total = 0.0
-            frame_chunk = step_num / size       ! divide the work, chunk is the amount of work for each thread.
+            frame_chunk = step_num / nproc       ! divide the work, chunk is the amount of work for each thread.
             start = rank * frame_chunk + 1      ! start and fin are index for the mpi loop, this line ensures beginning index of each thread.
             fin = start + frame_chunk - 1       ! this line ensures the ending index.
-                                                ! i.e  100 steps in 4 size, meaning we have 4 loops for each thread,
+                                                ! i.e  100 steps in 4 nproc, meaning we have 4 loops for each thread,
                                                 ! |rank=0, start=0*25+1=1, fin= 1+25-1=25| |rank=1, start=1*25+1=26, fin= 26+25-1=50|, ...
 
-            if (rank == size - 1) then
-                fin = step_num                  ! ensuring for step_num is not divisible by size (like 100/7) the ending index is the step_num.
+            if (rank == nproc - 1) then
+                fin = step_num                  ! ensuring for step_num is not divisible by nproc (like 100/7) the ending index is the step_num.
             endif                               ! 100/7 = 14; 14*7 = 98, if this condition were not imposed, the loop is incomplete.
 
             ! Compute histogram h(k)
@@ -194,19 +189,17 @@ module post_trajectory_analysis
         real(8), allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
         character(50), intent(in) :: rmsd_file
 
-        integer :: i, j, p, size, rank, ierr
+        integer :: i, j, p
         integer :: partial_steps, frame_chunk, start, fin, actual_step
         integer, allocatable :: recvcounts(:), displs(:)
         real(8), allocatable :: total_rmsd(:), partial_rmsd(:)
         real(8) :: dx, dy, dz, sum_sq
 
-        call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
-        call MPI_Comm_size(MPI_COMM_WORLD, size, ierr)
 
-        frame_chunk = step_num / size       ! Division of work
+        frame_chunk = step_num / nproc       ! Division of work
         start = rank * frame_chunk + 1      ! Each division start indexation
         fin = start + frame_chunk - 1       ! Each division ending indexation
-        if (rank == size - 1) then          ! Any residual work in the no divisible case gives to the last worker, by forcing the last indexation be the total step num
+        if (rank == nproc - 1) then          ! Any residual work in the no divisible case gives to the last worker, by forcing the last indexation be the total step num
             fin = step_num
         endif
         partial_steps = fin - start + 1
@@ -229,14 +222,14 @@ module post_trajectory_analysis
         ! Rank 0 allocates full arrays and prepare displacements
         if (rank == 0) then
             allocate(total_rmsd(step_num))
-            allocate(recvcounts(size), displs(size))
+            allocate(recvcounts(nproc), displs(nproc))
 
-            do p = 0, size - 1
+            do p = 0, nproc - 1
                 recvcounts(p + 1) = frame_chunk
             end do
-            recvcounts(size) = step_num - (size - 1) * frame_chunk  ! last rank may get more
+            recvcounts(nproc) = step_num - (nproc - 1) * frame_chunk  ! last rank may get more
             displs(1) = 0
-            do p = 2, size
+            do p = 2, nproc
                 displs(p) = displs(p - 1) + recvcounts(p - 1)
             end do
         end if

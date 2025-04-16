@@ -34,39 +34,82 @@ program vdw_gas
     real ::  tcpustart, tcpuend
 
 
-    call system_clock(count_rate = clock_rate)  ! Set reference clock rate (tick/s).
-    call system_clock(tclockstart)              ! Start actual tick couting.
-    call cpu_time(tcpustart)                    ! Start counting cpu time.
+    ! Initialize MPI
+    call mpi_init(ierr)
+    call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
+    call mpi_comm_size(MPI_COMM_WORLD, nproc, ierr)
 
-    ! System parameters.
-    input_file = 'input_parameters.in'
-    call read_input(input_file)
+    ! Calculate the range of particles each process will handle.
+    chunk_size = part_num / nproc
+    start = rank * chunk_size + 1
 
-    volume = system_size**(3.)  ! System is a cubic box.
+    ! Ensure the last process handles any remaining particles.
+    if (rank == nproc - 1) then
+        end = part_num
+    else
+        end = (rank + 1) * chunk_size
+    end if
 
-    ! Initialize a flag to let the user know if at a certain time of the
-    ! simulation a particle has escaped the box with infinite velocity.
-    infinite_distance = .false.
+    if (rank == 0) then
+        ! Initialize simulation time measurement.
+        call system_clock(count_rate = clock_rate)  ! Set reference clock rate (tick/s).
+        call system_clock(tclockstart)              ! Start actual tick couting.
+        call cpu_time(tcpustart)                    ! Start counting cpu time.
+
+        ! Read simulation parameters.
+        input_file = 'input_parameters.in'
+        call read_input(input_file)
+
+        volume = system_size**(3.)  ! System is a cubic box.
+
+        ! Initialize a flag to let the user know if at a certain time of the
+        ! simulation a particle has escaped the box with infinite velocity.
+        infinite_distance = .false.
+    end if
+
+    ! Broadcast simulation parameters.
+    call mpi_bcast(part_num                 , 1                 , MPI_INTEGER   , 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(atom_type                , len(atom_type)    , MPI_CHARACTER , 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(system_size              , 1                 , MPI_REAL8     , 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(lattice_type             , len(lattice_type) , MPI_CHARACTER , 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(timestep                 , 1                 , MPI_REAL8     , 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(step_num                 , 1                 , MPI_INTEGER   , 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(equilibration_step_num   , 1                 , MPI_INTEGER   , 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(temperature              , 1                 , MPI_REAL8     , 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(collision_frequence      , 1                 , MPI_REAL8     , 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(cutoff                   , 1                 , MPI_REAL8     , 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(test_mode                , len(test_mode)    , MPI_CHARACTER , 0, MPI_COMM_WORLD, ierr)
+
+    print *, 'Rank: ', rank, 'atom_type: ', atom_type
+    print *, 'Rank: ', rank, 'part_num: ', part_num
+    print *, 'Rank: ', rank, 'system_size: ', system_size
+
+    call mpi_barrier(MPI_COMM_WORLD, ierr)
+    call mpi_finalize(ierr)
+    stop
 
     !
     ! Generate initial system configuration.
     !
 
-    ! Generate the initial configuration from a lattice.
-    call gen_initial_conf(part_density, positions)
-    print *, 'Initial lattice particle density: ', part_density
-    print *
-
-    ! Center initial config at the origin of coordinates.
-    call apply_pbc(positions)
-
     allocate(velocities(part_num, 3))
-    call gen_velocities_bimodal_distr(velocities)
 
-    print *, 'Computing initial Lennard-Jones forces...'
+    if (rank == 0) then
+        ! Generate the initial configuration from a lattice.
+        call gen_initial_conf(part_density, positions)
+        print *, 'Initial lattice particle density: ', part_density
+        print *
+
+        ! Center initial config at the origin of coordinates.
+        call apply_pbc(positions)
+
+        call gen_velocities_bimodal_distr(velocities)
+    end if
+
+    if (rank == 0) print *, 'Computing initial Lennard-Jones forces...'
     call compute_forces(positions, forces, lj_potential, verlet_list, n_neighbors)
 
-    print *, 'Generating initial configuration for a VdW gas from the lattice...'
+    if (rank == 0) print *, 'Generating initial configuration for a VdW gas from the lattice...'
 
     ! Seed initialization for the Andersen_thermsostat.
     call random_seed(size = seed_size)
@@ -78,29 +121,36 @@ program vdw_gas
     endif
 
     do step = 1, equilibration_step_num
+        if (mod(step, 10) == 0) then
+            call compute_verlet_list(positions, verlet_list, n_neighbors)
+        end if
         call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors)
         call andersen_thermostat(velocities)
     end do
 
     deallocate(seed)
 
-    call cpu_time(tcpuend)                  ! Stop counting cpu time.
-    call system_clock(tclockend)            ! Stop tick counting.
+    if (rank == 0) then
+        call cpu_time(tcpuend)                  ! Stop counting cpu time.
+        call system_clock(tclockend)            ! Stop tick counting.
 
-    print *
-    print *, 'Generation of the initial system configuration complete.'
-    print *, 'Cputime: ', tcpuend - tcpustart, 's'
-    print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
+        print *
+        print *, 'Generation of the initial system configuration complete.'
+        print *, 'Cputime: ', tcpuend - tcpustart, 's'
+        print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
+    end if
 
     !
     ! System evolution.
     !
 
-    print *
-    print *, 'Computing evolution of the particle system...'
+    if (rank == 0) then
+        print *
+        print *, 'Computing evolution of the particle system...'
 
-    call cpu_time(tcpustart)
-    call system_clock(tclockstart)
+        call cpu_time(tcpustart)
+        call system_clock(tclockstart)
+    end if
 
     ! Create a new positions_file or replace the existing one.
     ! This needs to be done previously, as the write_positions_xyz subroutine
@@ -140,22 +190,26 @@ program vdw_gas
         print *, 'Check your simulation results and consider using a smaller timestep.'
     end if
 
-    call cpu_time(tcpuend)
-    call system_clock(tclockend)
+    if (rank == 0) then
+        call cpu_time(tcpuend)
+        call system_clock(tclockend)
 
-    print *
-    print *, 'Study of the system evolution (production loops) complete.'
-    print *, 'Particle trajectories saved to ', positions_file
-    print *, 'Measures of thermodynamical variables saved to ', thermodynamics_file
-    print *, 'Cputime: ', tcpuend - tcpustart, 's'
-    print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
+        print *
+        print *, 'Study of the system evolution (production loops) complete.'
+        print *, 'Particle trajectories saved to ', positions_file
+        print *, 'Measures of thermodynamical variables saved to ', thermodynamics_file
+        print *, 'Cputime: ', tcpuend - tcpustart, 's'
+        print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
+    end if
 
     !
     ! Post-trajectory analysis (RDF and RMSD computation).
     !
 
-    call cpu_time(tcpustart)
-    call system_clock(tclockstart)
+    if (rank == 0) then
+        call cpu_time(tcpustart)
+        call system_clock(tclockstart)
+    end if
 
     print *
     print *, 'Performing post-trajectory analysis...'
@@ -176,9 +230,10 @@ program vdw_gas
 
     deallocate(x, y, z, time_points)
 
-    call cpu_time(tcpuend)
-    call system_clock(tclockend)
-    print *, 'Cputime: ', tcpuend-tcpustart, 's'
-    print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
-
+    if (rank == 0) then
+        call cpu_time(tcpuend)
+        call system_clock(tclockend)
+        print *, 'Cputime: ', tcpuend-tcpustart, 's'
+        print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
+    end if
 end program vdw_gas

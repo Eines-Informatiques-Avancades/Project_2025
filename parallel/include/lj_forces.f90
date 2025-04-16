@@ -79,7 +79,7 @@ module lj_forces
             integer, intent(in)               :: verlet_list(:, :)
             integer, intent(in)               :: n_neighbors(:)
 
-            integer :: i, k, j, h, ierr, rank, nprocs
+            integer :: i, k, j, h
             integer :: tot_inter, local_target, n_inter_acc
             integer, allocatable :: assign_start(:), assign_end(:)
             integer :: i_start, i_end, current_proc, target
@@ -87,19 +87,17 @@ module lj_forces
             real(8) :: r_vec(3)
             real(8), allocatable :: local_forces(:, :)
 
-            call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
-            call mpi_comm_size(MPI_COMM_WORLD, nprocs, ierr)
 
             tot_inter = 0
             do i = 1, part_num - 1
                 tot_inter = tot_inter + n_neighbors(i)
             end do
 
-            local_target = tot_inter / nprocs
+            local_target = tot_inter / nproc
 
             ! Divide tasks between processors (last particle does not have a list)
-            allocate(assign_start(nprocs))
-            allocate(assign_end(nprocs))
+            allocate(assign_start(nproc))
+            allocate(assign_end(nproc))
             current_proc = 0
             n_inter_acc = 0
             assign_start(current_proc+1) = 1
@@ -108,20 +106,20 @@ module lj_forces
             do i = 1, part_num - 1
                 n_inter_acc = n_inter_acc + n_neighbors(i)
 
-                if (current_proc < mod(tot_inter, nprocs)) then
+                if (current_proc < mod(tot_inter, nproc)) then
                     target = local_target + 1
                 else
                     target = local_target
                 endif
 
-                if (n_inter_acc >= target .and. current_proc < nprocs - 1) then
+                if (n_inter_acc >= target .and. current_proc < nproc - 1) then
                     assign_end(current_proc+1) = i
                     current_proc = current_proc + 1
                     assign_start(current_proc+1) = i + 1
                     n_inter_acc = 0
                 end if
             end do
-            assign_end(nprocs) = part_num - 1
+            assign_end(nproc) = part_num - 1
 
             i_start = assign_start(rank + 1)
             i_end   = assign_end(rank + 1)
