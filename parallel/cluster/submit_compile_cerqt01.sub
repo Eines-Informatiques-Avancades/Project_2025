@@ -1,6 +1,6 @@
 #!/bin/csh
 # Basic parameters: job name, parallel environment and cores, queue, used shell,
-# # current working directory,output files (.err, .out), email.
+# current working directory,output files (.err, .out), email.
 #$ -N vdw_gas_compile
 #$ -pe smp 1
 #$ -q iqtc07.q@g2nodeb1
