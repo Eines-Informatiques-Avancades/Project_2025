@@ -23,28 +23,42 @@ module geometry
             real(8), allocatable, intent(inout) :: positions(:, :)
 
             integer :: i, j
+            integer, allocatable :: counts(:), displs(:)
+
+            allocate(counts(0:nproc - 1))
+            allocate(displs(0:nproc - 1))
+
+            do i = 0, nproc - 1
+                if (i < mod(part_num, nproc)) then
+                    counts(i) = (part_num / nproc + 1)
+                else
+                    counts(i) = (part_num / nproc)
+                end if
+            end do
+
+            displs(0) = 0
+            do i = 1, nproc - 1
+                displs(i) = displs(i - 1) + counts(i - 1)
+            end do
 
             ! Apply PBC to the assigned chunk of positions
-            do i = start, end
+            do i = displs(rank) + 1, displs(rank) + counts(rank)
                 do j = 1, 3
                     positions(i, j) = pbc(positions(i, j), system_size)
                 end do
             end do
 
-            ! Gather results back to the root process (rank 0)
-            if (rank == 0) then
-                ! Gather the results into the root process
-                call mpi_gather( &
-                    positions(start:end, :), end-start+1, MPI_REAL8, &
-                    positions, end-start+1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr &
+            print *, 'Rank: ', rank, 'start: ', start, 'd+1: ', displs(rank)+1, 'end: ', end, 'd+c', displs(rank)+counts(rank)
+
+            call mpi_barrier(MPI_COMM_WORLD, ierr)
+
+            ! Gather the results into the root process
+            do i = 1, 3
+                call mpi_allgatherv( &
+                    positions(displs(rank) + 1 : displs(rank) + counts(rank), i), counts(rank), MPI_REAL8, &
+                    positions(:, i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierr &
                 )
-            else
-                ! Other processes send their results to rank 0
-                call mpi_gather( &
-                    positions(start:end, :), end-start+1, MPI_REAL8, &
-                    positions, end-start+1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr &
-                )
-            end if
+            end do
         end subroutine apply_pbc
 
         ! Apply PBC to a certain distance, given the box size.
