@@ -80,29 +80,39 @@ program vdw_gas
         end = (rank + 1) * chunk_size
     end if
 
-    print *, 'Rank: ', rank, 'start: ', start, 'end: ', end, 'chunk_size: ', chunk_size, 'nproc: ', nproc
-
-    call mpi_barrier(MPI_COMM_WORLD, ierr)
-    call mpi_finalize(ierr)
-    stop
+    ! print *, 'Rank: ', rank, 'start: ', start, 'end: ', end, 'chunk_size: ', chunk_size, 'nproc: ', nproc
 
     !
     ! Generate initial system configuration.
     !
 
     allocate(velocities(part_num, 3))
+    allocate(positions(part_num, 3))
 
     if (rank == 0) then
         ! Generate the initial configuration from a lattice.
         call gen_initial_conf(part_density, positions)
         print *, 'Initial lattice particle density: ', part_density
         print *
-
-        ! Center initial config at the origin of coordinates.
-        call apply_pbc(positions)
-
-        call gen_velocities_bimodal_distr(velocities)
     end if
+    call mpi_bcast(positions    , size(positions)   , MPI_REAL8 , 0, MPI_COMM_WORLD, ierr)
+
+    ! TODO: Check if necessary
+    call mpi_barrier(MPI_COMM_WORLD, ierr)
+
+    ! Center initial config at the origin of coordinates.
+    call apply_pbc(positions)
+
+    call mpi_barrier(MPI_COMM_WORLD, ierr)
+    call mpi_finalize(ierr)
+    stop
+
+    call gen_velocities_bimodal_distr(velocities)
+
+    ! call mpi_bcast(velocities   , size(velocities)  , MPI_REAL8 , 0, MPI_COMM_WORLD, ierr)
+
+    ! print *, 'Rank: ', rank, 'velocity (1, 1)', velocities(1, 1)
+    ! print *, 'Rank: ', rank, 'position (1, 1)', positions(1, 1)
 
     if (rank == 0) print *, 'Computing initial Lennard-Jones forces...'
     call compute_forces(positions, forces, lj_potential, verlet_list, n_neighbors)
