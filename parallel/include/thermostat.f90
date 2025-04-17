@@ -28,7 +28,7 @@ module thermostat
 
             sigma = sqrt(temperature)
 
-            do i = start, end
+            do i = start_part, end_part
                 call random_number(rnumber)
 
                 if (rnumber < collision_frequence) then
@@ -38,20 +38,14 @@ module thermostat
                 end if
             end do
 
-            ! Gather results back to the root process (rank 0)
-            if (rank == 0) then
-                ! Gather the results into the root process
-                call mpi_gather( &
-                    velocities(start:end, :), end-start+1, MPI_REAL8, &
-                    velocities, end-start+1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr &
+            ! Gather the results into the root process
+            do i = 1, 3
+                call mpi_allgatherv( &
+                    velocities(start_part : end_part, i), counts(rank), MPI_REAL8, &
+                    velocities(:, i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierr &
                 )
-            else
-                ! Other processes send their results to rank 0
-                call mpi_gather( &
-                    velocities(start:end, :), end-start+1, MPI_REAL8, &
-                    velocities, end-start+1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr &
-                )
-            end if
+            end do
+
         end subroutine andersen_thermostat
 
         ! Function that returns a random number following the gaussian distribution.
