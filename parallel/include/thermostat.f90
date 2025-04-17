@@ -15,12 +15,13 @@ module thermostat
     contains
         ! Andersen thermostat. Updates the velocity magnitude and direction of a random
         ! number of particles to one that follows the Maxwell-Boltzmann distribution.
-        subroutine andersen_thermostat(velocities)
+        subroutine andersen_thermostat(velocities, counts, displs)
             use mpi
 
             implicit none
 
             real(8), allocatable, intent(inout) :: velocities(:, :)
+            integer, allocatable, intent(in) :: counts(:), displs(:) ! MPI arguments.
 
             integer :: i
             real(8) :: sigma, rnumber
