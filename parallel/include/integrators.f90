@@ -30,6 +30,7 @@ module integrators
 
 
             call compute_forces(positions, forces, lj_potential, verlet_list, n_neighbors)
+
             do i = start_part, end_part
                 positions(i,1) = positions(i,1) + velocities(i,1)*timestep + 0.5 * forces(i,1)*timestep*timestep
                 positions(i,2) = positions(i,2) + velocities(i,2)*timestep + 0.5 * forces(i,2)*timestep*timestep
@@ -41,14 +42,13 @@ module integrators
             end do
 
             call MPI_Barrier(MPI_COMM_WORLD, ierr)
+
             do i = 1, 3
                 call MPI_Allgatherv(positions(start_part : end_part, i), counts(rank), MPI_REAL8, &
                                     positions(:,i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierr)
             end do
 
-            if (rank == 0) then
-                call apply_pbc(positions, counts, displs)
-            end if
+            call apply_pbc(positions, counts, displs)
 
             call compute_forces(positions, forces, lj_potential, verlet_list, n_neighbors)
             velocities = velocities + 0.5 * forces*timestep
