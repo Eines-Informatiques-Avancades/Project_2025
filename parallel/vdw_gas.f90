@@ -99,8 +99,8 @@ program vdw_gas
     !
 
     allocate( &
-        velocities(part_num, 3), &
-        positions(part_num, 3)   &
+        velocities(part_num, 3), positions(part_num, 3), forces(part_num, 3), &
+        n_neighbors(part_num), verlet_list(part_num, part_num) &
     )
 
     if (rank == 0) then
@@ -117,14 +117,23 @@ program vdw_gas
     if (rank == 0) call gen_velocities_bimodal_distr(velocities)
     call mpi_bcast(velocities, size(velocities), MPI_REAL8, 0, MPI_COMM_WORLD, ierr)
 
-    call mpi_barrier(MPI_COMM_WORLD, ierr)
-    call mpi_finalize(ierr)
-    stop
+    if (rank == 0) then
+        print *, 'Computing initial Verlet lists...'
+        call compute_verlet_list(positions, verlet_list, n_neighbors)
+    end if
+    call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
     if (rank == 0) print *, 'Computing initial Lennard-Jones forces...'
     call compute_forces(positions, forces, lj_potential, verlet_list, n_neighbors)
 
     if (rank == 0) print *, 'Generating initial configuration for a VdW gas from the lattice...'
+
+    if (rank == 0) print *, 'Forces: ', forces(:, :)
+
+    call mpi_barrier(MPI_COMM_WORLD, ierr)
+    call mpi_finalize(ierr)
+    stop
 
     ! Seed initialization for the Andersen_thermsostat.
     call random_seed(size = seed_size)
@@ -137,8 +146,11 @@ program vdw_gas
 
     do step = 1, equilibration_step_num
         if (mod(step, 10) == 0) then
-            call compute_verlet_list(positions, verlet_list, n_neighbors)
+            if (rank == 0) call compute_verlet_list(positions, verlet_list, n_neighbors)
+            call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+            call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
         end if
+
         call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors, counts, displs)
         call andersen_thermostat(velocities)
     end do
