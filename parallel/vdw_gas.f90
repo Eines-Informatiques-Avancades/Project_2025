@@ -111,9 +111,6 @@ program vdw_gas
     end if
     call mpi_bcast(positions, size(positions), MPI_REAL8, 0, MPI_COMM_WORLD, ierr)
 
-    ! TODO: Check if necessary
-    call mpi_barrier(MPI_COMM_WORLD, ierr)
-
     ! Center initial config at the origin of coordinates.
     call apply_pbc(positions, counts, displs)
 
