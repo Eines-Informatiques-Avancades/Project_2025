@@ -129,13 +129,7 @@ program vdw_gas
 
     if (rank == 0) print *, 'Generating initial configuration for a VdW gas from the lattice...'
 
-    if (rank == 0) print *, 'Forces: ', forces(:, :)
-
-    call mpi_barrier(MPI_COMM_WORLD, ierr)
-    call mpi_finalize(ierr)
-    stop
-
-    ! Seed initialization for the Andersen_thermsostat.
+    ! Seed initialization for the Andersen thermostat.
     call random_seed(size = seed_size)
     allocate(seed(seed_size))
 
@@ -144,7 +138,12 @@ program vdw_gas
         call random_seed(put = seed)
     endif
 
+    ! Force all threads to start thermalization at the same time.
+    call mpi_barrier(MPI_COMM_WORLD, ierr)
+
     do step = 1, equilibration_step_num
+        print *, rank, step, '/', equilibration_step_num
+
         if (mod(step, 10) == 0) then
             if (rank == 0) call compute_verlet_list(positions, verlet_list, n_neighbors)
             call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
@@ -152,7 +151,9 @@ program vdw_gas
         end if
 
         call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors, counts, displs)
-        call andersen_thermostat(velocities)
+        ! call andersen_thermostat(velocities, counts, displs)
+
+        print *, rank, step, 'completed'
     end do
 
     deallocate(seed)
@@ -166,6 +167,10 @@ program vdw_gas
         print *, 'Cputime: ', tcpuend - tcpustart, 's'
         print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
     end if
+
+    call mpi_barrier(MPI_COMM_WORLD, ierr)
+    call mpi_finalize(ierr)
+    stop
 
     !
     ! System evolution.
@@ -194,17 +199,25 @@ program vdw_gas
     do step = 1, step_num
         time = time + timestep
 
+        if (mod(step, 10) == 0) then
+            if (rank == 0) call compute_verlet_list(positions, verlet_list, n_neighbors)
+            call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+            call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+        end if
+
         call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors, counts, displs)
-        call andersen_thermostat(velocities)
+        call andersen_thermostat(velocities, counts, displs)
 
         call compute_total_kinetic_energy(velocities, kinetic_energy)
 
         total_energy = lj_potential + kinetic_energy
         temperature_inst = instantaneous_temperature(kinetic_energy)
 
-        write(12, '(f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6)') &
-            time, lj_potential, kinetic_energy, total_energy, temperature_inst
-        call write_positions_xyz(time, positions, positions_file)
+        if (rank == 0) then
+            write(12, '(f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6)') &
+                time, lj_potential, kinetic_energy, total_energy, temperature_inst
+            call write_positions_xyz(time, positions, positions_file)
+        end if
     end do
 
     close(12)
