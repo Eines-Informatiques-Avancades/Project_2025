@@ -15,6 +15,7 @@ module post_trajectory_analysis
         ! Each row refers to a particle in an specific time.
     subroutine read_trajectory(positions_file, x, y, z, time)
         use mpi
+        
         implicit none
 
         character(50), intent(in) :: positions_file
@@ -82,6 +83,7 @@ module post_trajectory_analysis
         ! creates.
     subroutine compute_rdf(x, y, z, rdf_file)
             use mpi
+            
             implicit none
 
             real(8), allocatable, intent(in) :: x(:, :), y(:, :), z(:, :)
@@ -94,12 +96,14 @@ module post_trajectory_analysis
             real(8) :: r, r_sq, dx, dy, dz, dv, r_lo, r_hi, const, nid
             integer :: bin_index, nproc, ierr, rank
 
+            call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
+            call MPI_Comm_size(MPI_COMM_WORLD, nproc, ierr)
+
             ! Parameters
             maximum_radius = system_size / 2
             bins = int(maximum_radius /timestep)
             volume = system_size**3
             density = part_num / volume
-
 
             ! Allocate arrays
             allocate(h(bins), rdf(bins), r_values(bins), h_total(bins))
@@ -189,12 +193,14 @@ module post_trajectory_analysis
         real(8), allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
         character(50), intent(in) :: rmsd_file
 
-        integer :: i, j, p
+        integer :: i, j, p, rank, nproc, ierr
         integer :: partial_steps, frame_chunk, start, fin, actual_step
         integer, allocatable :: recvcounts(:), displs(:)
         real(8), allocatable :: total_rmsd(:), partial_rmsd(:)
         real(8) :: dx, dy, dz, sum_sq
 
+        call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
+        call MPI_Comm_size(MPI_COMM_WORLD, nproc, ierr)
 
         frame_chunk = step_num / nproc       ! Division of work
         start = rank * frame_chunk + 1      ! Each division start indexation
