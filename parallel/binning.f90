@@ -304,18 +304,18 @@ program mpi_binning
    !--------------------------------------------------------------------
    ! 14. Print times
    !--------------------------------------------------------------------
- if (my_rank == 0) then
-   t_total_end = MPI_Wtime()
-   print *, "============================================="
-   print *, "[Rank 0] Total time:         ", t_total_end - t_total_start, " sec"
-   ! New print statement for Total Real time:
-   print *, "[Rank 0] Total Real time:  ", global_read_time + global_convert_time, " sec"
-   print *, "[Rank 0] Allgather time:     ", global_allgather_time, " sec"
-   print *, "[Rank 0] Binning time:       ", global_binning_time, " sec"
-   print *, "[Rank 0] Output write time:  ", t_output_end - t_output_start, " sec"
-   print *, "[Rank 0] Output file:        ", trim(final_output_file)
-   print *, "============================================="
- end if
+   if (my_rank == 0) then
+      t_total_end = MPI_Wtime()
+      print *, "============================================="
+      print *, "[Rank 0] Total time:         ", t_total_end - t_total_start, " sec"
+      ! New print statement for Total Real time:
+      print *, "[Rank 0] Total Real time:  ", global_read_time + global_convert_time, " sec"
+      print *, "[Rank 0] Allgather time:     ", global_allgather_time, " sec"
+      print *, "[Rank 0] Binning time:       ", global_binning_time, " sec"
+      print *, "[Rank 0] Output write time:  ", t_output_end - t_output_start, " sec"
+      print *, "[Rank 0] Output file:        ", trim(final_output_file)
+      print *, "============================================="
+   end if
 
    if (allocated(global_vec))      deallocate(global_vec)
    if (allocated(recv_counts))     deallocate(recv_counts)
