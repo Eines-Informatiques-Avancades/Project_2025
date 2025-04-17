@@ -15,6 +15,7 @@ module post_trajectory_analysis
         ! Each row refers to a particle in an specific time.
     subroutine read_trajectory(positions_file, x, y, z, time)
         use mpi
+        
         implicit none
 
         character(50), intent(in) :: positions_file
@@ -82,6 +83,7 @@ module post_trajectory_analysis
         ! creates.
     subroutine compute_rdf(x, y, z, rdf_file)
             use mpi
+            
             implicit none
 
             real(8), allocatable, intent(in) :: x(:, :), y(:, :), z(:, :)
@@ -102,7 +104,6 @@ module post_trajectory_analysis
             bins = int(maximum_radius /timestep)
             volume = system_size**3
             density = part_num / volume
-
 
             ! Allocate arrays
             allocate(h(bins), rdf(bins), r_values(bins), h_total(bins))
@@ -187,7 +188,6 @@ module post_trajectory_analysis
     subroutine compute_rmsd(x, y, z, time, rmsd_file)
         use mpi
 
-        
         implicit none
 
         real(8), allocatable, intent(in) :: x(:, :), y(:, :), z(:, :), time(:)
