@@ -41,11 +41,13 @@ module integrators
                 velocities(i,3) = velocities(i,3) + 0.5 * forces(i,3)*timestep
             end do
 
-            call MPI_Barrier(MPI_COMM_WORLD, ierr)
+            call mpi_barrier(MPI_COMM_WORLD, ierr)
 
             do i = 1, 3
-                call MPI_Allgatherv(positions(start_part : end_part, i), counts(rank), MPI_REAL8, &
-                                    positions(:,i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierr)
+                call mpi_allgatherv( &
+                    positions(start_part : end_part, i), counts(rank), MPI_REAL8, &
+                    positions(:, i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierr &
+                )
             end do
 
             call apply_pbc(positions, counts, displs)
@@ -56,8 +58,10 @@ module integrators
             ! The simulation works without this gathering, but it's better if all the velocities are only divided inside this
             ! subroutine. to work better in the final versions of the code.
             do i = 1, 3
-                call MPI_Allgatherv(velocities(start_part : end_part, i), counts(rank), MPI_REAL8, &
-                                    velocities(:, i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierr)
+                call mpi_allgatherv( &
+                    velocities(start_part : end_part, i), counts(rank), MPI_REAL8, &
+                    velocities(:, i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierr &
+                )
             end do
         end subroutine velocity_verlet
 end module integrators
