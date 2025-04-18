@@ -17,35 +17,41 @@ module lj_forces
         ! The Verlet list for one particle contains a list of neighbours it interactis with.
         ! This subroutine must not be run at each step, but every 5 to 15 timesteps.
         subroutine compute_verlet_list(positions, verlet_list, n_neighbors)
+            use mpi
+            use global_vars
+            use geometry
+            
             implicit none
 
-            real(8), intent(in) :: positions(:, :)
-            integer, allocatable, intent(out) :: verlet_list(:, :)
-            integer, allocatable, intent(out) :: n_neighbors(:)
-
-            integer :: i, j
+            real(8), intent(in)               :: positions(:, :)     
+            integer, allocatable, intent(out) :: verlet_list(:,:)  
+            integer, allocatable, intent(out) :: n_neighbors(:)   
+            integer :: i, j, n
+            integer :: i_start, i_end, local_n, rem
+            integer, allocatable :: local_n_nb(:), local_list(:,:)
             real(8) :: dx, dy, dz, r2, cutoff_verlet
 
-            ! Must be slightly bigger than the Lennard-Jones cutoff.
             cutoff_verlet = cutoff * 1.2
+    
+            n = part_num
 
-            if (allocated(n_neighbors)) then
-                deallocate(n_neighbors)
+            local_n  = (n-1) / nproc
+            rem = mod(n-1, nproc)
+            if (rank < rem) then
+                i_start = rank*(local_n+1) + 1
+                i_end = i_start + local_n
+            else
+                i_start = rem*(local_n+1) + (rank-rem)*local_n + 1
+                i_end = i_start + local_n - 1
             endif
-            if (allocated(verlet_list)) then
-                deallocate(verlet_list)
-            endif
 
-            ! Set a long enough list range
-            allocate(n_neighbors(part_num))
-            n_neighbors = 0
+            allocate(local_n_nb(n))
+            allocate(local_list(n,n))
+            local_n_nb = 0
+            local_list = 0
 
-            allocate(verlet_list(part_num, part_num))
-            verlet_list = 0
-
-            ! Compute pairs (i, j) with j > i.
-            do i = 1, part_num - 1
-                do j = i + 1, part_num
+            do i = i_start, i_end
+                do j = i + 1, n
                     dx = positions(i, 1) - positions(j, 1)
                     dy = positions(i, 2) - positions(j, 2)
                     dz = positions(i, 3) - positions(j, 3)
@@ -59,11 +65,29 @@ module lj_forces
 
                     ! Allocate interactions within the cutoff_verlet
                     if (r2 <= cutoff_verlet**2) then
-                        n_neighbors(i) = n_neighbors(i) + 1
-                        verlet_list(i, n_neighbors(i)) = j
+                        local_n_nb(i) = local_n_nb(i) + 1
+                        local_list(i, local_n_nb(i)) = j
                     endif
                 end do
             end do
+
+
+            if (allocated(n_neighbors)) then
+                deallocate(n_neighbors)
+            endif
+            if (allocated(verlet_list)) then
+                deallocate(verlet_list)
+            endif
+
+            allocate(n_neighbors(n))
+            allocate(verlet_list(n,n))
+
+            call mpi_barrier(MPI_COMM_WORLD, ierr)
+            call mpi_allreduce(local_n_nb, n_neighbors, n, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr)
+            call mpi_allreduce(local_list, verlet_list, n*n, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr)
+
+            deallocate(local_n_nb, local_list)
+
         end subroutine compute_verlet_list
 
         subroutine compute_forces(positions, forces, lj_potential, verlet_list, n_neighbors)
