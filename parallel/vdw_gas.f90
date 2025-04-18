@@ -151,7 +151,7 @@ program vdw_gas
         end if
 
         call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors, counts, displs)
-        ! call andersen_thermostat(velocities, counts, displs)
+        call andersen_thermostat(velocities, counts, displs)
 
         print *, rank, step, 'completed'
     end do
