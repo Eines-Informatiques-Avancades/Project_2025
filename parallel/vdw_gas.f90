@@ -142,8 +142,6 @@ program vdw_gas
     call mpi_barrier(MPI_COMM_WORLD, ierr)
 
     do step = 1, equilibration_step_num
-        print *, rank, step, '/', equilibration_step_num
-
         if (mod(step, 10) == 0) then
             if (rank == 0) call compute_verlet_list(positions, verlet_list, n_neighbors)
             call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
@@ -152,8 +150,6 @@ program vdw_gas
 
         call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors, counts, displs)
         call andersen_thermostat(velocities, counts, displs)
-
-        print *, rank, step, 'completed'
     end do
 
     deallocate(seed)
@@ -167,10 +163,6 @@ program vdw_gas
         print *, 'Cputime: ', tcpuend - tcpustart, 's'
         print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
     end if
-
-    call mpi_barrier(MPI_COMM_WORLD, ierr)
-    call mpi_finalize(ierr)
-    stop
 
     !
     ! System evolution.
@@ -251,8 +243,10 @@ program vdw_gas
         call system_clock(tclockstart)
     end if
 
-    print *
-    print *, 'Performing post-trajectory analysis...'
+    if (rank == 0) then
+        print *
+        print *, 'Performing post-trajectory analysis...'
+    end if
 
     allocate( &
         x(part_num, step_num), y(part_num, step_num), &
@@ -261,7 +255,7 @@ program vdw_gas
 
     call read_trajectory(positions_file, x, y, z, time_points)
 
-    print *
+    if (rank == 0) print *
 
     rdf_file = 'rdf.dat'
     rmsd_file = 'rmsd.dat'
@@ -276,4 +270,7 @@ program vdw_gas
         print *, 'Cputime: ', tcpuend-tcpustart, 's'
         print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
     end if
+
+    call mpi_barrier(MPI_COMM_WORLD, ierr)
+    call mpi_finalize(ierr)
 end program vdw_gas
