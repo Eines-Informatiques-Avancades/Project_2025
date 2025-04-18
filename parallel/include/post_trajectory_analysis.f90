@@ -153,7 +153,7 @@ module post_trajectory_analysis
             end do
 
             ! Here the reduction is applied to all local values of h, converting it to h_total at rank 0
-            call mpi_reduce(h,h_total,bins, mpi_real, mpi_sum, 0, mpi_comm_world, ierr)
+            call mpi_reduce(h,h_total,bins, mpi_real8, mpi_sum, 0, mpi_comm_world, ierr)
 
             ! Now normalize the h stored in h_total by master
             if (rank == 0) then
@@ -241,8 +241,8 @@ module post_trajectory_analysis
         end if
 
         ! Use Gatherv to merge all rmsd
-        call MPI_Gatherv(partial_rmsd, partial_steps, MPI_REAL, &
-            total_rmsd, recvcounts, displs, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
+        call MPI_Gatherv(partial_rmsd, partial_steps, MPI_REAL8, &
+            total_rmsd, recvcounts, displs, MPI_REAL8, 0, MPI_COMM_WORLD, ierr)
 
         if (rank == 0) then
             open(12, file = rmsd_file, status = 'replace')
