@@ -119,8 +119,8 @@ program vdw_gas
 
     if (rank == 0) then
         print *, 'Computing initial Verlet lists...'
-        call compute_verlet_list(positions, verlet_list, n_neighbors)
     end if
+    call compute_verlet_list(positions, verlet_list, n_neighbors)
     call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
     call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
@@ -145,7 +145,7 @@ program vdw_gas
         print *, rank, step, '/', equilibration_step_num
 
         if (mod(step, 10) == 0) then
-            if (rank == 0) call compute_verlet_list(positions, verlet_list, n_neighbors)
+            call compute_verlet_list(positions, verlet_list, n_neighbors)
             call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
             call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
         end if
@@ -200,7 +200,7 @@ program vdw_gas
         time = time + timestep
 
         if (mod(step, 10) == 0) then
-            if (rank == 0) call compute_verlet_list(positions, verlet_list, n_neighbors)
+            call compute_verlet_list(positions, verlet_list, n_neighbors)
             call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
             call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
         end if
