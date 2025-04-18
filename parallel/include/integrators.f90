@@ -53,10 +53,13 @@ module integrators
             call apply_pbc(positions, counts, displs)
 
             call compute_forces(positions, forces, lj_potential, verlet_list, n_neighbors)
-            velocities = velocities + 0.5 * forces*timestep
 
-            ! The simulation works without this gathering, but it's better if all the velocities are only divided inside this
-            ! subroutine. to work better in the final versions of the code.
+            do i = start_part, end_part
+                velocities(i,1) = velocities(i,1) + 0.5 * forces(i,1)*timestep
+                velocities(i,2) = velocities(i,2) + 0.5 * forces(i,2)*timestep
+                velocities(i,3) = velocities(i,3) + 0.5 * forces(i,3)*timestep
+            end do
+
             do i = 1, 3
                 call mpi_allgatherv( &
                     velocities(start_part : end_part, i), counts(rank), MPI_REAL8, &
