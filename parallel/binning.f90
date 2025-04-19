@@ -65,14 +65,14 @@ program mpi_binning
    ! Variables for column distribution (se procesan las columnas 2 a n_cols)
    integer :: col_start, col_end, num_assigned, remainder
 
-   ! Buffer para almacenar el resultado local (se asume 10000 caracteres es suficiente)
+   ! Buffer para almacenar el resultado local
    character(len=10000) :: local_result
    character(len=10000), allocatable :: gathered_results(:)
    character(len=10000) :: temp_result
 
    local_result = ""
    t_read_start = 0.0
-   t_read_end = 0.0
+   t_read_end   = 0.0
 
    !--------------------------------------------------------------------
    ! 2. Start of the program
@@ -80,11 +80,10 @@ program mpi_binning
    call MPI_Init(ierr)
    call MPI_Comm_rank(MPI_COMM_WORLD, my_rank, ierr)
    call MPI_Comm_size(MPI_COMM_WORLD, nprocs, ierr)
-
    t_total_start = MPI_Wtime()
 
-   input_file  = 'thermodynamics.dat'
-   output_file = 'binning_' // trim(input_file)
+   input_file       = 'thermodynamics.dat'
+   output_file      = 'binning_' // trim(input_file)
    final_output_file = trim(output_file) // '_final.dat'
 
    !--------------------------------------------------------------------
@@ -103,7 +102,7 @@ program mpi_binning
    !--------------------------------------------------------------------
    if (my_rank == 0) then
       t_header_start = MPI_Wtime()
-      offset = int(0, kind=MPI_OFFSET_KIND)
+      offset = int(0, MPI_OFFSET_KIND)
       call MPI_File_seek(fh, offset, MPI_SEEK_SET, ierr)
       call MPI_File_read(fh, header_buf, 1024, MPI_CHARACTER, status, ierr)
       header_line = array_to_string(header_buf)
@@ -111,11 +110,11 @@ program mpi_binning
       if (header_length == 0) header_length = len_trim(header_line)
       t_header_end = MPI_Wtime()
       print *, "[Rank 0 Debug] header_length =", header_length
-      print *, "[Rank 0 Debug] Header = |", trim(header_line), "|"
+      print *, "[Rank 0 Debug] Header = |", trim(header_line(1:header_length)), "|"
    end if
 
-   call MPI_Bcast(header_line, 1024, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
-   call MPI_Bcast(header_length, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+   call MPI_Bcast(header_line,   1024, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
+   call MPI_Bcast(header_length, 1,   MPI_INTEGER,   0, MPI_COMM_WORLD, ierr)
 
    call parse_header(header_line(1:header_length), col_names, n_cols)
    if (n_cols > 0) then
@@ -132,18 +131,17 @@ program mpi_binning
    !--------------------------------------------------------------------
    if (my_rank == 0) then
       t_row_read_start = MPI_Wtime()
-      offset = int(header_length, kind=MPI_OFFSET_KIND)
+      offset = int(header_length, MPI_OFFSET_KIND)
       call MPI_File_seek(fh, offset, MPI_SEEK_SET, ierr)
       call MPI_File_read(fh, row_buf, 1024, MPI_CHARACTER, status, ierr)
       row_line = array_to_string(row_buf)
       row_length = index(row_line, char(10))
-      if (row_length == 0) then
-         row_length = len_trim(row_line)
-      end if
+      if (row_length == 0) row_length = len_trim(row_line)
       t_row_read_end = MPI_Wtime()
-      print *, "[Rank 0 Debug] row_line = |", trim(row_line), "|"
+      print *, "[Rank 0 Debug] row_line   = |", trim(row_line(1:row_length)), "|"
       print *, "[Rank 0 Debug] row_length =", row_length
    end if
+
    call MPI_Bcast(row_length, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
    !--------------------------------------------------------------------
@@ -172,7 +170,7 @@ program mpi_binning
    end if
 
    !--------------------------------------------------------------------
-   ! 7. Distribute rows among processes (base+remainder method)
+   ! 7. Distribute rows among processes
    !--------------------------------------------------------------------
    base = n_rows / int(nprocs, MPI_OFFSET_KIND)
    rem  = mod(n_rows, int(nprocs, MPI_OFFSET_KIND))
@@ -181,14 +179,14 @@ program mpi_binning
       start_row  = int(my_rank, MPI_OFFSET_KIND) * (base + 1_MPI_OFFSET_KIND)
    else
       local_rows = base
-      start_row  = rem * (base + 1_MPI_OFFSET_KIND) + (int(my_rank, MPI_OFFSET_KIND) - rem) * base
+      start_row  = rem * (base + 1_MPI_OFFSET_KIND) + &
+                   (int(my_rank, MPI_OFFSET_KIND) - rem) * base
    end if
 
-   offset  = int(header_length, MPI_OFFSET_KIND) + &
-             start_row * int(row_length, MPI_OFFSET_KIND)
+   offset  = int(header_length, MPI_OFFSET_KIND) + start_row * int(row_length, MPI_OFFSET_KIND)
    buf_len = local_rows * int(row_length, MPI_OFFSET_KIND)
    if (offset + buf_len > file_size_offset) then
-      buf_len = file_size_offset - offset
+      buf_len    = file_size_offset - offset
       local_rows = buf_len / int(row_length, MPI_OFFSET_KIND)
    end if
 
@@ -203,14 +201,14 @@ program mpi_binning
       t_read_start = MPI_Wtime()
       call MPI_File_seek(fh, offset, MPI_SEEK_SET, ierr)
       call MPI_File_read(fh, local_buffer, int(buf_len), MPI_CHARACTER, status, ierr)
-      call MPI_Barrier(MPI_COMM_WORLD, ierr)  ! Sincronización extra
+      call MPI_Barrier(MPI_COMM_WORLD, ierr)
       t_read_end = MPI_Wtime()
    else
       allocate(local_buffer(0))
    end if
+
    call MPI_File_close(fh, ierr)
 
-   ! Calcular el tiempo de lectura local y reducir al máximo
    local_read_time = t_read_end - t_read_start
    call MPI_Reduce(local_read_time, global_read_time, 1, MPI_DOUBLE_PRECISION, MPI_MAX, 0, MPI_COMM_WORLD, ierr)
 
@@ -224,7 +222,7 @@ program mpi_binning
       call parse_fixed_line(local_buffer(pos:pos+row_length-1), &
            local_vec((i-1)*n_cols+1 : i*n_cols), n_cols)
    end do
-   if (allocated(local_buffer)) deallocate(local_buffer)
+   deallocate(local_buffer)
    t_convert_end = MPI_Wtime()
    local_convert_time = t_convert_end - t_convert_start
    call MPI_Reduce(local_convert_time, global_convert_time, 1, MPI_DOUBLE_PRECISION, MPI_MAX, 0, MPI_COMM_WORLD, ierr)
@@ -243,16 +241,16 @@ program mpi_binning
    allocate(global_vec(int(n_rows)*n_cols))
    call MPI_Allgatherv(local_vec, local_count, MPI_DOUBLE_PRECISION, &
         global_vec, recv_counts, displs, MPI_DOUBLE_PRECISION, MPI_COMM_WORLD, ierr)
-   if (allocated(local_vec)) deallocate(local_vec)
+   deallocate(local_vec)
    t_allgather_end = MPI_Wtime()
    local_allgather_time = t_allgather_end - t_allgather_start
    call MPI_Reduce(local_allgather_time, global_allgather_time, 1, MPI_DOUBLE_PRECISION, MPI_MAX, 0, MPI_COMM_WORLD, ierr)
 
    !--------------------------------------------------------------------
-   ! 11. Distribute the binning calculation: Each process handles a subset of columns (columns 2 to n_cols)
+   ! 11. Perform binning: each process a subset of columns
    !--------------------------------------------------------------------
    num_assigned = (n_cols - 1) / nprocs
-   remainder = mod(n_cols - 1, nprocs)
+   remainder    = mod(n_cols - 1, nprocs)
    if (my_rank < remainder) then
       col_start = 2 + my_rank*(num_assigned + 1)
       col_end   = col_start + num_assigned
@@ -261,7 +259,6 @@ program mpi_binning
       col_end   = col_start + num_assigned - 1
    end if
 
-   ! Cada proceso mide el tiempo de su parte de binning
    call MPI_Barrier(MPI_COMM_WORLD, ierr)
    t_binning_start = MPI_Wtime()
    do j = col_start, col_end
@@ -278,13 +275,13 @@ program mpi_binning
    call MPI_Reduce(local_binning_time, global_binning_time, 1, MPI_DOUBLE_PRECISION, MPI_MAX, 0, MPI_COMM_WORLD, ierr)
 
    !--------------------------------------------------------------------
-   ! 12. Recolectar los resultados de binning de todos los procesos
+   ! 12. Gather binning results
    !--------------------------------------------------------------------
    allocate(gathered_results(nprocs))
    call MPI_Gather(local_result, 10000, MPI_CHARACTER, gathered_results, 10000, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
 
    !--------------------------------------------------------------------
-   ! 13. El proceso 0 escribe un único archivo de salida con toda la información
+   ! 13. Rank 0 writes the final output file
    !--------------------------------------------------------------------
    if (my_rank == 0) then
       t_output_start = MPI_Wtime()
@@ -293,23 +290,20 @@ program mpi_binning
       write(unit_out, '(A)') "# Format: ColName, BinSize, Mean, Variance, StdDev"
       do i = 1, nprocs
          temp_result = trim(gathered_results(i))
-         if (len_trim(temp_result) > 0) then
-            write(unit_out, '(A)') trim(temp_result)
-         end if
+         if (len_trim(temp_result) > 0) write(unit_out, '(A)') temp_result
       end do
       close(unit_out)
       t_output_end = MPI_Wtime()
    end if
 
    !--------------------------------------------------------------------
-   ! 14. Print times
+   ! 14. Print timings
    !--------------------------------------------------------------------
    if (my_rank == 0) then
       t_total_end = MPI_Wtime()
       print *, "============================================="
       print *, "[Rank 0] Total time:         ", t_total_end - t_total_start, " sec"
-      ! New print statement for Total Real time:
-      print *, "[Rank 0] Total Real time:  ", global_read_time + global_convert_time, " sec"
+      print *, "[Rank 0] Total Real time:    ", global_read_time + global_convert_time, " sec"
       print *, "[Rank 0] Allgather time:     ", global_allgather_time, " sec"
       print *, "[Rank 0] Binning time:       ", global_binning_time, " sec"
       print *, "[Rank 0] Output write time:  ", t_output_end - t_output_start, " sec"
@@ -317,17 +311,19 @@ program mpi_binning
       print *, "============================================="
    end if
 
-   if (allocated(global_vec))      deallocate(global_vec)
-   if (allocated(recv_counts))     deallocate(recv_counts)
-   if (allocated(displs))          deallocate(displs)
+   ! Cleanup
+   if (allocated(global_vec))       deallocate(global_vec)
+   if (allocated(recv_counts))      deallocate(recv_counts)
+   if (allocated(displs))           deallocate(displs)
    if (allocated(gathered_results)) deallocate(gathered_results)
 
    call MPI_Finalize(ierr)
 
+
 contains
 
    !---------------------------------------------------------------------
-   ! array_to_string: converts an array of chars (len=1) to a Fortran string.
+   ! array_to_string: convierte un array de chars (len=1) a un string.
    !---------------------------------------------------------------------
    function array_to_string(arr) result(str)
       implicit none
@@ -340,25 +336,25 @@ contains
    end function array_to_string
 
    !---------------------------------------------------------------------
-   ! remove_cr: removes CR (ASCII 13) from a string.
+   ! remove_crlf: elimina CR (13) y LF (10) de un string.
    !---------------------------------------------------------------------
-   function remove_cr(str) result(out)
+   function remove_crlf(str) result(out)
       implicit none
       character(len=*), intent(in) :: str
-      character(len=len(str)) :: out
+      character(len=len(str))    :: out
       integer :: i, j
       j = 0
       do i = 1, len(str)
-         if (str(i:i) /= char(13)) then
+         if (str(i:i) /= char(13) .and. str(i:i) /= char(10)) then
             j = j + 1
             out(j:j) = str(i:i)
          end if
       end do
       out = out(:j)
-   end function remove_cr
+   end function remove_crlf
 
    !---------------------------------------------------------------------
-   ! parse_header: extracts column names from the first line.
+   ! parse_header: extrae nombres de columna de la primera línea.
    !---------------------------------------------------------------------
    subroutine parse_header(line_in, col_names, n_cols)
       implicit none
@@ -370,24 +366,21 @@ contains
       character(len=64) :: token
 
       tmp_line = adjustl(line_in)
-      if (len_trim(tmp_line) > 0 .and. tmp_line(1:1) == '#') then
-         tmp_line = adjustl(tmp_line(2:))
-      end if
+      if (len_trim(tmp_line) > 0 .and. tmp_line(1:1) == '#') tmp_line = adjustl(tmp_line(2:))
       do i = 1, len(tmp_line)
-         if (tmp_line(i:i) == ',') then
-            tmp_line(i:i) = ' '
-         end if
+         if (tmp_line(i:i) == ',') tmp_line(i:i) = ' '
       end do
       len_line = len_trim(tmp_line)
       n_cols   = 0
       pos      = 1
+
       do while (pos <= len_line)
          token_len = index(tmp_line(pos:), ' ')
          if (token_len == 0) then
             token = tmp_line(pos:)
             pos = len_line + 1
          else
-            token = tmp_line(pos: pos+token_len-2)
+            token = tmp_line(pos:pos+token_len-2)
             pos = pos + token_len
          end if
          if (len_trim(token) > 0) then
@@ -398,7 +391,7 @@ contains
    end subroutine parse_header
 
    !---------------------------------------------------------------------
-   ! parse_fixed_line: parses a fixed-length line (array of chars) into a vector of reals.
+   ! parse_fixed_line: convierte una línea fija en un vector de reales.
    !---------------------------------------------------------------------
    subroutine parse_fixed_line(line_arr, arr, n_cols)
       implicit none
@@ -407,12 +400,13 @@ contains
       integer, intent(in) :: n_cols
       character(len=:), allocatable :: cleaned_line
 
-      cleaned_line = remove_cr(trim(array_to_string(line_arr)))
+      cleaned_line = remove_crlf(array_to_string(line_arr))
       read(cleaned_line, *) arr
    end subroutine parse_fixed_line
 
    !---------------------------------------------------------------------
-   ! do_binning_for_column: Performs binning for 1 column and appends the output to output_buffer.
+   ! do_binning_for_column: hace el binning para una columna y acumula
+   ! en output_buffer.
    !---------------------------------------------------------------------
    subroutine do_binning_for_column(col_data, n_values, col_name, output_buffer)
       use mpi
@@ -422,12 +416,10 @@ contains
       character(len=*), intent(in) :: col_name
       character(len=*), intent(inout) :: output_buffer
 
-      integer(8) :: j, k
-      integer(8) :: max_num_bins, num_bins, bin_size
-      integer(8) :: bin_start, bin_end
+      integer(8) :: j, k, max_num_bins, num_bins, bin_size
+      integer(8) :: bin_start, bin_end, level
       real(8) :: sum_bin, mean_global, var_value, sum_diff
       real(8), allocatable :: avg_bin(:)
-      integer(8) :: level
       character(len=100) :: line_out
 
       max_num_bins = 1
@@ -442,7 +434,7 @@ contains
 
          allocate(avg_bin(num_bins))
          do j = 1, num_bins
-            bin_start = (j - 1)*bin_size + 1
+            bin_start = (j-1)*bin_size + 1
             bin_end   = j*bin_size
             sum_bin = 0.0d0
             do k = bin_start, bin_end
@@ -452,7 +444,7 @@ contains
          end do
 
          mean_global = sum(avg_bin) / num_bins
-         sum_diff = 0.0d0
+         sum_diff    = 0.0d0
          do j = 1, num_bins
             sum_diff = sum_diff + (avg_bin(j) - mean_global)**2
          end do
@@ -462,7 +454,8 @@ contains
 
          write(line_out, '(A,1X,I12,1X,F15.8,1X,F15.8,1X,F15.8)') &
               trim(col_name), bin_size, mean_global, var_value, sqrt(var_value)
-         output_buffer = trim(output_buffer) // trim(line_out) // new_line('A')
+
+         output_buffer = trim(output_buffer)//trim(line_out)//new_line('A')
          deallocate(avg_bin)
       end do
    end subroutine do_binning_for_column
