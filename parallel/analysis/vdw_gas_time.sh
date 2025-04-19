@@ -10,7 +10,10 @@
 # Requirements: awk, sed, grep, paste, rm, POSIX-compliant shell
 #
 
-get_times() {
+tmp_labels_file="tmp_labels_${run_output}"
+tmp_time_file="tmp_time_${run_output}"
+
+get_times_vdw_gas() {
     timestamp_string="$2"
     run_output="$1"
 
@@ -23,9 +26,8 @@ get_times() {
 format_time_output() {
     run_output="$1"
     time_output="time_${run_output}"
-    tmp_labels_file="tmp_labels_${run_output}"
-    tmp_time_file="tmp_time_${run_output}"
 
+    # Output header.
     printf "# %s, %s, %s\n" \
         'Part' 'CPU time (s)' 'Wallclock time (s)' \
         > "$time_output"
@@ -36,16 +38,41 @@ format_time_output() {
         'Post-trajectory analysis   ' \
         > "$tmp_labels_file"
 
-    get_times "$run_output" 'Cputime: ' > "$tmp_time_file"
+    # Retrieve main simulation times (vdw_gas).
+    get_times_vdw_gas "$run_output" 'Cputime: ' > "$tmp_time_file"
 
     paste -d '\t' \
         "$tmp_labels_file" "$tmp_time_file" \
         >> "$time_output"
-
-    rm "$tmp_labels_file" "$tmp_time_file"
 }
 
+cleanup(){
+    rm -f "$tmp_labels_file" "$tmp_time_file"
+}
+
+rm time_*.out
 
 for i in 1 2 4 8 16 32 40; do
-    [ -f "vdw_gas_${i}_core.out" ] && format_time_output "vdw_gas_${i}_core.out"
+    run_output="vdw_gas_${i}_core.out"
+    time_output="time_${run_output}"
+
+    [ -f "vdw_gas_${i}_core.out" ] && (
+        # Create a file containing the duration of each part of a simulation
+        # with a certain number of cores.
+        format_time_output "$run_output"
+
+        # Create files for each time measure across all simulations with
+        # different amount of cores.
+        while IFS= read -r line; do
+            measure="$(echo "$line" | sed 's/[[:space:]]*$//' | tr '[:upper:]' '[:lower:]' | tr ' ' '_')"
+            grep "$line" "$time_output" | \
+                awk -F '\t' -v cores="$i" '{print cores $2 "\t" $3}' \
+                >> "time_${measure}.out"
+        done < "$tmp_labels_file"
+    )
 done
+
+# for file in
+# sed '1 i# Cores, Cpu time (s), Wallclock time (s)'
+
+cleanup
