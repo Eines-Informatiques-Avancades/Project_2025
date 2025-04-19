@@ -11,9 +11,10 @@
 #
 
 get_times() {
+    timestamp_string="$2"
     run_output="$1"
 
-    grep -A 1 'Cputime: ' "$run_output" | \
+    grep -A 1 "$timestamp_string" "$run_output" | \
         awk -F ':' '{print $2}' | \
         sed 's/ s$//g' | \
         awk 'NF { if (n++ % 2) print prev "\t" $0; else prev = $0 }'
@@ -35,7 +36,7 @@ format_time_output() {
         'Post-trajectory analysis   ' \
         > "$tmp_labels_file"
 
-    get_times "$run_output" > "$tmp_time_file"
+    get_times "$run_output" 'Cputime: ' > "$tmp_time_file"
 
     paste -d '\t' \
         "$tmp_labels_file" "$tmp_time_file" \
