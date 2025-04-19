@@ -51,12 +51,18 @@ in said cluster, it should be compiled in it too, so that the produced binary is
 optimized for its hardware.
 
 `make cluster-compile` will send a job to compile the parallel version of the
-code in cerqt2.
+code in cerqt2 (both `vdw_gas` and `binning`)[^cluster].
+
+[^cluster]: See the`.sub` files under the `parallel/cluster/` folder and the
+  Makefile under `parallel/` for more details on the queue used for compiling
+  and executing the code in the cluster.
 
 `make cluster-run-` followed by either 1, 2, 4, 8, 16, 32 or 40 will execute the
 simulation using the number of cores corresponding to that number. `make
 cluster-run-all` will send one job for each of those numbers so that the user
 can compare the performance of the code with different numbers of processors.
+
+All the `make-cluster-run-...` rules will execute both `vdw_gas` and `binning`.
 
 ## Plotting the results
 
