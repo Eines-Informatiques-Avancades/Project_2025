@@ -28,7 +28,7 @@ module thermodynamics
 
             kinetic_energy = 0
             total_kinetic_energy = 0
-            do i = start, end
+            do i = start_part, end_part
                 velocity_norm_sq = velocities(i, 1)**2 + velocities(i, 2)**2 + velocities(i, 3)**2
                 kinetic_energy = kinetic_energy + 0.5*velocity_norm_sq
             end do

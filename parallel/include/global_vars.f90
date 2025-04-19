@@ -18,5 +18,6 @@ module global_vars
     logical :: infinite_distance
 
     ! MPI variables.
-    integer :: rank, nproc, chunk_size, start, end, ierr
+    integer :: rank, nproc, start_part, end_part, ierr
+    integer, allocatable :: counts(:), displs(:)
 end module global_vars

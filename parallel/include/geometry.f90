@@ -15,36 +15,33 @@ module geometry
         ! Apply PBC conditions to the positions array.
         ! This subroutine must be run every time the positions of the particles are
         ! updated.
-        subroutine apply_pbc(positions)
+        subroutine apply_pbc(positions, counts, displs)
             use mpi
 
             implicit none
 
             real(8), allocatable, intent(inout) :: positions(:, :)
+            integer, allocatable, intent(in) :: counts(:), displs(:) ! MPI arguments.
 
             integer :: i, j
 
+
             ! Apply PBC to the assigned chunk of positions
-            do i = start, end
+            do i = start_part, end_part
                 do j = 1, 3
                     positions(i, j) = pbc(positions(i, j), system_size)
                 end do
             end do
 
-            ! Gather results back to the root process (rank 0)
-            if (rank == 0) then
-                ! Gather the results into the root process
-                call mpi_gather( &
-                    positions(start:end, :), end-start+1, MPI_REAL8, &
-                    positions, end-start+1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr &
+            call mpi_barrier(MPI_COMM_WORLD, ierr)
+
+            ! Gather the results into the root process
+            do i = 1, 3
+                call mpi_allgatherv( &
+                    positions(start_part : end_part, i), counts(rank), MPI_REAL8, &
+                    positions(:, i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierr &
                 )
-            else
-                ! Other processes send their results to rank 0
-                call mpi_gather( &
-                    positions(start:end, :), end-start+1, MPI_REAL8, &
-                    positions, end-start+1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr &
-                )
-            end if
+            end do
         end subroutine apply_pbc
 
         ! Apply PBC to a certain distance, given the box size.

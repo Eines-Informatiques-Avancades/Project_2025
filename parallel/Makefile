@@ -1,7 +1,7 @@
 .SUFFIXES:
 
 FC = mpif90
-FCFLAGS = -O3 -Wall -Wextra -J$(MODDIR)
+FCFLAGS = -O3 -module $(MODDIR) # ifort flags
 FLFLAGS =
 MODDIR = ./include
 CLUSTERDIR = ./cluster
@@ -26,43 +26,43 @@ cluster-compile:
 cluster-run-all: cluster-run-1 cluster-run-2 cluster-run-4 cluster-run-8 \
 	cluster-run-16 cluster-run-32 cluster-run-40
 
-cluster-run-1: $(PROG) binning
+cluster-run-1:
 	rm -f vdw_gas_1_core.out
 	qsub -N 'vdw_gas_1_core' -pe smp 1 \
 		-o 'vdw_gas_1_core.out' -e 'vdw_gas_1_core.err' \
 		$(CLUSTERDIR)/submit_run_cerqt01.sub
 
-cluster-run-2: $(PROG) binning
+cluster-run-2:
 	rm -f vdw_gas_2_core.out
 	qsub -N 'vdw_gas_2_core' -pe smp 2 \
 		-o 'vdw_gas_2_core.out' -e 'vdw_gas_2_core.err' \
 		$(CLUSTERDIR)/submit_run_cerqt01.sub
 
-cluster-run-4: $(PROG) binning
+cluster-run-4:
 	rm -f vdw_gas_4_core.out
 	qsub -N 'vdw_gas_4_core' -pe smp 4 \
 		-o 'vdw_gas_4_core.out' -e 'vdw_gas_4_core.err' \
 		$(CLUSTERDIR)/submit_run_cerqt01.sub
 
-cluster-run-8: $(PROG) binning
+cluster-run-8:
 	rm -f vdw_gas_8_core.out
 	qsub -N 'vdw_gas_8_core' -pe smp 8 \
 		-o 'vdw_gas_8_core.out' -e 'vdw_gas_8_core.err' \
 		$(CLUSTERDIR)/submit_run_cerqt01.sub
 
-cluster-run-16: $(PROG) binning
+cluster-run-16:
 	rm -f vdw_gas_16_core.out
 	qsub -N 'vdw_gas_16_core' -pe smp 16 \
 		-o 'vdw_gas_16_core.out' -e 'vdw_gas_16_core.err' \
 		$(CLUSTERDIR)/submit_run_cerqt01.sub
 
-cluster-run-32: $(PROG) binning
+cluster-run-32:
 	rm -f vdw_gas_32_core.out
 	qsub -N 'vdw_gas_32_core' -pe smp 32 \
 		-o 'vdw_gas_32_core.out' -e 'vdw_gas_32_core.err' \
 		$(CLUSTERDIR)/submit_run_cerqt01.sub
 
-cluster-run-40: $(PROG) binning
+cluster-run-40:
 	rm -f vdw_gas_40_core.out
 	qsub -N 'vdw_gas_40_core' -pe smp 40 \
 		-o 'vdw_gas_40_core.out' -e 'vdw_gas_40_core.err' \

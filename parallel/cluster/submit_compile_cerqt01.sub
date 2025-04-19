@@ -14,7 +14,7 @@
 source /etc/profile.d/modules.csh
 
 # Load the modules needed
-module load openmpi/3.1.3_gcc-4.8.5
+module load openmpi/4.1.4_ics-2021.3
 
 # Compile the program using the Makefile provided.
 make

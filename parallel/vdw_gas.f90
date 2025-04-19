@@ -22,7 +22,7 @@ program vdw_gas
 
     implicit none
 
-    integer :: step, seed_size, tclockstart, tclockend, clock_rate
+    integer :: i, step, seed_size, tclockstart, tclockend, clock_rate
     integer, allocatable :: seed(:), verlet_list(:, :), n_neighbors(:)
     real(8) :: part_density, volume, time, lj_potential, temperature_inst, &
         kinetic_energy, total_energy
@@ -69,47 +69,67 @@ program vdw_gas
     call mpi_bcast(cutoff                   , 1                 , MPI_REAL8     , 0, MPI_COMM_WORLD, ierr)
     call mpi_bcast(test_mode                , len(test_mode)    , MPI_CHARACTER , 0, MPI_COMM_WORLD, ierr)
 
-    ! Calculate the range of particles each process will handle.
-    chunk_size = part_num / nproc
-    start = rank * chunk_size + 1
+    !
+    ! MPI variable definition.
+    !
 
-    ! Ensure the last process handles any remaining particles.
-    if (rank == nproc - 1) then
-        end = part_num
-    else
-        end = (rank + 1) * chunk_size
-    end if
+    allocate( &
+        counts(0:nproc - 1), &
+        displs(0:nproc - 1)  &
+    )
 
-    print *, 'Rank: ', rank, 'start: ', start, 'end: ', end, 'chunk_size: ', chunk_size, 'nproc: ', nproc
+    do i = 0, nproc - 1
+        if (i < mod(part_num, nproc)) then
+            counts(i) = (part_num / nproc + 1)
+        else
+            counts(i) = (part_num / nproc)
+        end if
+    end do
 
-    call mpi_barrier(MPI_COMM_WORLD, ierr)
-    call mpi_finalize(ierr)
-    stop
+    displs(0) = 0
+    do i = 1, nproc - 1
+        displs(i) = displs(i - 1) + counts(i - 1)
+    end do
+
+    start_part = displs(rank) + 1
+    end_part = displs(rank) + counts(rank)
 
     !
     ! Generate initial system configuration.
     !
 
-    allocate(velocities(part_num, 3))
+    allocate( &
+        velocities(part_num, 3), positions(part_num, 3), forces(part_num, 3), &
+        n_neighbors(part_num), verlet_list(part_num, part_num) &
+    )
 
     if (rank == 0) then
         ! Generate the initial configuration from a lattice.
         call gen_initial_conf(part_density, positions)
         print *, 'Initial lattice particle density: ', part_density
         print *
-
-        ! Center initial config at the origin of coordinates.
-        call apply_pbc(positions)
-
-        call gen_velocities_bimodal_distr(velocities)
     end if
+    call mpi_bcast(positions, size(positions), MPI_REAL8, 0, MPI_COMM_WORLD, ierr)
+
+    ! Center initial config at the origin of coordinates.
+    call apply_pbc(positions, counts, displs)
+
+    if (rank == 0) call gen_velocities_bimodal_distr(velocities)
+    call mpi_bcast(velocities, size(velocities), MPI_REAL8, 0, MPI_COMM_WORLD, ierr)
+
+    if (rank == 0) then
+        print *, 'Computing initial Verlet lists...'
+        call compute_verlet_list(positions, verlet_list, n_neighbors)
+    end if
+    call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
     if (rank == 0) print *, 'Computing initial Lennard-Jones forces...'
     call compute_forces(positions, forces, lj_potential, verlet_list, n_neighbors)
 
     if (rank == 0) print *, 'Generating initial configuration for a VdW gas from the lattice...'
 
-    ! Seed initialization for the Andersen_thermsostat.
+    ! Seed initialization for the Andersen thermostat.
     call random_seed(size = seed_size)
     allocate(seed(seed_size))
 
@@ -118,12 +138,18 @@ program vdw_gas
         call random_seed(put = seed)
     endif
 
+    ! Force all threads to start thermalization at the same time.
+    call mpi_barrier(MPI_COMM_WORLD, ierr)
+
     do step = 1, equilibration_step_num
         if (mod(step, 10) == 0) then
-            call compute_verlet_list(positions, verlet_list, n_neighbors)
+            if (rank == 0) call compute_verlet_list(positions, verlet_list, n_neighbors)
+            call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+            call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
         end if
-        call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors)
-        call andersen_thermostat(velocities)
+
+        call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors, counts, displs)
+        call andersen_thermostat(velocities, counts, displs)
     end do
 
     deallocate(seed)
@@ -165,17 +191,25 @@ program vdw_gas
     do step = 1, step_num
         time = time + timestep
 
-        call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors)
-        call andersen_thermostat(velocities)
+        if (mod(step, 10) == 0) then
+            if (rank == 0) call compute_verlet_list(positions, verlet_list, n_neighbors)
+            call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+            call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+        end if
+
+        call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors, counts, displs)
+        call andersen_thermostat(velocities, counts, displs)
 
         call compute_total_kinetic_energy(velocities, kinetic_energy)
 
         total_energy = lj_potential + kinetic_energy
         temperature_inst = instantaneous_temperature(kinetic_energy)
 
-        write(12, '(f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6)') &
-            time, lj_potential, kinetic_energy, total_energy, temperature_inst
-        call write_positions_xyz(time, positions, positions_file)
+        if (rank == 0) then
+            write(12, '(f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6)') &
+                time, lj_potential, kinetic_energy, total_energy, temperature_inst
+            call write_positions_xyz(time, positions, positions_file)
+        end if
     end do
 
     close(12)
@@ -209,8 +243,10 @@ program vdw_gas
         call system_clock(tclockstart)
     end if
 
-    print *
-    print *, 'Performing post-trajectory analysis...'
+    if (rank == 0) then
+        print *
+        print *, 'Performing post-trajectory analysis...'
+    end if
 
     allocate( &
         x(part_num, step_num), y(part_num, step_num), &
@@ -219,7 +255,7 @@ program vdw_gas
 
     call read_trajectory(positions_file, x, y, z, time_points)
 
-    print *
+    if (rank == 0) print *
 
     rdf_file = 'rdf.dat'
     rmsd_file = 'rmsd.dat'
@@ -234,4 +270,7 @@ program vdw_gas
         print *, 'Cputime: ', tcpuend-tcpustart, 's'
         print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
     end if
+
+    call mpi_barrier(MPI_COMM_WORLD, ierr)
+    call mpi_finalize(ierr)
 end program vdw_gas
