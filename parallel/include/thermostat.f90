@@ -46,7 +46,6 @@ module thermostat
                     velocities(:, i), counts, displs, MPI_REAL8, MPI_COMM_WORLD, ierr &
                 )
             end do
-
         end subroutine andersen_thermostat
 
         ! Function that returns a random number following the gaussian distribution.
