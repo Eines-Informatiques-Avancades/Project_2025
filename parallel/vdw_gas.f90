@@ -174,18 +174,18 @@ program vdw_gas
 
         call cpu_time(tcpustart)
         call system_clock(tclockstart)
+
+        ! Create a new positions_file or replace the existing one.
+        ! This needs to be done previously, as the write_positions_xyz subroutine
+        ! appends the positions to an existing file.
+        positions_file = 'positions.xyz'
+        open(4, file = positions_file, status = 'replace')
+        close(4)
+
+        thermodynamics_file = 'thermodynamics.dat'
+        open(12, file = thermodynamics_file, status = 'replace')
+        write(12, *) '# time, lj_potential, kinetic_energy, total_energy, temperature_inst'
     end if
-
-    ! Create a new positions_file or replace the existing one.
-    ! This needs to be done previously, as the write_positions_xyz subroutine
-    ! appends the positions to an existing file.
-    positions_file = 'positions.xyz'
-    open(4, file = positions_file, status = 'replace')
-    close(4)
-
-    thermodynamics_file = 'thermodynamics.dat'
-    open(12, file = thermodynamics_file, status = 'replace')
-    write(12, *) '# time, lj_potential, kinetic_energy, total_energy, temperature_inst'
 
     time = 0
     do step = 1, step_num
@@ -212,7 +212,7 @@ program vdw_gas
         end if
     end do
 
-    close(12)
+    if (rank == 0) close(12)
 
     deallocate(positions, velocities, forces)
 
@@ -241,9 +241,7 @@ program vdw_gas
     if (rank == 0) then
         call cpu_time(tcpustart)
         call system_clock(tclockstart)
-    end if
 
-    if (rank == 0) then
         print *
         print *, 'Performing post-trajectory analysis...'
     end if
@@ -267,6 +265,7 @@ program vdw_gas
     if (rank == 0) then
         call cpu_time(tcpuend)
         call system_clock(tclockend)
+
         print *, 'Cputime: ', tcpuend-tcpustart, 's'
         print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
     end if
