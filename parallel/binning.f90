@@ -34,7 +34,6 @@ program mpi_binning
 
    ! File names
    character(len=256) :: input_file, output_file
-   character(len=256) :: final_output_file
    integer :: unit_out
 
    ! Buffers to read the header and the second line
@@ -82,9 +81,8 @@ program mpi_binning
    call MPI_Comm_size(MPI_COMM_WORLD, nprocs, ierr)
    t_total_start = MPI_Wtime()
 
-   input_file       = 'thermodynamics.dat'
-   output_file      = 'binning_' // trim(input_file)
-   final_output_file = trim(output_file) // '_final.dat'
+   input_file  = 'thermodynamics.dat'
+   output_file = 'binning_' // trim(input_file)
 
    !--------------------------------------------------------------------
    ! 3. Open file in parallel (MPI I/O)
@@ -285,7 +283,7 @@ program mpi_binning
    !--------------------------------------------------------------------
    if (my_rank == 0) then
       t_output_start = MPI_Wtime()
-      open(newunit=unit_out, file=trim(final_output_file), status='replace', action='write')
+      open(newunit=unit_out, file=trim(output_file), status='replace', action='write')
       write(unit_out, '(A)') "# Binning results for multicolumn data"
       write(unit_out, '(A)') "# Format: ColName, BinSize, Mean, Variance, StdDev"
       do i = 1, nprocs
@@ -307,7 +305,7 @@ program mpi_binning
       print *, "[Rank 0] Allgather time:     ", global_allgather_time, " sec"
       print *, "[Rank 0] Binning time:       ", global_binning_time, " sec"
       print *, "[Rank 0] Output write time:  ", t_output_end - t_output_start, " sec"
-      print *, "[Rank 0] Output file:        ", trim(final_output_file)
+      print *, "[Rank 0] Output file:        ", trim(output_file)
       print *, "============================================="
    end if
 
