@@ -109,8 +109,8 @@ program mpi_binning
       header_length = index(header_line, char(10))
       if (header_length == 0) header_length = len_trim(header_line)
       t_header_end = MPI_Wtime()
-      print *, "[Rank 0 Debug] header_length =", header_length
-      print *, "[Rank 0 Debug] Header = |", trim(header_line(1:header_length)), "|"
+      ! print *, "[Rank 0 Debug] header_length =", header_length
+      ! print *, "[Rank 0 Debug] Header = |", trim(header_line(1:header_length)), "|"
    end if
 
    call MPI_Bcast(header_line,   1024, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
@@ -138,8 +138,8 @@ program mpi_binning
       row_length = index(row_line, char(10))
       if (row_length == 0) row_length = len_trim(row_line)
       t_row_read_end = MPI_Wtime()
-      print *, "[Rank 0 Debug] row_line   = |", trim(row_line(1:row_length)), "|"
-      print *, "[Rank 0 Debug] row_length =", row_length
+      ! print *, "[Rank 0 Debug] row_line   = |", trim(row_line(1:row_length)), "|"
+      ! print *, "[Rank 0 Debug] row_length =", row_length
    end if
 
    call MPI_Bcast(row_length, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
@@ -165,8 +165,8 @@ program mpi_binning
    end if
 
    if (my_rank == 0) then
-      print *, "[Rank 0 Debug] file_size_offset =", file_size_offset, &
-               " => n_rows =", n_rows, " n_cols =", n_cols
+      ! print *, "[Rank 0 Debug] file_size_offset =", file_size_offset, &
+               ! " => n_rows =", n_rows, " n_cols =", n_cols
    end if
 
    !--------------------------------------------------------------------
@@ -190,8 +190,8 @@ program mpi_binning
       local_rows = buf_len / int(row_length, MPI_OFFSET_KIND)
    end if
 
-   print *, "[Rank", my_rank, " Debug] offset =", offset, " buf_len =", buf_len, &
-            " local_rows =", local_rows, " row_length =", row_length
+   ! print *, "[Rank", my_rank, " Debug] offset =", offset, " buf_len =", buf_len, &
+            ! " local_rows =", local_rows, " row_length =", row_length
 
    !--------------------------------------------------------------------
    ! 8. Read block assigned to each process
@@ -461,4 +461,3 @@ contains
    end subroutine do_binning_for_column
 
 end program mpi_binning
-
