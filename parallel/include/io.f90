@@ -17,7 +17,9 @@ module io
         !
         ! Write the coordinates of all particles of the system in the current point of
         ! time in an specified external file with an XYZ format.
-        ! The external file must already exist and results will be appended to it.
+        ! The external file must already be open before running this subroutine
+        ! and must be closed afterwards.
+        ! The file is opened in unit 4 in the main program (vdw_gas).
         subroutine write_positions_xyz(time, positions, output_file)
             implicit none
 
@@ -27,15 +29,11 @@ module io
 
             integer :: i
 
-            open(4, file = output_file, status = 'old', action = 'write', access = 'append')
-
             write(4, *) part_num
             write(4, *) time
             do i = 1, part_num
                 write(4, *) trim(atom_type), positions(i, :)
             end do
-
-            close(4)
         end subroutine write_positions_xyz
 
         ! Itziar Rabal, Ricard Rodriguez

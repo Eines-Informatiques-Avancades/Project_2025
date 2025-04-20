@@ -176,7 +176,6 @@ program vdw_gas
         ! appends the positions to an existing file.
         positions_file = 'positions.xyz'
         open(4, file = positions_file, status = 'replace')
-        close(4)
 
         thermodynamics_file = 'thermodynamics.dat'
         open(12, file = thermodynamics_file, status = 'replace')
@@ -207,7 +206,10 @@ program vdw_gas
         end if
     end do
 
-    if (rank == 0) close(12)
+    if (rank == 0) then
+        close(4)
+        close(12)
+    end if
 
     deallocate(positions, velocities, forces)
 
