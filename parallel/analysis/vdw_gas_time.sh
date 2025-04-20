@@ -50,6 +50,7 @@ cleanup(){
     rm -f "$tmp_labels_file" "$tmp_time_file"
 }
 
+# Remove previous time outputs.
 rm time_*.out
 
 for i in 1 2 4 8 16 32 40; do
@@ -65,8 +66,14 @@ for i in 1 2 4 8 16 32 40; do
         # different amount of cores.
         while IFS= read -r line; do
             measure="$(echo "$line" | sed 's/[[:space:]]*$//' | tr '[:upper:]' '[:lower:]' | tr ' ' '_')"
+
+            [ ! -f "time_${measure}.out" ] && \
+                printf "# %s, %s, %s\n" \
+                'Cores' 'CPU time (s)' 'Wallclock time (s)' \
+                > "time_${measure}.out"
+
             grep "$line" "$time_output" | \
-                awk -F '\t' -v cores="$i" '{print cores $2 "\t" $3}' \
+                awk -F '\t' -v cores="$i" '{print cores "\t" $2 "\t" $3}' \
                 >> "time_${measure}.out"
         done < "$tmp_labels_file"
     )
