@@ -121,8 +121,6 @@ program vdw_gas
         print *, 'Computing initial Verlet lists...'
     end if
     call compute_verlet_list(positions, verlet_list, n_neighbors)
-    call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
     if (rank == 0) print *, 'Computing initial Lennard-Jones forces...'
     call compute_forces(positions, forces, lj_potential, verlet_list, n_neighbors)
@@ -144,8 +142,6 @@ program vdw_gas
     do step = 1, equilibration_step_num
         if (mod(step, 10) == 0) then
             call compute_verlet_list(positions, verlet_list, n_neighbors)
-            call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-            call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
         end if
 
         call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors, counts, displs)
@@ -193,8 +189,6 @@ program vdw_gas
 
         if (mod(step, 10) == 0) then
             call compute_verlet_list(positions, verlet_list, n_neighbors)
-            call mpi_bcast(verlet_list, size(verlet_list), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-            call mpi_bcast(n_neighbors, size(n_neighbors), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
         end if
 
         call velocity_verlet(positions, velocities, lj_potential, verlet_list, n_neighbors, counts, displs)
@@ -208,6 +202,7 @@ program vdw_gas
         if (rank == 0) then
             write(12, '(f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6, 2x, f12.6)') &
                 time, lj_potential, kinetic_energy, total_energy, temperature_inst
+
             call write_positions_xyz(time, positions, positions_file)
         end if
     end do
