@@ -166,11 +166,29 @@ program vdw_gas
 
     call read_trajectory(positions_file, x, y, z, time_points)
 
+    call cpu_time(tcpuend)
+    call system_clock(tclockend)
+    print *, 'Cputime: ', tcpuend-tcpustart, 's'
+    print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
     print *
 
     rdf_file = 'rdf.dat'
     rmsd_file = 'rmsd.dat'
+
+    call cpu_time(tcpustart)
+    call system_clock(tclockstart)
+
     call compute_rdf(x, y, z, rdf_file)
+
+    call cpu_time(tcpuend)
+    call system_clock(tclockend)
+    print *, 'Cputime: ', tcpuend-tcpustart, 's'
+    print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
+    print *
+
+    call cpu_time(tcpustart)
+    call system_clock(tclockstart)
+    
     call compute_rmsd(x, y, z, time_points, rmsd_file)
 
     deallocate(x, y, z, time_points)
