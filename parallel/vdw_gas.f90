@@ -250,11 +250,40 @@ program vdw_gas
 
     call read_trajectory(positions_file, x, y, z, time_points)
 
-    if (rank == 0) print *
+    if (rank == 0) then
+	call cpu_time(tcpuend)
+        call system_clock(tclockend)
+
+	print *, 'Cputime: ', tcpuend-tcpustart, 's'
+        print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
+	print *
+    endif
 
     rdf_file = 'rdf.dat'
     rmsd_file = 'rmsd.dat'
+
+    if (rank == 0) then
+        call cpu_time(tcpustart)
+        call system_clock(tclockstart)
+    endif
+
     call compute_rdf(x, y, z, rdf_file)
+    
+    if (rank == 0) then
+	call cpu_time(tcpuend)
+        call system_clock(tclockend)
+
+	print *, 'Cputime: ', tcpuend-tcpustart, 's'
+        print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
+	print *
+    endif
+
+    
+    if (rank == 0) then
+        call cpu_time(tcpustart)
+        call system_clock(tclockstart)
+    endif
+	
     call compute_rmsd(x, y, z, time_points, rmsd_file)
 
     deallocate(x, y, z, time_points)
@@ -265,6 +294,7 @@ program vdw_gas
 
         print *, 'Cputime: ', tcpuend-tcpustart, 's'
         print *, 'Wallclock time: ', real(tclockend - tclockstart) / clock_rate, 's'
+	print *
     end if
 
     call mpi_barrier(MPI_COMM_WORLD, ierr)
