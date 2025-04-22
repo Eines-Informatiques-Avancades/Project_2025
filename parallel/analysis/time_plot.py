@@ -32,6 +32,7 @@ def plot_part_time_per_core(data_file, output_filename):
     plt.plot(data[:, 0], data[:, 2], label = 'Wallclock Time')
     plt.xlabel('\# Cores')
     plt.ylabel(r'$t$ (s)')
+    plt.legend()
     plt.savefig(output_filename, format = 'pdf')
     plt.close()
 
@@ -65,11 +66,11 @@ if __name__ == '__main__':
         'post-trajectory_analysis'
     ]
 
-    #  for measure in measure_list:
-        #  data_file = f"time_{measure}.out"
-        #  output_file = f"time_vdw_gas_{measure}.pdf"
+    for measure in measure_list:
+        data_file = f"time_{measure}.out"
+        output_file = f"time_vdw_gas_{measure}.pdf"
 
-        #  plot_part_time_per_core(data_file, output_file)
+        plot_part_time_per_core(data_file, output_file)
 
     for core in [1, 2, 4, 8, 16, 32, 20]:
         data_file = f"time_vdw_gas_{core}_core.out"
