@@ -1,7 +1,8 @@
 #!/bin/sh
 #
 # plot.sh
-#
+# Molecular Dynamics Simulation of a Van der Waals Gas
+# Ricard Rodriguez
 #
 
 # Paths relative to the 'plot/' subdirectory.
