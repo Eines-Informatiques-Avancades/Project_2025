@@ -79,7 +79,4 @@ for i in 1 2 4 8 16 32 40; do
     )
 done
 
-# for file in
-# sed '1 i# Cores, Cpu time (s), Wallclock time (s)'
-
 cleanup
