@@ -51,7 +51,7 @@ cleanup(){
 }
 
 # Remove previous time outputs.
-rm time_*.out
+rm -f time_*.out
 
 for i in 1 2 4 8 16 32 40; do
     run_output="vdw_gas_${i}_core.out"
