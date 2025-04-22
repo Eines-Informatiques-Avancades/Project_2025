@@ -19,7 +19,7 @@ $ cd Project_2025
 ```
 
 Once inside the root directory of the project one must move into one of the 2
-folder containing either the parallelized version of the code or the serial one
+folders containing either the parallelized version of the code or the serial one
 and run:
 
 ```
@@ -107,6 +107,8 @@ The project tree for each of the two versions has the following structure:
 
 ```
 .
+|-- analysis/               <- Scripts related to processing time analysis (parallel only).
+|   `-- ...
 |-- include/
 |   |-- lj_forces.f90       <- Lennard-Jones forces computation.
 |   |-- geometry.f90        <- PBC
@@ -117,19 +119,19 @@ The project tree for each of the two versions has the following structure:
 |   `-- thermostat.f90      <- Implementation of the Andersen thermostat.
 |-- plot/                   <- Python plotting scripts for the results.
 |   `-- ...
-|-- test/                   <- Files related to the program testing.
+|-- test/                   <- Files related to the program testing (serial only).
 |   `-- ...
 |-- Makefile
 |-- binning.f90             <- Binning statistical analysis of the results.
 |-- input_parameters.in     <- System and simulation parameter definition.
-|-- run.sh                  <- Wrapper script for executing the full program.
+|-- run.sh                  <- Wrapper script for executing the full program (serial only).
 `-- vdw_gas.f90             <- Main simulation program.
 ```
 
 ## Credits and contributors
 
-- Ricard Rodríguez: system initialization, periodic boundary condition, project
-    coordination
+- Ricard Rodríguez: system initialization, periodic boundary condition, energies
+    computation and project coordination
 - Oriol Miró: integrators
 - Alejandro Díaz: forces
 - Joan Serrano: statistical analysis
